@@ -25,18 +25,11 @@
     ); 
     attributesUsedForLocking = (shopID); 
     className = EOGenericRecord; 
-    classProperties = (shopID, shopName, shopCrawlInformationId, shopcrawlinformation, pages); 
+    classProperties = (shopID, shopName, shopCrawlInformationId, shopcrawlinformation); 
     externalName = shop; 
     name = Shop; 
     primaryKeyAttributes = (shopID); 
     relationships = (
-        {
-            destination = Page; 
-            isToMany = Y; 
-            joinSemantic = EOInnerJoin; 
-            joins = ({destinationAttribute = shopID; sourceAttribute = shopID; }); 
-            name = pages; 
-        }, 
         {
             destination = ShopCrawlInformation; 
             isToMany = N; 

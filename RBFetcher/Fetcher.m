@@ -31,7 +31,7 @@
 {
     [super init];
 
-    fileWriter		= [[FileWriter alloc] init];
+    fileWriter		= [[FileWriter alloc] initWithFilenamePrefix:@"fetched/fetched.out" urlsPerFile:1000];
 
     receivePort		= [inPort retain];
     sendPort		= [outPort retain];
@@ -106,16 +106,18 @@
 {
     while(1)
     {
-        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-        NSMutableDictionary *url = [receiveQueue pop];
+        NSAutoreleasePool 	*pool = [[NSAutoreleasePool alloc] init];
+        NSMutableDictionary 	*url = [receiveQueue pop];
 
         #if DEBUG
         NSLog(@"Fetcher runWorkingThread: Have to retrieve:%@",[url description]);
         #endif
         
         [[Worker worker] retrieveUrl:url];
-        if( [url objectForKey:@"pageid"] )
+        //if( [url objectForKey:@"pageid"] || [[url objectForKey:@"status"] isEqual:@"invalid"] )
+        {
             [fileWriter writeUrlDatatoFile:[[url copy] autorelease]];
+        }
 
         [url removeObjectForKey:@"httpdata"];					// everything else will send the url without contents back
         [url removeObjectForKey:@"textRepresentation"];				// everything else will send the url without contents back

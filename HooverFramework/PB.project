@@ -17,15 +17,10 @@
             MTQueue.m, 
             HFUDPSocket.m, 
             MD5Checksum.m, 
-            EODatabaseFile.m
+            RedBlackTree.m
         ); 
-        FRAMEWORKS = (
-            EOAccess.framework, 
-            EOControl.framework, 
-            Foundation.framework, 
-            GDBM.framework, 
-            System.framework
-        ); 
+        FRAMEWORKS = (Foundation.framework, System.framework,GDBM.framework); 
+        HEADERSEARCH = (/usr/local/include); 
         H_FILES = (
             HooverFramework.h, 
             SortedArray.h, 
@@ -42,9 +37,9 @@
             MTQueue.h, 
             HFUDPSocket.h, 
             MD5Checksum.h, 
-            EODatabaseFile.h
+            RedBlackTree.h
         ); 
-        OTHER_LIBS = (); 
+        OTHER_LIBS = (avl); 
         OTHER_SOURCES = (
             Makefile.preamble, 
             Makefile, 
@@ -71,7 +66,8 @@
             MTQueue.h, 
             HFUDPSocket.h, 
             MD5Checksum.h, 
-            EODatabaseFile.h
+            EODatabaseFile.h, 
+            RedBlackTree.h
         ); 
     }; 
     LANGUAGE = English; 

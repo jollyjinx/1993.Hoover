@@ -2,30 +2,6 @@
     attributes = (
         {
             allowsNull = Y; 
-            definition = shop.shopcrawlinformation.crawlTimeFactor; 
-            externalType = float8; 
-            name = crawlTimeFactor; 
-            valueClassName = NSNumber; 
-            valueType = d; 
-        }, 
-        {
-            allowsNull = Y; 
-            definition = shop.shopcrawlinformation.crawlTimeMaximum; 
-            externalType = float8; 
-            name = crawlTimeMaximum; 
-            valueClassName = NSNumber; 
-            valueType = d; 
-        }, 
-        {
-            allowsNull = Y; 
-            definition = shop.shopcrawlinformation.crawlTimeMinimum; 
-            externalType = float8; 
-            name = crawlTimeMinimum; 
-            valueClassName = NSNumber; 
-            valueType = d; 
-        }, 
-        {
-            allowsNull = Y; 
             columnName = current_stage; 
             externalType = int4; 
             name = currentStage; 
@@ -35,8 +11,15 @@
         {
             columnName = date_inserted; 
             externalType = timestamp; 
-            name = dateInserted; 
+            name = dateinserted; 
             valueClassName = NSCalendarDate; 
+        }, 
+        {
+            columnName = dont_crawl; 
+            externalType = int2; 
+            name = doNotCrawl; 
+            valueClassName = NSNumber; 
+            valueType = i; 
         }, 
         {
             allowsNull = Y; 
@@ -50,7 +33,7 @@
             allowsNull = Y; 
             columnName = follow_links; 
             externalType = int2; 
-            name = followLinks; 
+            name = followlinks; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
@@ -58,7 +41,7 @@
             allowsNull = Y; 
             columnName = last_downloaded; 
             externalType = timestamp; 
-            name = lastDownloaded; 
+            name = lastmodified; 
             serverTimeZone = NSLocalTimeZone; 
             valueClassName = NSCalendarDate; 
         }, 
@@ -66,7 +49,7 @@
             allowsNull = Y; 
             columnName = link_depth; 
             externalType = link_depth; 
-            name = linkDepth; 
+            name = linkdepth; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
@@ -74,13 +57,13 @@
             allowsNull = Y; 
             columnName = md5_page; 
             externalType = varchar; 
-            name = md5Page; 
+            name = md5page; 
             valueClassName = NSString; 
         }, 
         {
             columnName = page_id; 
             externalType = int4; 
-            name = pageID; 
+            name = pageid; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
@@ -93,55 +76,35 @@
         {
             columnName = shop_id; 
             externalType = int4; 
-            name = shopID; 
+            name = shopid; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
         {
             columnName = site_id; 
             externalType = int4; 
-            name = siteID; 
+            name = siteid; 
             valueClassName = NSNumber; 
             valueType = i; 
         }
     ); 
-    attributesUsedForLocking = (pageID); 
-    className = Page; 
+    attributesUsedForLocking = (pageid); 
+    className = EOGenericRecord; 
     classProperties = (
-        pageID, 
+        pageid, 
         path, 
-        siteID, 
-        md5Page, 
-        shopID, 
+        siteid, 
+        md5page, 
+        shopid, 
         currentStage, 
         fetchStatus, 
-        lastDownloaded, 
-        dateInserted, 
-        linkDepth, 
-        followLinks, 
-        shop, 
-        site, 
-        crawlTimeFactor, 
-        crawlTimeMaximum, 
-        crawlTimeMinimum
+        lastmodified, 
+        dateinserted, 
+        linkdepth, 
+        followlinks, 
+        doNotCrawl
     ); 
     externalName = page; 
     name = Page; 
-    primaryKeyAttributes = (pageID); 
-    relationships = (
-        {
-            destination = Shop; 
-            isToMany = N; 
-            joinSemantic = EOInnerJoin; 
-            joins = ({destinationAttribute = shopID; sourceAttribute = shopID; }); 
-            name = shop; 
-        }, 
-        {
-            destination = Site; 
-            isToMany = N; 
-            joinSemantic = EOInnerJoin; 
-            joins = ({destinationAttribute = siteID; sourceAttribute = siteID; }); 
-            name = site; 
-        }
-    ); 
+    primaryKeyAttributes = (pageid); 
 }

@@ -6,8 +6,6 @@
 #import "HooverController.h"
 #import "FetcherController.h"
 #import "StageInformation.h"
-#import "Page.h"
-#import "Site.h"
 
 #define ENTITY_NAME_SHOP	@"Shop"
 #define ENTITY_NAME_SITE	@"Site"
@@ -18,12 +16,13 @@
 #define	FETCH_STATUS_FETCHING	1
 #define	FETCH_STATUS_FETCHED	2
 
-#define ROBOTS_REFETCH_TIME	86400.0
+#define ROBOTS_REFETCH_TIME	864000.0
 #define ROBOTS_PATH		@"/robots.txt"
 
-#define	REFETCH_FACTOR		10.0
+#define	REFETCH_FACTOR		5.0
 #define	FAILEDFETCH_MINIMUM_TIMETOWAIT	800.0
 #define	FAILEDFETCH_MAXIMUM_TIMETOWAIT	300000.0
+#define AVERAGE_PAGE_LOADTIME	20
 
 @implementation HooverController : NSObject
 
@@ -47,9 +46,11 @@
     [super init];
 
     pool			= [[NSAutoreleasePool alloc] init];
-    allSitesDatedQueue		= [[DatedQueue alloc] init];
+    allSitesDatedQueue		= [[AdvancedDatedQueue alloc] init];
     receivedUrlsQueue		= [[MTQueue alloc] init];
     sitesInformationDictionary	= [[NSMutableDictionary alloc] init];
+
+    eofLock			= [[NSLock alloc] init];
     
     if( !(generalConfiguration = [configurationDictionary objectForKey:@"general"]) )
     {
@@ -57,47 +58,9 @@
         return nil;
     }
     
-    [EOModelGroup setDefaultGroup:[EOModelGroup new]];
+    [EOModelGroup setDefaultGroup:[[[EOModelGroup alloc] init] autorelease]];
     [[EOModelGroup defaultGroup] addModelWithFile:[generalConfiguration objectForKey:@"eomodel"]];
-
-    if(! (shopClassDescription  = [[EOClassDescription classDescriptionForEntityName:ENTITY_NAME_SHOP] retain]) )
-    {
-        NSLog(@"Coudn't get classDescription for Entity:%@",ENTITY_NAME_SHOP);
-        return nil;
-    }
-    if(! (siteClassDescription  = [[EOClassDescription classDescriptionForEntityName:ENTITY_NAME_SITE] retain]) )
-    {
-        NSLog(@"Coudn't get classDescription for Entity:%@",ENTITY_NAME_SITE);
-        return nil;
-    }
-    if(! (pageClassDescription  = [[EOClassDescription classDescriptionForEntityName:ENTITY_NAME_PAGE] retain]) )
-    {
-        NSLog(@"Coudn't get classDescription for Entity:%@",ENTITY_NAME_PAGE);
-        return nil;
-    }
-    if(! (stageClassDescription  = [[EOClassDescription classDescriptionForEntityName:ENTITY_NAME_STAGE] retain]) )
-    {
-        NSLog(@"Coudn't get classDescription for Entity:%@",ENTITY_NAME_STAGE);
-        return nil;
-    }
-
-    // Set all open Pages (fetchStatus != FETCH_STATUS_TOFETCH ) that might still be in the database due to Hoover-crash to TOFETCH that we try those again
-    {
-        EOEditingContext	*eoEditingContext = [[[EOEditingContext alloc] initWithParentObjectStore:[EOObjectStoreCoordinator defaultCoordinator]] autorelease];
-        NSEnumerator		*pageEnumerator = [[eoEditingContext objectsWithFetchSpecification:
-            [EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_PAGE
-                                                                  qualifier:[EOQualifier qualifierWithQualifierFormat:@"fetchStatus==%d",FETCH_STATUS_FETCHING]
-                                                              sortOrderings:nil]
-												] objectEnumerator];
-        Page *eoPage;	
-
-        while( eoPage = [pageEnumerator nextObject] )
-        {
-            NSLog(@"Updateing fetchStatus in database for Page: %d",[eoPage pageID]);
-            [eoPage setFetchStatus:0];
-        }
-        [eoEditingContext saveChanges];
-    }
+    
     NSLog(@"HooverController init done - starting background threads.");
     fetcherController = [[FetcherController alloc] init];
     [NSThread detachNewThreadSelector:@selector(runWithHooverController:)
@@ -115,84 +78,200 @@
 
 - (void)stageWorkLoop;
 {
+    NSDate	*stageEndDate = nil;
+
     while(1)
     {	
         NSAutoreleasePool	*stagePool = [[NSAutoreleasePool alloc] init];
-        EOEditingContext	*eoEditingContext = [[[EOEditingContext alloc] initWithParentObjectStore:[EOObjectStoreCoordinator defaultCoordinator]] autorelease];
-        StageInformation	*currentStage = [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_STAGE qualifier:nil sortOrderings:nil]] lastObject];
-        NSDate			*stageEndDate= [NSDate dateWithTimeIntervalSinceNow:[currentStage stageIntervall]];
-
+        int			currentstage = 0;
+       
+        [eofLock lock];
         {
-            NSEnumerator *siteEnumerator = [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_SITE qualifier:nil sortOrderings:nil]] objectEnumerator];
-            Site *eoSite;
-
-            while( eoSite = [siteEnumerator nextObject] )
-            {
-                [allSitesDatedQueue push:[NSNumber numberWithInt:[eoSite siteID]] withDate:[NSDate distantPast]];
-            }
-        }
-
-        while( NSOrderedDescending == [stageEndDate compare:[NSDate date]] )
-        {
-            NSAutoreleasePool	*innerPool = [[NSAutoreleasePool alloc] init];
-            NSNumber			*siteidNumber;
+            NSAutoreleasePool 	*eoPool = [[NSAutoreleasePool alloc] init];
             
-            if( siteidNumber = [allSitesDatedQueue popBeforeDate:stageEndDate] )
+            EOEditingContext 	*eoEditingContext= [[[EOEditingContext alloc] initWithParentObjectStore:[EOObjectStoreCoordinator defaultCoordinator]] autorelease];
+            EODatabaseContext	*myDatabaseContext = [EODatabaseContext registeredDatabaseContextForModel:[[[EOModelGroup defaultGroup] models] lastObject]
+                                                                                         editingContext: eoEditingContext];
+            StageInformation 	*currentStage	= [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_STAGE qualifier:nil sortOrderings:nil]] lastObject];
+
+            [eoEditingContext setUndoManager:nil];
+            currentstage	= [currentStage currentStage];
+            
+            if( stageEndDate )
+                [stageEndDate release];
+            stageEndDate	= [NSDate dateWithTimeIntervalSinceNow:[currentStage stageIntervall]];
+            [stageEndDate retain];
+
+            NSLog(@"HooverController stageWorkLoop: Entering now Stage: %d",currentstage);
             {
-                Site *eoSite = [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_SITE
-                                                                                                                             qualifier:[EOQualifier qualifierWithQualifierFormat:@"siteID = %@",siteidNumber]	
-                                                                                                                         sortOrderings:nil]] lastObject];
-                if( nil == eoSite )
-                {
-                    NSLog(@"HooverController stageWorkLoop: got siteID %@ which is no longer in the database.");
-                }
-                else
-                {
-                    if( ![eoSite robotsDate] || (NSOrderedDescending == [(NSDate *)[NSDate dateWithTimeIntervalSinceNow:- ROBOTS_REFETCH_TIME] compare:[eoSite robotsDate]]) )
-                    {
-                        [fetcherController fetchLocalUrl:[NSMutableDictionary dictionaryWithObjectsAndKeys:
-                            [NSNumber numberWithInt:[eoSite siteID]], @"siteid",
-                            [eoSite siteName],@"host",
-                            [NSNumber numberWithInt:[eoSite port]],@"port",
-                            ROBOTS_PATH,@"path",
-                            nil]];
-                    }
-                    else
-                    {
-                        Page *eoPage = [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_PAGE
-                                                                                                                                     qualifier:[EOQualifier qualifierWithQualifierFormat:
-																		@"siteID=%d AND currentStage<=%d AND fetchStatus=%d ",
-																		[siteidNumber intValue],[currentStage currentStage],FETCH_STATUS_TOFETCH]
-                                                                                                                                 sortOrderings:[NSArray arrayWithObjects:[EOSortOrdering sortOrderingWithKey:@"currentStage" selector:EOCompareDescending],nil]]
-                            ] lastObject];
+                NSAutoreleasePool 	*sitePool = [[NSAutoreleasePool alloc] init];
+                NSMutableDictionary	*aSite;
+                EOAdaptorChannel 	*myChannel = [[myDatabaseContext availableChannel] adaptorChannel];
 
+                [myChannel selectAttributes:[[[EOModelGroup defaultGroup] entityNamed: ENTITY_NAME_SITE] attributes]
+                         fetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_SITE qualifier:nil sortOrderings:nil]
+                                       lock:NO
+                                     entity:[[EOModelGroup defaultGroup] entityNamed: ENTITY_NAME_SITE]];
 
-                        if( nil != eoPage )
+                do
+                {
+                    NSAutoreleasePool 	*channelDataPool = [[NSAutoreleasePool alloc] init];
+
+                    if( aSite = [myChannel fetchRowWithZone:NULL] )
+                    {
+                        NSMutableDictionary	*siteDictionary = [sitesInformationDictionary objectForKey:[aSite objectForKey:@"siteID"]];
+
+                        if( nil == siteDictionary )
                         {
-                            NSMutableDictionary *newUrl = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                [NSNumber numberWithInt:[eoSite siteID]],@"siteid",
-                                [NSNumber numberWithInt:[eoPage pageID]], @"pageid",
-                                [NSNumber numberWithInt:[eoPage shopID]],@"shopid",
-                                [eoSite siteName],@"host",
-                                [NSNumber numberWithInt:[eoSite port]],@"port",
-                                [eoPage path],@"path",
-                                nil];
-                            if( [eoSite robotsData] ) 		[newUrl setObject:[eoSite robotsData] forKey:@"robotsdata"];
-                            if( [eoPage lastDownloaded] ) 	[newUrl setObject:[eoPage lastDownloaded] forKey:@"lastmodified"];
-                            if( [eoPage followLinks] )		[newUrl setObject:[NSNumber numberWithInt:[eoPage followLinks]] forKey:@"followlinks"];
-                            if( [eoPage linkDepth] )		[newUrl setObject:[NSNumber numberWithInt:[eoPage linkDepth]] forKey:@"linkdepth"];
-                            if( [[sitesInformationDictionary objectForKey:[eoSite siteName]] objectForKey:@"ipaddress"] )
-                                [newUrl setObject:[[sitesInformationDictionary objectForKey:[eoSite siteName]] objectForKey:@"ipaddress"] forKey:@"ipaddress"];
+                            siteDictionary = [NSMutableDictionary dictionary];
 
-                            [fetcherController fetchLocalUrl:newUrl];
-                            [eoPage setFetchStatus: FETCH_STATUS_FETCHING];
+                            [siteDictionary setObject:[aSite objectForKey:@"siteName"] forKey:@"host"];
+                            [siteDictionary setObject:[aSite objectForKey:@"siteID"] forKey:@"siteid"];
+                            [siteDictionary setObject:[aSite objectForKey:@"port"] forKey:@"port"];
+
+                            if( [EONull class] != [[aSite objectForKey:@"robotsDate"] class] )
+                                [siteDictionary setObject:[aSite objectForKey:@"robotsDate"] forKey:@"robotsdate"];
+                            if( [EONull class] != [[aSite objectForKey:@"robotsData"] class] )
+                                [siteDictionary setObject:[aSite objectForKey:@"robotsData"] forKey:@"robotsdata"];
+                            
+                            [siteDictionary setObject:[NSNumber numberWithInt:800.0] forKey:@"timetowait"];
+                            [siteDictionary setObject:[NSMutableArray array] forKey:@"pages"];
+                            [sitesInformationDictionary setObject:siteDictionary forKey:[aSite objectForKey:@"siteID"]];
                         }
                         else
                         {
-                            NSLog(@"HooverController stageWorkLoop: popped site with no work: siteID=%@ currentStage=%d", siteidNumber,[currentStage currentStage]);
+                            [siteDictionary setObject:[NSMutableArray array] forKey:@"pages"];
+                        }
+                        [allSitesDatedQueue push:siteDictionary withDate:[NSDate distantPast]];
+                    }
+                    [channelDataPool release];
+                }
+                while( nil != aSite );
+                [sitePool release];
+            }
+            NSLog(@"HooverController stageWorkLoop: Sites now %d",[allSitesDatedQueue count]);
+
+
+
+
+            NSLog(@"HooverController stageWorkLoop: init pages");
+            {
+                NSAutoreleasePool 	*pagePool = [[NSAutoreleasePool alloc] init];
+
+                EOAdaptorChannel 	*myChannel = [[myDatabaseContext availableChannel] adaptorChannel];
+                NSMutableDictionary	*aPage;
+                int pagecount=0;
+                int throwcount=0;
+                
+                [myChannel selectAttributes:[[[EOModelGroup defaultGroup] entityNamed: ENTITY_NAME_PAGE] attributes]
+                              fetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_PAGE
+                                                                                              qualifier:[EOQualifier qualifierWithQualifierFormat:@"currentStage<=%d AND fetchStatus=%d AND doNotCrawl!=1",currentstage,FETCH_STATUS_TOFETCH]
+                                                                                          sortOrderings:[NSArray arrayWithObjects:[EOSortOrdering sortOrderingWithKey:@"currentStage" selector:EOCompareAscending],nil]]
+                                            lock:NO
+                                          entity:[[EOModelGroup defaultGroup] entityNamed: ENTITY_NAME_PAGE]];
+
+
+                do
+                {
+                    NSAutoreleasePool 	*channelDataPool = [[NSAutoreleasePool alloc] init];
+
+                    if( aPage = [myChannel fetchRowWithZone:NULL] )
+                    {
+                        NSMutableDictionary	*siteDictionary = [sitesInformationDictionary objectForKey:[aPage objectForKey:@"siteid"]];
+                        NSMutableArray		*pageArray = [siteDictionary objectForKey:@"pages"];
+
+                        if( [pageArray count] <= ([currentStage stageIntervall]/AVERAGE_PAGE_LOADTIME) )
+                        {
+                            NSMutableDictionary	*newPage = [NSMutableDictionary dictionaryWithObjectsAndKeys:[aPage objectForKey:@"pageid"],@"pageid",
+                                                                                                      [aPage objectForKey:@"shopid"],@"shopid",
+                                                                                                      [aPage objectForKey:@"siteid"],@"siteid",
+                                                                                                      [aPage objectForKey:@"path"],@"path",
+                                nil];
+                            if( [aPage objectForKey:@"linkdepth"] )
+                                [newPage setObject:[aPage objectForKey:@"linkdepth"] forKey:@"linkdepth"];
+
+                            if( ! [[siteDictionary objectForKey:@"fetchedpages"] objectForKey:[aPage objectForKey:@"pageid"]] )
+                                [pageArray insertObject:newPage atIndex:0];
+                            if(0== ++pagecount%1000) NSLog(@"HooverController stageWorkLoop: added page no. %d",pagecount);
+                        }
+                        else
+                        {
+                            if(0== ++throwcount%1000) NSLog(@"HooverController stageWorkLoop: thrown away page no. %d",throwcount);
                         }
                     }
-                    [eoEditingContext saveChanges];
+                    [channelDataPool release];
+                }
+                while(nil != aPage);
+                [pagePool release];
+            }
+
+            {
+                NSEnumerator *objectEnumerator = [sitesInformationDictionary objectEnumerator];
+                NSMutableDictionary *aSite;
+
+                while( aSite = [objectEnumerator nextObject] )
+                {
+                    [aSite setObject:[NSMutableDictionary dictionary] forKey:@"fetchedpages"];
+                }
+            }
+            
+
+            [eoEditingContext invalidateAllObjects];
+            [eoPool release];
+            NSLog(@"HooverController stageWorkLoop: eoPool release done");
+        }
+        [eofLock unlock];
+
+        NSLog(@"HooverController stageWorkLoop: entering the sendLoop now.");
+        
+        while( NSOrderedDescending == [stageEndDate compare:[NSDate date]] )
+        {
+            NSAutoreleasePool	*innerPool = [[NSAutoreleasePool alloc] init];
+            NSMutableDictionary	*siteDictionary;
+            
+            if( siteDictionary = [allSitesDatedQueue popBeforeDate:stageEndDate] )
+            {
+                #if DEBUG
+                NSLog(@"HooverController stageWorkLoop: Trying site : %@",siteDictionary);
+                #endif
+
+                if( ![siteDictionary objectForKey:@"robotsdata"] || (NSOrderedDescending == [(NSDate *)[NSDate dateWithTimeIntervalSinceNow:- ROBOTS_REFETCH_TIME] compare:[siteDictionary objectForKey:@"robotsdate"]]) )
+                {
+                    [fetcherController fetchLocalUrl:[NSMutableDictionary dictionaryWithObjectsAndKeys:
+                        [siteDictionary objectForKey:@"siteid"], @"siteid",
+                        [siteDictionary objectForKey:@"host"],@"host",
+                            [siteDictionary objectForKey:@"port"],@"port",
+                            ROBOTS_PATH,@"path",
+                        [NSNumber numberWithInt:10],@"crawltimefactor",
+                        [NSNumber numberWithInt:1],@"crawltimeminimum",
+                        [NSNumber numberWithInt:100000],@"crawltimemaximum",
+                            nil]];
+                }
+                else
+                {
+                    NSMutableDictionary *aPage = [[siteDictionary objectForKey:@"pages"] lastObject];
+
+                    if( aPage )
+                    {
+                        [aPage setObject:[siteDictionary objectForKey:@"siteid"] forKey:@"siteid"];
+                        [aPage setObject:[siteDictionary objectForKey:@"host"] forKey:@"host"];
+                        [aPage setObject:[siteDictionary objectForKey:@"port"] forKey:@"port"];
+
+                        [aPage setObject:[NSNumber numberWithInt:1] forKey:@"crawltimeminimum"];
+                        [aPage setObject:[NSNumber numberWithInt:10000] forKey:@"crawltimemaximum"];
+                        [aPage setObject:[NSNumber numberWithInt:10] forKey:@"crawltimefactor"];
+
+                        if( [siteDictionary objectForKey:@"robotsdata"] )	[aPage setObject:[siteDictionary objectForKey:@"robotsdata"] forKey:@"robotsdata"];
+                        if( [siteDictionary objectForKey:@"ipaddress"] )		[aPage setObject:[siteDictionary objectForKey:@"ipaddress"] forKey:@"ipaddress"];
+
+                        [fetcherController fetchLocalUrl:aPage];
+
+                        [[siteDictionary objectForKey:@"pages"] removeLastObject];
+                    }
+                    else
+                    {
+                        NSLog(@"HooverController stageWorkLoop: popped site with no work: siteID=%@ currentStage=%d", [siteDictionary objectForKey:@"siteid"],currentstage);
+                    }
                 }
             }
             else
@@ -201,16 +280,27 @@
             }
             [innerPool release];
         }
-        [currentStage setCurrentStage:[currentStage currentStage]+1];
-        [eoEditingContext saveChanges];
+        
+        [eofLock lock];
+        {
+            EOEditingContext 	*eoEditingContext= [[[EOEditingContext alloc] initWithParentObjectStore:[EOObjectStoreCoordinator defaultCoordinator]] autorelease];
+            StageInformation 	*currentStage	= [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_STAGE qualifier:nil sortOrderings:nil]] lastObject];
+
+            [currentStage setCurrentStage:[currentStage currentStage]+1];
+            [eoEditingContext saveChanges];
+        }
+        [eofLock unlock];
         [stagePool release];
-    }//while(1) 
+    }//while(1)
+        
 }
 
 
 - (void)retrievedUrl:(NSMutableDictionary *)url;
 {
+    #if DEBUG
     NSLog(@"HooverController retrievedUrl:%@",url);
+    #endif
     [receivedUrlsQueue push:url];
 }
 
@@ -218,97 +308,103 @@
 {
     while(1)
     {
-        NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
-        NSMutableDictionary	*url = [receivedUrlsQueue pop];
-        EOEditingContext	*eoEditingContext = [[[EOEditingContext alloc] initWithParentObjectStore:[EOObjectStoreCoordinator defaultCoordinator]] autorelease];
+        NSAutoreleasePool	*pool	= [[NSAutoreleasePool alloc] init];
+        NSMutableDictionary	*url	= [receivedUrlsQueue pop];
+        NSMutableDictionary	*siteDictionary = [sitesInformationDictionary objectForKey:[url objectForKey:@"siteid"]];
 
-        Site *eoSite = [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_SITE
-                                                                                                                     qualifier:[EOQualifier qualifierWithQualifierFormat:@"siteID = %@",[url objectForKey:@"siteid"]]	
-                                                                                                                 sortOrderings:nil]] lastObject];
-        if( nil != eoSite )
+        NSAssert1( nil != siteDictionary, @"HooverController runTheRetrievingThread: Site Dictionary for %@ not there",url );
+
+        if(! [[url objectForKey:@"status"] isEqual:@"invalid"] )		// possible stati : invalid,fetched,redirected
         {
-            NSMutableDictionary	*siteDictionary = [sitesInformationDictionary objectForKey:[eoSite siteName]];
-
-            if( nil == siteDictionary )
+            if( [[url objectForKey:@"path"] isEqual:ROBOTS_PATH] )		// if it's a robots.txt then remember the robots data and the ipaddress
             {
-                siteDictionary = [NSMutableDictionary dictionary];
-                [siteDictionary setObject:[NSNumber numberWithInt:1] forKey:@"timetowait"];
-                [sitesInformationDictionary setObject:siteDictionary forKey:[eoSite siteName]];
-            }
+                EOEditingContext	*eoEditingContext;
+                EOGenericRecord		*eoSite;
 
-            
-            if(! [[url objectForKey:@"status"] isEqual:@"invalid"] )		// possible stati : invalid,fetched,redirected
-            {
-                [siteDictionary setObject:[NSNumber numberWithInt:1] forKey:@"timetowait"];
-                
-                if( [[url objectForKey:@"path"] isEqual:ROBOTS_PATH] )		// if it's a robots.txt then remember the robots data and the ipaddress
+                [eofLock lock];
+                eoEditingContext= [[[EOEditingContext alloc] initWithParentObjectStore:[EOObjectStoreCoordinator defaultCoordinator]] autorelease];
+                [eoEditingContext setUndoManager:nil];
+                eoSite = [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_SITE
+                                                                                                                              qualifier:[EOQualifier qualifierWithQualifierFormat:@"siteID = %@",[url objectForKey:@"siteid"]]
+                                                                                                                          sortOrderings:nil]] lastObject];
+                if( nil == eoSite )
                 {
-                    [eoSite setRobotsData:[url objectForKey:@"robotsdata"]];
-                    [eoSite setRobotsDate:[url objectForKey:@"transferdate"]];
-                    [siteDictionary setObject:[url objectForKey:@"ipaddress"] forKey:@"ipaddress"];
-                    [allSitesDatedQueue push:[NSNumber numberWithInt:[eoSite siteID]]
-                                    withDate:[[url objectForKey:@"transferdate"] addTimeInterval:REFETCH_FACTOR*[[url objectForKey:@"transfertime"] floatValue]]];
+                    NSLog(@"HooverController runTheRetrievingThread: got Url for Site where the site is no longer in the database : %@",[url description]);
                 }
                 else
                 {
-                    Page *eoPage = [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_PAGE
-                                                                                                    qualifier:[EOQualifier qualifierWithQualifierFormat:@"pageID = %@",[url objectForKey:@"pageid"]]
-                                                                           	        	sortOrderings:nil]] lastObject];
-                    if( nil != eoPage )
+                    if( [[url objectForKey:@"robotsdata"] length] > 8000 )
                     {
-                        NSTimeInterval	timetowait = [eoPage crawlTimeFactor]*[[url objectForKey:@"transfertime"] floatValue];
-
-                        if( timetowait < [eoPage crawlTimeMinimum] )
-                        {
-                            timetowait = [eoPage crawlTimeMinimum];
-                        }
-                        else if( timetowait > [eoPage crawlTimeMaximum] )
-                        {
-                            timetowait = [eoPage crawlTimeMaximum];
-                        }
-                     
-                        [eoPage setFetchStatus:FETCH_STATUS_FETCHED];
-                        [allSitesDatedQueue push:[NSNumber numberWithInt:[eoSite siteID]] withDate:[[url objectForKey:@"transferdate"] addTimeInterval:timetowait]];
+                        NSLog(@"Robots Data exceeds limit for url: %@ ",url);
                     }
                     else
                     {
-                        NSLog(@"HooverController runTheRetrievingThread: got Url for Site where the Url is no longer in the database : %@",[url description]);
-                        [allSitesDatedQueue push:[NSNumber numberWithInt:[eoSite siteID]]
-                                        withDate:[[url objectForKey:@"transferdate"] addTimeInterval:REFETCH_FACTOR*[[url objectForKey:@"transfertime"] floatValue]]];
+                        [eoSite takeValue:[url objectForKey:@"robotsdata"] forKey:@"robotsData"];
                     }
-                }
-            }
-            else // invalid status
-            {
-                NSTimeInterval timetowait = [[siteDictionary objectForKey:@"timetowait"] floatValue] * 2.0;
+                    [eoSite takeValue:[url objectForKey:@"transferdate"] forKey:@"robotsDate"];
+                    [siteDictionary setObject:[url objectForKey:@"ipaddress"] forKey:@"ipaddress"];
+                    [siteDictionary setObject:[url objectForKey:@"transferdate"] forKey:@"robotsdate"];
+                    [siteDictionary setObject:[url objectForKey:@"robotsdata"] forKey:@"robotsdata"];
 
-                if( [url objectForKey:@"pageid"] )
-                {
-                    Page *eoPage = [[eoEditingContext objectsWithFetchSpecification:[EOFetchSpecification fetchSpecificationWithEntityName:ENTITY_NAME_PAGE
-                                                                                                                                 qualifier:[EOQualifier qualifierWithQualifierFormat:@"pageID = %@",[url objectForKey:@"pageid"]]
-                                                                                                                             sortOrderings:nil]] lastObject];
-                    if( nil != eoPage )
+                    [allSitesDatedQueue push:siteDictionary withDate:[[url objectForKey:@"transferdate"] addTimeInterval:REFETCH_FACTOR*[[url objectForKey:@"transfertime"] floatValue]]];
+
                     {
-                        [eoPage setFetchStatus:FETCH_STATUS_TOFETCH];
+                        BOOL savedflag = NO;
+                        NS_DURING
+                            [eoEditingContext saveChanges];
+                            savedflag=YES;
+                        NS_HANDLER
+                            NSLog(@"%@.%@1.Exception url:%@",[localException name],[localException reason],[url description]);
+                        NS_ENDHANDLER
+
+                        NS_DURING
+                            if( NO==savedflag)
+                            {
+                                NSLog(@"HooverController: - runTheRetrievingThread: saving failed trying again.");
+                                [NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1.0]];
+                                [eoEditingContext saveChanges];
+                            }
+                        NS_HANDLER
+                            NSLog(@"%@.%@2.Exception url:%@",[localException name],[localException reason],[url description]);
+                        NS_ENDHANDLER
                     }
                 }
+                [eofLock unlock];
+            }
+            else
+            {
+                NSTimeInterval	timetowait =  [[url objectForKey:@"crawltimefactor"] doubleValue]*[[url objectForKey:@"transfertime"] doubleValue];
+
+                NSLog(@"HooverController runTheRetrievingThread: Got page %@ for site %@ have %d",[url objectForKey:@"pageid"],[url objectForKey:@"shopid"],[[siteDictionary objectForKey:@"fetchedpages"] count]);
+                [[siteDictionary objectForKey:@"fetchedpages"] setObject:@"!" forKey:[url objectForKey:@"pageid"]];	// @"!" is just a short constant string
                 
-                if( timetowait < FAILEDFETCH_MINIMUM_TIMETOWAIT )
+                if( timetowait < [[url objectForKey:@"crawltimeminimum"] doubleValue] )
                 {
-                    timetowait = FAILEDFETCH_MINIMUM_TIMETOWAIT;
+                    timetowait = [[url objectForKey:@"crawltimeminimum"] doubleValue];
                 }
-                else if( timetowait > FAILEDFETCH_MAXIMUM_TIMETOWAIT )
+                else if( timetowait > [[url objectForKey:@"crawltimemaximum"] doubleValue] )
                 {
-                    timetowait = FAILEDFETCH_MAXIMUM_TIMETOWAIT;
+                    timetowait = [[url objectForKey:@"crawltimemaximum"] doubleValue];
                 }
-                [allSitesDatedQueue push:[NSNumber numberWithInt:[eoSite siteID]] withDate:[NSDate dateWithTimeIntervalSinceNow:timetowait]];
+
+                [allSitesDatedQueue push:siteDictionary withDate:[[url objectForKey:@"transferdate"] addTimeInterval:timetowait]];
             }
         }
-        else
+        else // invalid status
         {
-            NSLog(@"HooverController runTheRetrievingThread: got Url for Site where the site is no longer in the database : %@",[url description]);
+            NSTimeInterval timetowait = [[siteDictionary objectForKey:@"timetowait"] floatValue] * 2.0;
+
+            if( timetowait < [[url objectForKey:@"crawltimeminimum"] doubleValue] )
+            {
+                timetowait = [[url objectForKey:@"crawltimeminimum"] doubleValue];
+            }
+            else if( timetowait > [[url objectForKey:@"crawltimemaximum"] doubleValue] )
+            {
+                timetowait = [[url objectForKey:@"crawltimemaximum"] doubleValue];
+            }
+
+            [allSitesDatedQueue push:siteDictionary withDate:[NSDate dateWithTimeIntervalSinceNow:timetowait]];
         }
-        [eoEditingContext saveChanges];
         [pool release];
     }
 }
@@ -319,15 +415,15 @@
     NSAutoreleasePool 	*pool = [[NSAutoreleasePool alloc] init];
 
     NSLog(@"HooverController: -save");
-    NSLog(@"HooverController: database saved");
-    exit(1);
+//    NSLog(@"HooverController: database saved");
+
     [pool release];
+    exit(1);
 }
 
 - (void)showCurrentStatus;
 {
     NSAutoreleasePool 	*pool = [[NSAutoreleasePool alloc] init];
-
     NSLog(@"HooverController: showCurrentStatus: receivedQueue count %d.",[receivedUrlsQueue count]);
     NSLog(@"HooverController: showCurrentStatus: sendQueue count %d.",[fetcherController count]);
     NSLog(@"HooverController: showCurrentStatus: allSitesDatedQueue count %d.",[allSitesDatedQueue count]);

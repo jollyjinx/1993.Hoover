@@ -9,16 +9,12 @@
 #define SHOULD_WRITE_TEXTUAL_REPRESENTATION 1
 
 static GeneralScanner *generalScanner;
+
 @implementation Worker
 
 + (void)initialize;
 {
-    static BOOL tooLate = NO;
-    if ( !tooLate )
-    {
-        generalScanner	= [[GeneralScanner alloc] initWithConfiguration:[NSDictionary dictionaryWithContentsOfFile:@"HTTPClient.configuration"]];
-        tooLate = YES;
-    }
+    generalScanner	= [[GeneralScanner alloc] initWithConfiguration:[NSDictionary dictionaryWithContentsOfFile:@"HTTPClient.configuration"]];
 }
 
 + (Worker *)worker;
@@ -34,7 +30,9 @@ static GeneralScanner *generalScanner;
     NS_DURING
         [[HTTPClient httpClient] retrieveUrl:url];
     NS_HANDLER
-        NSLog(@"%@.Exception url:%@",[localException reason],[url description]);
+        #if DEBUG
+        NSLog(@"Worker retrieveUrl: %@.Exception url:%@",[localException reason],[url description]);
+        #endif
         if( (! [[localException name] isEqualToString:@"HTTPClient"] )
             && (! [[localException name] isEqualToString:NSFileHandleOperationException] ))
             [localException raise];	/* Re-raise the exception. */
@@ -44,19 +42,19 @@ static GeneralScanner *generalScanner;
 
     if( [[url objectForKey:@"status"] isEqual:@"invalid"] )
     {
-        NSLog(@"Got failure while retieving url:%@",[url description]);
+        NSLog(@"Worker retrieveUrl: Got failure while retieving url:%@",[url description]);
         return;
     }
 
     if( [[url objectForKey:@"path"] isEqual:@"/robots.txt"] )
     {
-        NSAssert1(nil != (robotScanner = [RobotScanner robotScannerWithUrl:url]),@"Assertion failed RobotScanner initWithUrl: failed. url= %@",[url description]);
+        NSAssert1(nil != (robotScanner = [RobotScanner robotScannerWithUrl:url]),@"Worker retrieveUrl :Assertion failed RobotScanner initWithUrl: failed. url= %@",[url description]);
         [url setObject:[robotScanner description] forKey:@"robotsdata"];
         return;
     }
     else
     {
-        NSAssert1(nil != (robotScanner = [RobotScanner robotScannerWithDescription:[url objectForKey:@"robotsdata"]]),@"Assertion failed RobotScanner robotScannerWithDescription: failed. url= %@",[url description]);
+        NSAssert1(nil != (robotScanner = [RobotScanner robotScannerWithDescription:[url objectForKey:@"robotsdata"]]),@"Worker retrieveUrl: Assertion failed RobotScanner robotScannerWithDescription: failed. url= %@",[url description]);
     }
 
     if( [[[url objectForKey:@"httpheader"] objectForKey:@"HTTP"] hasPrefix:@"30"] && [[url objectForKey:@"httpheader"] objectForKey:@"location"] )

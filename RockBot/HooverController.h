@@ -9,15 +9,13 @@
 
 @interface HooverController : NSObject
 {
-    DatedQueue			*allSitesDatedQueue;
+    AdvancedDatedQueue		*allSitesDatedQueue;
     MTQueue			*receivedUrlsQueue;
     NSMutableDictionary		*sitesInformationDictionary;
     FetcherController		*fetcherController;
 
-    EOClassDescription		*shopClassDescription;
-    EOClassDescription		*siteClassDescription;
-    EOClassDescription		*pageClassDescription;
-    EOClassDescription		*stageClassDescription;
+//    EOEditingContext		*eoEditingContext;
+    NSLock			*eofLock;
 }
 
 - (id)initWithConfiguration:(NSDictionary *)configurationDictionary;

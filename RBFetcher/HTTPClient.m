@@ -19,50 +19,54 @@
 				httpheader
 				httpdata
 */
-
-@implementation HTTPClient
-
 static	NSMutableDictionary	*httpClientDictionary;
 static	NSMutableDictionary	*httpProxyDictionary;
 static	NSLock			*nameserverLookupLock;
 static	unsigned int		maximumpagesize;
 
 
+@implementation HTTPClient
+
 + (void) initialize;
 {
     NSNumber *pageSize;
-    
-    httpClientDictionary = [[NSMutableDictionary dictionaryWithContentsOfFile:@"HTTPClient.configuration"] retain];
+  //  static BOOL hasbeeninizalized = NO;
 
-    if( pageSize = [httpClientDictionary objectForKey:@"maximumpagesize"] )
+   // if( !hasbeeninizalized )
     {
-        maximumpagesize= [pageSize intValue];
-    }
-    else
-    {
-        maximumpagesize=(2^32)-1;
-    }
-    NSLog(@"HTTPClient initalize: will read Pages up to %d Bytes",maximumpagesize);
-      
-    if( httpProxyDictionary = [httpClientDictionary objectForKey:@"httpproxy"] )
-    {
-        httpProxyDictionary = [[httpClientDictionary objectForKey:@"httpproxy"] mutableCopy];
-        if( ! [httpProxyDictionary objectForKey:@"ipaddress"] )
+        httpClientDictionary = [[NSMutableDictionary dictionaryWithContentsOfFile:@"HTTPClient.configuration"] retain];
+
+        if( pageSize = [httpClientDictionary objectForKey:@"maximumpagesize"] )
         {
-            NSString *ipAddress;
-            
-            if( !(ipAddress = [[NSHost hostWithName:[httpProxyDictionary objectForKey:@"host"]] address]) )
-            {
-                NSLog(@"HTTPClient will raise exception: NoIPAddressForProxy");
-                [NSException raise:@"HTTPClient" format:@"NoIPAddressForProxy"] ;
-            }
-            [httpProxyDictionary setObject:ipAddress forKey:@"ipaddress"];
+            maximumpagesize= [pageSize intValue];
         }
+        else
+        {
+            maximumpagesize=(2^32)-1;
+        }
+        NSLog(@"HTTPClient initialize: will read Pages up to %d Bytes",maximumpagesize);
+
+        if( httpProxyDictionary = [httpClientDictionary objectForKey:@"httpproxy"] )
+        {
+            httpProxyDictionary = [[[httpClientDictionary objectForKey:@"httpproxy"] mutableCopy] autorelease];
+            if( ! [httpProxyDictionary objectForKey:@"ipaddress"] )
+            {
+                NSString *ipAddress;
+
+                if( !(ipAddress = [[NSHost hostWithName:[httpProxyDictionary objectForKey:@"host"]] address]) )
+                {
+                    NSLog(@"HTTPClient will raise exception: NoIPAddressForProxy");
+                    [NSException raise:@"HTTPClient" format:@"NoIPAddressForProxy"] ;
+                }
+                [httpProxyDictionary setObject:ipAddress forKey:@"ipaddress"];
+            }
+        }
+        #if DEBUG
+        NSLog(@"HTTPClient.configuration looks like:\n%@",[httpClientDictionary description]);
+        #endif
+        nameserverLookupLock = [[NSLock alloc] init];
+       // hasbeeninizalized = YES;
     }
-    #if DEBUG
-    NSLog(@"HTTPClient.configuration looks like:\n%@",[httpClientDictionary description]);
-    #endif
-    nameserverLookupLock = [[NSLock alloc] init];
 }
 
 
@@ -162,12 +166,13 @@ static	unsigned int		maximumpagesize;
     NSDate		*beginDate,*endDate;
 
     [url setObject:@"invalid" forKey:@"status"];
-    NSLog(@"HTTPClient:%@:%@%@",[url objectForKey:@"host"],[url objectForKey:@"port"],[url objectForKey:@"path"]);
-
+    #if DEBUG
+    NSLog(@"HTTPClient retrieveUrl: have to retrieve %@:%@%@",[url objectForKey:@"host"],[url objectForKey:@"port"],[url objectForKey:@"path"]);
+    #endif
+    
     conncectionFileHandle = [self createConnectionToHost:httpProxyDictionary?httpProxyDictionary:url];
 
     requestString = [NSMutableString stringWithFormat:@"GET %@ HTTP/1.1\r\nHost: %@\r\n",[url objectForKey:@"path"],[url objectForKey:@"host"] ];
-    [requestString appendFormat:@"Connection: close\r\n"];
     [requestString appendFormat:@"From: %@\r\n",[httpClientDictionary objectForKey:@"useragentmail"]];
     [requestString appendFormat:@"User-Agent: %@\r\n",[httpClientDictionary objectForKey:@"useragentname"]];
     [requestString appendFormat:@"Referer: %@\r\n",[httpClientDictionary objectForKey:@"refererurl"]];
@@ -175,10 +180,13 @@ static	unsigned int		maximumpagesize;
     {
         [requestString appendFormat:@"If-Modified-Since: %@\r\n",[url objectForKey:@"lastmodified"]];
     }
+    [requestString appendFormat:@"Connection: close\r\n"];
     [requestString appendString:@"\r\n"];
 
-    [conncectionFileHandle writeData:[requestString dataUsingEncoding:NSISOLatin1StringEncoding]];
+    //NSLog(@"Requesting:%@",requestString);
+
     beginDate = [NSDate date];
+    [conncectionFileHandle writeData:[requestString dataUsingEncoding:NSISOLatin1StringEncoding]];
     httpData = [conncectionFileHandle readDataOfLength:maximumpagesize];
     endDate = [NSDate date];
     if( ![httpData length] )
@@ -188,7 +196,9 @@ static	unsigned int		maximumpagesize;
     [url setObject:[NSCalendarDate date] forKey:@"transferdate"];
     [url setObject:@"fetched" forKey:@"status"];
 
-    NSLog(@"HTTPClient - transfer complete");
+    #if DEBUG
+    NSLog(@"HTTPClient retrieveUrl: transfer complete %@:%@%@",[url objectForKey:@"host"],[url objectForKey:@"port"],[url objectForKey:@"path"]);
+    #endif
 
     {
         char *beginofdata = (char *)[httpData bytes];

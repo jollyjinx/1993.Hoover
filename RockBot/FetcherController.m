@@ -9,7 +9,7 @@
 #define	CONDITION_NO_FETCHERS_AVAILABLE	0
 #define	CONDITION_FETCHER_AVAILABLE	1
 
-#define HOOVER_PORT 12345
+#define HOOVER_PORT 20001
 
 #define MAXIMUM_CONNECTIONS 20
 
@@ -56,7 +56,6 @@
     [NSThread detachNewThreadSelector:@selector(createVendingConnection)
                              toTarget:self
                            withObject:nil];
-    
 
     while( 1 )
     {

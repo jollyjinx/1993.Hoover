@@ -1,4 +1,3 @@
-
 #import "AdvancedDatedQueue.h"
 
 #define	FIRST_IN_QUEUE_IS_UNKNOWN	0
@@ -49,7 +48,13 @@
 
 - (NSComparisonResult)compare:(id)anObject;
 {
-    return [contentDate compare:(NSDate *)[anObject contentDate]];
+    NSComparisonResult result;
+    if( NSOrderedSame == ( result = [contentDate compare:(NSDate *)[anObject contentDate]] ) )
+    {
+        if(self == anObject) return NSOrderedSame;
+        return self<anObject?NSOrderedAscending:NSOrderedDescending;
+    }
+    return result;
 }
 
 - contentObject;
@@ -66,13 +71,6 @@
 
 
 @implementation AdvancedDatedQueue
-{
-    NSConditionLock	*queueLock;
-    NSLock		*singlePopLock;
-    SortedArray 	*queueArray;
-    NSMutableDictionary	*queueDictionary;
-}
-
 
 - init
 {
@@ -80,7 +78,7 @@
     
     queueLock = [[NSConditionLock alloc] initWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
     singlePopLock = [[NSConditionLock alloc] init];
-    queueArray = [[SortedArray alloc] init];
+    queueArray = [[RedBlackTree alloc] init];
     queueDictionary = [[NSMutableDictionary alloc] init];
     return self;
 }
@@ -91,7 +89,7 @@
     [singlePopLock release];
     [queueArray release];
     [queueDictionary release];
-    [super release];
+    [super dealloc];
 }
 
 
@@ -105,7 +103,7 @@
     {
         if( YES == [queueLock lockWhenCondition:FIRST_IN_QUEUE_IS_UNKNOWN beforeDate:aDate] )
         {
-            aDate = (NSDate *)[[[[queueArray objectAtIndex:0] contentDate] retain] autorelease];
+            aDate = (NSDate *)[[[[queueArray firstObject] contentDate] retain] autorelease];
             [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
         }
         else
@@ -119,21 +117,74 @@
             }
             else
             {
-                AdvancedDatedQueueLeaf	*aLeaf = [queueArray objectAtIndex:0];
+                AdvancedDatedQueueLeaf	*aLeaf = [queueArray firstObject];
 
                 if( NSOrderedDescending == [(NSDate*)[NSDate date] compare:(NSDate*)[aLeaf contentDate]] )
                 {
-                    [[aLeaf retain] autorelease];
+                    NSObject *contentObject = [[aLeaf contentObject] retain];
 
-                    [queueArray removeObjectAtIndex:0];
-                    [queueDictionary removeObjectForKey:[aLeaf contentObject]];
+                    [queueArray removeObject:aLeaf];
+                    [queueDictionary removeObjectForKey:contentObject];
 
                     [queueLock unlockWithCondition:([queueArray count]?FIRST_IN_QUEUE_IS_UNKNOWN:FIRST_IN_QUEUE_IS_KNOWN)];
                     [singlePopLock unlock];
-                    return [aLeaf contentObject];
+                    return [contentObject autorelease];
                 }
                 [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_UNKNOWN];
             }                
+        }
+    }
+}
+
+- popBeforeDate:(NSDate *)endDate;
+{
+    NSDate *aDate=endDate;
+    
+    [singlePopLock lock];
+
+    while(1)
+    {
+        if( YES == [queueLock lockWhenCondition:FIRST_IN_QUEUE_IS_UNKNOWN beforeDate:aDate] )
+        {
+            aDate = (NSDate *)[[[[queueArray firstObject] contentDate] retain] autorelease];
+            [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
+        }
+        else
+        {
+            NSDate	*nowDate;
+
+            [queueLock lock];
+            nowDate = [NSDate date];
+            
+            if( 0 == [queueArray count] )
+            {
+                [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
+                aDate = endDate;
+            }
+            else
+            {
+                AdvancedDatedQueueLeaf	*aLeaf = [queueArray firstObject];
+
+                if( NSOrderedDescending == [nowDate compare:(NSDate*)[aLeaf contentDate]] )
+                {
+                    NSObject *contentObject = [[aLeaf contentObject] retain];
+
+                    [queueArray removeObject:aLeaf];
+                    [queueDictionary removeObjectForKey:contentObject];
+
+                    [queueLock unlockWithCondition:([queueArray count]?FIRST_IN_QUEUE_IS_UNKNOWN:FIRST_IN_QUEUE_IS_KNOWN)];
+                    [singlePopLock unlock];
+                    return [contentObject autorelease];
+                }
+
+                [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_UNKNOWN];
+            }
+
+            if( NSOrderedDescending == [nowDate compare:endDate] )
+            {
+                [singlePopLock unlock];
+                return nil;
+            }
         }
     }
 }
@@ -146,15 +197,14 @@
 
 - (void)removeObjectIdenticalTo:(id)anObject;
 {
-    AdvancedDatedQueueLeaf	*aLeaf,*firstLeaf;
+    AdvancedDatedQueueLeaf	*aLeaf;
 
     [queueLock lock];
-    firstLeaf = [queueArray objectAtIndex:0];
     
     NSAssert( aLeaf = [queueDictionary objectForKey:anObject], @"AdvancedDatedQueue: -removeObjectIdenticalTo: got called with unknown Object" );
 
     [queueDictionary removeObjectForKey:anObject];
-    [queueArray removeObjectIdenticalTo:aLeaf];
+    [queueArray removeObject:aLeaf];
 
     if( 0 == [queueArray count] )
     {
@@ -162,7 +212,7 @@
     }
     else
     {
-        [queueLock unlockWithCondition:((aLeaf==firstLeaf)?FIRST_IN_QUEUE_IS_UNKNOWN:[queueLock condition])];
+        [queueLock unlockWithCondition:(([queueArray firstObject]==aLeaf)?FIRST_IN_QUEUE_IS_UNKNOWN:[queueLock condition])];
     }
 }
 
@@ -170,10 +220,13 @@
 - (void)removeAllObjects;
 {
     [queueLock lock];
+
     [queueDictionary release];
     [queueArray release];
-    queueArray = [[SortedArray alloc] init];
-    queueDictionary = [[NSMutableDictionary alloc] init];
+    
+    queueArray		= [[RedBlackTree alloc] init];
+    queueDictionary	= [[NSMutableDictionary alloc] init];
+    
     [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
 }
 
@@ -187,17 +240,19 @@
 
     if( aLeaf = [queueDictionary objectForKey:anObject] )
     {
+        [queueArray removeObject:aLeaf];
         [aLeaf setDate:aDate];
-        [queueArray adjustObjectIdenticalTo:aLeaf];
+        [queueArray addObject:aLeaf];
     }
     else
     {
-        aLeaf = [[[AdvancedDatedQueueLeaf alloc] initWithObject:anObject andDate:aDate] autorelease];
+        aLeaf = [[AdvancedDatedQueueLeaf alloc] initWithObject:anObject andDate:aDate];
 
         [queueArray addObject:aLeaf];
         [queueDictionary setObject:aLeaf forKey:anObject];
+        [aLeaf release];
     }
-    [queueLock unlockWithCondition:(([queueArray objectAtIndex:0]==aLeaf)?FIRST_IN_QUEUE_IS_UNKNOWN:[queueLock condition])];
+    [queueLock unlockWithCondition:(([queueArray firstObject]==aLeaf)?FIRST_IN_QUEUE_IS_UNKNOWN:[queueLock condition])];
 }
 
 

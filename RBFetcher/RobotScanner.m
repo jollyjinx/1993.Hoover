@@ -13,6 +13,7 @@ static NSString *userAgentName;
     NSString		*configurationFileName = @"HTTPClient.configuration";
     NSMutableDictionary *hooverConfigurationDictionary;
 
+
     enumerator = [[[NSProcessInfo processInfo] arguments] objectEnumerator];
     while( commandlineArgument =  [enumerator nextObject])
     {
@@ -37,8 +38,14 @@ static NSString *userAgentName;
 }
 + (RobotScanner *)robotScannerWithDescription:(NSString *)aDescription;
 {
-    NSDictionary *descriptionDictionary = [aDescription propertyList];
-
+    NSDictionary *descriptionDictionary;
+    NS_DURING
+    descriptionDictionary = [aDescription propertyList];
+    NS_HANDLER
+        NSLog(@"RobotScanner robotScannerWithDescription: %@.%@.Exception parsing robotData:%@",[localException name],[localException reason],aDescription);
+    NS_ENDHANDLER
+    if( nil == descriptionDictionary ) return nil;
+    
     return [[[self alloc] initWithIncludedPathArray:[descriptionDictionary objectForKey:@"includedPathArray"]
                                   excludedPathArray:[descriptionDictionary objectForKey:@"excludedPathArray"]] autorelease];
 }
@@ -172,8 +179,8 @@ static NSString *userAgentName;
 {
     NSMutableDictionary *aDictionary = [NSMutableDictionary dictionary];
     
-    if( includedPathArray ) [aDictionary setObject:includedPathArray forKey:@"includedPathArray"];
-    if( excludedPathArray ) [aDictionary setObject:excludedPathArray forKey:@"excludedPathArray"];
+    if( includedPathArray && [includedPathArray count] ) [aDictionary setObject:includedPathArray forKey:@"includedPathArray"];
+    if( excludedPathArray && [excludedPathArray count]) [aDictionary setObject:excludedPathArray forKey:@"excludedPathArray"];
     return [aDictionary description];
 }
 

@@ -1,5 +1,5 @@
 {
-	useragentname 	= "RockBot/1.01.1";						// this is the useragent name we will provide the connected hosts
+	useragentname 	= "RockBot/2.00.0";						// this is the useragent name we will provide the connected hosts
 	useragentmail 	= "rockbot@rockbottom.de";					// this is the useragentmail we will provide the connected hosts
 	refererurl	= "http://www.rockbottom.de/";					//
 	maximumpagesize = 1000000; 

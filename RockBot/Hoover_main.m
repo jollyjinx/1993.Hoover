@@ -30,7 +30,8 @@ int main(int argc, const char *argv[])
     NSString		*commandlineArgument;
     NSEnumerator	*enumerator = [[[NSProcessInfo processInfo] arguments] objectEnumerator];
 
-    
+    objc_setMultithreaded(YES);
+   
     while( commandlineArgument = [enumerator nextObject])
     {
         if( [commandlineArgument isEqual:@"-configuration"] && (commandlineArgument = [enumerator nextObject]) )
@@ -46,10 +47,15 @@ int main(int argc, const char *argv[])
    }
    else
    {
-        
-       hoover = [[HooverController alloc] initWithConfiguration:configurationDictionary];
        NSLog(@"Enableing Signals now.");
+       signal(SIGPIPE, SIG_IGN);
+       signal(SIGTERM, signalhandler);
+       signal(SIGINT, signalhandler);
+       signal(SIGUSR1, signalusr1);
+       signal(SIGHUP, signalhandler);
+       hoover = [[HooverController alloc] initWithConfiguration:configurationDictionary];
 #ifdef GNUSTEP
+#warning Using GNUStep coding
        [NSThread detachNewThreadSelector:@selector(stageWorkLoop)
                                 toTarget:hoover
                               withObject:nil];
@@ -69,9 +75,8 @@ int main(int argc, const char *argv[])
        while(1)
            [NSThread sleepUntilDate:[NSDate distantFuture]];
 #else
-        signal(SIGTERM, signalhandler);
-        signal(SIGINT, signalhandler);
-        signal(SIGUSR1, signalusr1);
+#warning Using NeXTSTEP coding 
+
         [hoover stageWorkLoop];
 #endif
         [hoover release];

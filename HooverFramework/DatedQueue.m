@@ -76,7 +76,7 @@
     [queueLock release];
     [singlePopLock release];
     [queueArray release];
-    [super release];
+    [super dealloc];
 }
 
 
@@ -111,7 +111,7 @@
 
 - popBeforeDate:(NSDate *)endDate;
 {
-    NSDate		*aDate = [NSDate distantFuture];
+    NSDate		*aDate = endDate;
     DatedQueueLeaf	*aLeaf;
     
     [singlePopLock lock];
@@ -119,19 +119,22 @@
     [queueLock unlockWithCondition:([queueArray count]?QUEUE_IS_UNKNOWN:QUEUE_IS_KNOWN)];
     do
     {
-        if( [queueLock lockWhenCondition:QUEUE_IS_UNKNOWN beforeDate:endDate] )
+        if( [queueLock lockWhenCondition:QUEUE_IS_UNKNOWN beforeDate:aDate] )
         {
-            aDate = (NSDate *)[[queueArray objectAtIndex:0] contentDate];
+            aDate = (NSOrderedAscending == [endDate compare:(NSDate *)[[queueArray objectAtIndex:0] contentDate]] ? endDate :(NSDate *)[[queueArray objectAtIndex:0] contentDate]);
             [queueLock unlockWithCondition:QUEUE_IS_KNOWN];
         }
+        else
+        {
+            if( endDate == aDate )
+            {
+                [singlePopLock unlock];
+                return nil;
+            }
+        }
     }
-    while( (NSOrderedDescending == [endDate compare:[NSDate date]]) && (NSOrderedDescending == [aDate compare:[NSDate date]]) );
+    while( NSOrderedDescending == [aDate compare:[NSDate date]] );
 
-    if(NSOrderedDescending == [aDate compare:[NSDate date]])
-    {
-        [singlePopLock unlock];
-        return nil;
-    }
 
     [queueLock lock];
     aLeaf = [[[queueArray objectAtIndex:0] retain] autorelease];
@@ -156,6 +159,10 @@
 - (unsigned int) count;
 {
     return [queueArray count];
+}
+- (BOOL)containsObject:(id)anObject;
+{
+    return [queueArray containsObject:anObject];
 }
 
 

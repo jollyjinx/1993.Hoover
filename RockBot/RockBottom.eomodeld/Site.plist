@@ -14,6 +14,7 @@
             externalType = varchar; 
             name = robotsData; 
             valueClassName = NSString; 
+            width = 8100; 
         }, 
         {
             columnName = robots_date; 
@@ -37,18 +38,9 @@
         }
     ); 
     attributesUsedForLocking = (siteID); 
-    className = Site; 
-    classProperties = (port, robotsData, robotsDate, siteID, siteName, pages); 
+    className = EOGenericRecord; 
+    classProperties = (port, robotsData, robotsDate, siteID, siteName); 
     externalName = site; 
     name = Site; 
     primaryKeyAttributes = (siteID); 
-    relationships = (
-        {
-            destination = Page; 
-            isToMany = Y; 
-            joinSemantic = EOInnerJoin; 
-            joins = ({destinationAttribute = siteID; sourceAttribute = siteID; }); 
-            name = pages; 
-        }
-    ); 
 }

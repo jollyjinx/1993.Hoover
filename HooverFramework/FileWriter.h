@@ -4,10 +4,14 @@
 
 @interface FileWriter : NSObject
 {
-    MTQueue	*writeToFileQueue;
+    MTQueue		*writeToFileQueue;
+    NSString		*fileNamePrefix;
+    unsigned int	urlsperfile;
 }
 
 - (id)init;
+- (id)initWithFilenamePrefix:(NSString *)filenamePrefix urlsPerFile:(int)number;
+
 - (void) writeUrlDatatoFile:(NSDictionary *)urlDictionary;
 
 - (void) _runTheWriteToFileLoop;

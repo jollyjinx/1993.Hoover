@@ -5,8 +5,9 @@
 #import <sys/time.h>
 #import <unistd.h>
 #import "Fetcher.h"
+#import "HTTPClient.h"
 
-#define HOOVER_PORT 12345
+#define HOOVER_PORT 20001	
 
 
 @protocol FetcherControllerProtocol
@@ -32,9 +33,11 @@ int main (int argc, const char *argv[])
     NSString		*hostName;
     int			maximumthreads;
 
-
+    objc_setMultithreaded(YES);
     pool = [[NSAutoreleasePool alloc] init];
 
+    [HTTPClient class];
+    
     hostName = nil;
     
     maximumthreads = 1;
@@ -96,10 +99,10 @@ int main (int argc, const char *argv[])
         signal(SIGALRM,SIG_IGN);
         siginterrupt(SIGALRM,0);
 
-
-        NSLog(@"Got connection");
-
-
+        #if DEBUG
+        NSLog(@"Fetcher_main: Got connection to HooverController.");
+        #endif
+        
         localFetcher = [[Fetcher alloc] initWithInPort:inPort outPort:outPort threads:maximumthreads];
     }
     [pool release];

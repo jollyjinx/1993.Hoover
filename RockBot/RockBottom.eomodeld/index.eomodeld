@@ -1,12 +1,12 @@
 {
     EOModelVersion = 2.1; 
     adaptorName = PostgreSQL; 
-    connectionDictionary = {databaseName = rockbottom; hostName = smee; }; 
+    connectionDictionary = {databaseEncoding = NSASCII; databaseName = rockbottom; hostName = telly; }; 
     entities = (
-        {className = Page; name = Page; }, 
+        {className = EOGenericRecord; name = Page; }, 
         {className = EOGenericRecord; name = Shop; }, 
         {className = EOGenericRecord; name = ShopCrawlInformation; }, 
-        {className = Site; name = Site; }, 
+        {className = EOGenericRecord; name = Site; }, 
         {className = StageInformation; name = StageInformation; }
     ); 
 }

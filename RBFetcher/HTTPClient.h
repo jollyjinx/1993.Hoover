@@ -3,9 +3,8 @@
 #import <Foundation/Foundation.h>
 
 @interface HTTPClient : NSObject
-{
-}
 
++ (void) initialize;
 + (HTTPClient *)httpClient;
 
 - (NSFileHandle *)createConnectionToHost:(NSMutableDictionary *)hostDictionary;

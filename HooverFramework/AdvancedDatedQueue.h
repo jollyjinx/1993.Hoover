@@ -1,15 +1,16 @@
 
 #import <Foundation/Foundation.h>
-#import "SortedArray.h"
+#import "RedBlackTree.h"
 
 @interface AdvancedDatedQueue : NSObject
 {
     NSConditionLock	*queueLock;
     NSLock		*singlePopLock;
-    SortedArray 	*queueArray;
+    RedBlackTree 	*queueArray;
     NSMutableDictionary	*queueDictionary;
 }
 - pop;
+- popBeforeDate:(NSDate *)endDate;
 - (void) push:(id)anObject withDate:(NSDate *)date;
 - (BOOL)containsObject:(id)anObject;
 - (void)removeObjectIdenticalTo:(id)anObject;

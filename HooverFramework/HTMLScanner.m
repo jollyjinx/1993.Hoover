@@ -33,8 +33,6 @@ static NSDictionary		*toplevelDomainDictionary;
 
 + (void)initialize
 {
-    [super initialize];
-
     schemeCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:SCHEME_CHARACTERS] retain];
     hostnameCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:HOSTNAME_CHARACTERS] retain];
     hostnumberCharacterSet = [[NSCharacterSet characterSetWithCharactersInString:HOSTNUMBER_CHARACTERS] retain];

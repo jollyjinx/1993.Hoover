@@ -14,10 +14,10 @@ PROJECT_TYPE = Tool
 LANGUAGE = English
 
 CLASSES = HooverController.m FetcherController.m DFetcher.m\
-          StageInformation.m Page.m Site.m
+          StageInformation.m
 
 HFILES = HooverController.h FetcherController.h DFetcher.h\
-         StageInformation.h Page.h Site.h
+         StageInformation.h
 
 MFILES = Hoover_main.m
 
@@ -33,6 +33,8 @@ DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
+HEADER_PATHS = -I/usr/local/include
+NEXTSTEP_PB_CFLAGS = -O4
 FRAMEWORKS = -framework EOAccess -framework EOControl\
              -framework Foundation -framework HooverFramework
 

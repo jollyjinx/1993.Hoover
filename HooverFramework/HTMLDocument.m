@@ -69,7 +69,7 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
     if(nil == escapedCharactersDictionary)
     {
         NSLog(@"HTMLDocument decodeHTMLTags: Can't read escapedCharactersDictionary, skipping conversion of &namedtags; .");
-        return [stringToDecode mutableCopy];
+        return [[stringToDecode mutableCopy] autorelease];
     }
 
     while( NO == [htmlScanner isAtEnd] )

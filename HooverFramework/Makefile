@@ -16,13 +16,13 @@ LANGUAGE = English
 CLASSES = SortedArray.m DatedQueue.m GDBMFile.m GDBMCache.m\
           FileWriter.m Categories.m HTMLScanner.m TCPConnection.m\
           AdvancedDatedQueue.m HTMLDocument.m MTQueue.m HFUDPSocket.m\
-          MD5Checksum.m EODatabaseFile.m
+          MD5Checksum.m RedBlackTree.m
 
 HFILES = HooverFramework.h SortedArray.h DatedQueue.h gdbm.h\
          GDBMFile.h GDBMCache.h FileWriter.h Categories.h\
          HTMLScanner.h TCPConnection.h AdvancedDatedQueue.h\
          HTMLDocument.h MTQueue.h HFUDPSocket.h MD5Checksum.h\
-         EODatabaseFile.h
+         RedBlackTree.h
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template\
             h.template HTMLDocument.configuration
@@ -34,18 +34,19 @@ CODE_GEN_STYLE = DYNAMIC
 MAKEFILE = framework.make
 NEXTSTEP_INSTALLDIR = /LocalLibrary/Frameworks
 WINDOWS_INSTALLDIR = $(HOMEDRIVE)/LocalDeveloper/Frameworks
-LIBS = 
+LIBS = -lavl
 DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
-FRAMEWORKS = -framework EOAccess -framework EOControl\
-             -framework Foundation -framework GDBM -framework System
+HEADER_PATHS = -I/usr/local/include
+FRAMEWORKS = -framework Foundation -framework GDBM -framework System
 PUBLIC_HEADERS = HooverFramework.h SortedArray.h DatedQueue.h\
                  GDBMFile.h GDBMCache.h gdbm.h FileWriter.h\
                  Categories.h HTMLScanner.h TCPConnection.h\
                  AdvancedDatedQueue.h HTMLDocument.h MTQueue.h\
-                 HFUDPSocket.h MD5Checksum.h EODatabaseFile.h
+                 HFUDPSocket.h MD5Checksum.h EODatabaseFile.h\
+                 RedBlackTree.h
 
 PROJECT_HEADERS = HooverFramework.h
 

@@ -10,7 +10,7 @@
         }, 
         {
             allowsNull = Y; 
-            columnName = crawl_min_wait; 
+            columnName = crawl_max_wait; 
             externalType = float8; 
             name = crawlTimeMaximum; 
             valueClassName = NSNumber; 
@@ -18,7 +18,7 @@
         }, 
         {
             allowsNull = Y; 
-            columnName = crawl_max_wait; 
+            columnName = crawl_min_wait; 
             externalType = float8; 
             name = crawlTimeMinimum; 
             valueClassName = NSNumber; 
@@ -80,8 +80,8 @@
     classProperties = (
         shopCrawlInformationId, 
         name, 
-        crawlTimeMaximum, 
         crawlTimeMinimum, 
+        crawlTimeMaximum, 
         includeSites, 
         excludeSites, 
         includePaths, 
