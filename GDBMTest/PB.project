@@ -1,0 +1,22 @@
+{
+    DYNAMIC_CODE_GEN = YES; 
+    FILESTABLE = {
+        CLASSES = (RobotScanner.m); 
+        FRAMEWORKS = (Foundation.framework, HooverFramework.framework); 
+        FRAMEWORKSEARCH = (/Users/admin/jolly/Library/Frameworks); 
+        HEADERSEARCH = (/usr/local/include); 
+        H_FILES = (RobotScanner.h); 
+        OTHER_LIBS = (gdbm); 
+        OTHER_LINKED = (GDBMTest_main.m); 
+        OTHER_SOURCES = (Makefile.preamble, Makefile, Makefile.postamble, m.template, h.template); 
+    }; 
+    LANGUAGE = English; 
+    LOCALIZABLE_FILES = {}; 
+    MAKEFILEDIR = "$(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles"; 
+    NEXTSTEP_BUILDTOOL = /bin/gnumake; 
+    PDO_UNIX_BUILDTOOL = $NEXT_ROOT/NextDeveloper/bin/make; 
+    PROJECTNAME = GDBMTest; 
+    PROJECTTYPE = Tool; 
+    PROJECTVERSION = 2.6; 
+    WINDOWS_BUILDTOOL = $NEXT_ROOT/NextDeveloper/Executables/make; 
+}

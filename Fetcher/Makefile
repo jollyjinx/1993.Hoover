@@ -7,22 +7,20 @@
 # and Makefile.postamble (both optional), and Makefile will include them.
 #
 
-NAME = Hoover
+NAME = Fetcher
 
 PROJECTVERSION = 2.6
 PROJECT_TYPE = Tool
 LANGUAGE = English
 
-CLASSES = HooverController.m RobotScanner.m FetcherController.m\
-          DFetcher.m
+CLASSES = Fetcher.m Worker.m HTTPClient.m GeneralScanner.m
 
-HFILES = HooverController.h RobotScanner.h FetcherController.h\
-         DFetcher.h
+HFILES = Fetcher.h Worker.h HTTPClient.h GeneralScanner.h
 
-MFILES = Hoover_main.m
+MFILES = Fetcher_main.m
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble\
-            HooverConfiguration
+            HTMLDocument.configuration HTTPClient.configuration
 
 
 MAKEFILEDIR = $(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles
@@ -34,7 +32,7 @@ PROF_LIBS = $(LIBS)
 
 
 FRAMEWORKS = -framework Foundation -framework HooverFramework\
-             -framework OmniBase -framework OmniNetworking
+             -framework OmniNetworking
 
 
 include $(MAKEFILEDIR)/platform.make

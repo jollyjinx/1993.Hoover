@@ -1,401 +1,302 @@
 /* HooverController.m created by jolly on Sat 01-Mar-1997 */
 
 #import <Foundation/Foundation.h>
+#import <HooverFramework/HooverFramework.h>
 
 #import "HooverController.h"
 #import "FetcherController.h"
 #import "RobotScanner.h"
 
+#define MAXIMUM_RETRY_TIME	100000.0
+#define GDBMCACHE_TIME		1000.0
+#define	FIRSTFAIL_TIME		800.0
 
-#define	CONDITION_QUEUE_EMPTY		0
-#define	CONDITION_QUEUE_NOT_EMPTY	1
+#import <mach/cthreads.h>
+@interface NSThread(threadExtendedMethods)
++ (int)setPriority:(int)newpriority;
+@end
 
+@implementation NSThread(threadExtendedMethods)
 
-static NSComparisonResult compareserver(NSMutableDictionary *server1, NSMutableDictionary *server2, int context)
++ (int)setPriority:(int)newpriority;
 {
-    if( ! [server1 objectForKey:@"nextaccess"] ) return NSOrderedAscending;
-    if( ! [server2 objectForKey:@"nextaccess"] ) return NSOrderedDescending;
-    return [(NSDate *)[server1 objectForKey:@"nextaccess"] compare:(NSDate *)[server2 objectForKey:@"nextaccess"]];
+    struct thread_sched_info  info;
+    unsigned int              info_count=THREAD_SCHED_INFO_COUNT;
+    
+    cthread_priority(cthread_self(),newpriority,FALSE);
+    if( KERN_SUCCESS != thread_info(thread_self(), THREAD_SCHED_INFO, (thread_info_t)&info, &info_count) )
+    {
+        NSLog(@"Can't get priority of thread");
+        return -1;
+    }
+
+    return info.cur_priority;
 }
+@end
 
 
 @implementation HooverController : NSObject
-{
-    JPPL		*propertyList;
 
-    NSConditionLock	*writeToFileLock;
-    NSMutableArray	*writeToFileQueue;
-    
-    NSConditionLock	*receivedUrlsQueueLock;	
-    NSMutableArray	*receivedUrlsQueue;
-    NSMutableArray	*sendingUrlsQueue;
-    FetcherController	*fetcherController;
-    
-    NSMutableDictionary	*allSitesDictionary;
-    SortedArray		*allSitesSortedArray;
-
-    RobotScanner	*generalScanner;
-
-    NSString		*userAgentName;
-    NSString		*userAgentMail;
-    NSMutableDictionary	*httpProxy;
-}
 
 - (void)dealloc
 {
-    [propertyList release];
-
-    [writeToFileQueue release];
-    [writeToFileLock release];
-    
-    [receivedUrlsQueueLock release];
+    [gdbmCache release];
     [receivedUrlsQueue release];
-    [sendingUrlsQueue release];
     [fetcherController release];
-
-    [allSitesDictionary release];
-    [allSitesSortedArray release];
-    
-    [generalScanner release];
-
-    
-    [userAgentName release];
-    [userAgentMail release];
-    [httpProxy release];
-    
+    [allSitesDatedQueue release];
+    [siteLock release];
     [super dealloc];
 }
 
 
-- (HooverController *)initWithConfiguration:(NSDictionary *)configurationDictionary;
+- (id)initWithConfiguration:(NSDictionary *)configurationDictionary;
 {
     NSMutableDictionary *generalConfiguration;
-    NSMutableDictionary *persistentSitesDictionary;
+    NSAutoreleasePool	*pool;
+    GDBMFile		*gdbmFile;
 
     [super init];
 
-    writeToFileLock = [[NSConditionLock alloc] initWithCondition:CONDITION_QUEUE_EMPTY];
-    writeToFileQueue = [[NSMutableArray alloc] init];
-    [NSThread detachNewThreadSelector:@selector(runTheWriteToFileLoop)
-                             toTarget:self
-                           withObject:nil];
-   
-    receivedUrlsQueue = [[NSMutableArray alloc] init];
-    sendingUrlsQueue = [[NSMutableArray alloc] init];
-    receivedUrlsQueueLock = [[NSConditionLock alloc] initWithCondition:CONDITION_QUEUE_EMPTY];
+    pool		= [[NSAutoreleasePool alloc] init];
+    receivedUrlsQueue	= [[Queue alloc] init];
+    allSitesDatedQueue	= [[DatedQueue alloc] init];
+    siteLock		= [[NSLock alloc] init];
     
-    if( ! (generalConfiguration =[configurationDictionary objectForKey:@"general"]) )
+    if( !(generalConfiguration = [configurationDictionary objectForKey:@"general"]) )
     {
-        NSLog(@"No 'general' Dictionary in configuration file.");
+        NSLog(@"HooverController: No 'general' Dictionary in configuration file.");
         return nil;
     }
-    if(! (propertyList = [[JPPL pplWithPath:[generalConfiguration objectForKey:@"databasename"]
-                                      create:YES
-                                    readOnly:NO] retain]) )
+    if( !(gdbmFile = [GDBMFile gdbmFileWithPath:[generalConfiguration objectForKey:@"databasename"] create:YES readOnly:NO]) )    
     {
-        NSLog(@"Couldn't open or create %@", [generalConfiguration objectForKey:@"databasename"]);
+        NSLog(@"HooverController: Couldn't create GDBMFile with database: %@", [generalConfiguration objectForKey:@"databasename"]);
         return nil;
     }
+    NSLog(@"GDBMFile opened");
 
-    [[NSNotificationCenter defaultCenter] addObserver:self	
-                                             selector:@selector(propertyListBecameInvalid:)
-                                                 name:NSPPLDidSaveNotification
-                                               object:propertyList];
-    //[propertyList setCacheHalfLife:(NSTimeInterval)1000.00];
-
-    allSitesDictionary = [[NSMutableDictionary dictionary] retain];
-    allSitesSortedArray = [[SortedArray sortedArray] retain];
-    [allSitesSortedArray sortUsingFunction:(int (*)(id, id, void *))&compareserver context:NULL];
-
-    userAgentName = [[generalConfiguration objectForKey:@"useragentname"] retain];
-    userAgentMail = [[generalConfiguration objectForKey:@"useragentmail"] retain];
-    if( [generalConfiguration objectForKey:@"httpproxy"] )
-    {
-        httpProxy = [[[generalConfiguration objectForKey:@"httpproxy"] mutableCopy] retain];
-    }
-    generalScanner = [[RobotScanner alloc] initWithContentsOfGeneralConfiguration:generalConfiguration];
-
-    persistentSitesDictionary = [propertyList rootDictionary];
-
-    if( 0 == [persistentSitesDictionary count])						// first use of program
+    if( [gdbmFile isEmpty] )											// first use of program
     {
         NSMutableDictionary	*urls;
         NSEnumerator		*objectEnumerator;
-
         NSString		*urlString;
         NSMutableDictionary	*urlDictionary;
 
-        if( ! (urls =[configurationDictionary objectForKey:@"urls"]) )
+        NSLog(@"HooverController: Database empty.");
+        
+        if( !(urls = [configurationDictionary objectForKey:@"urls"]) )
         {
-            NSLog(@"No 'urls' Dictionary in configuration file.");
+            NSLog(@"HooverController: No 'urls' Dictionary in configuration file.");
             return nil;
         }
-        objectEnumerator = [urls objectEnumerator];
-        while( urlString = [objectEnumerator nextObject])
+        if( !(gdbmCache = [[GDBMCache gdbmCacheWithGDBMFile:gdbmFile] retain]) )
         {
-            if( urlDictionary = [HTMLScanner getDictionaryFromURL:urlString] )
+            NSLog(@"HooverController: Couldn't create GDBMCache with GDBMFile object.");
+            return nil;
+        }
+
+        objectEnumerator = [urls objectEnumerator];
+        while( urlString = [objectEnumerator nextObject] )
+        {
+            NSAutoreleasePool *urlReadPool = [[NSAutoreleasePool alloc] init];
+
+            if( urlDictionary = [HTMLScanner getDictionaryFromURL:urlString baseUrl:nil] )
             {
                 [self addUrlToSearchlist:urlDictionary];
             }
+            [urlReadPool release];
         }
     }
     else
     {
-        NSEnumerator	*objectEnumerator = [persistentSitesDictionary keyEnumerator];
-        NSString	*siteName;
-
-        NSLog(@"Found %d sites in persistent property list.",[persistentSitesDictionary count]);
-        while( siteName = [objectEnumerator nextObject] )
+        NSEnumerator		*keyEnumerator = [gdbmFile keyEnumerator];
+        id			siteName;
+        unsigned int		allsitescount=0;
+        NSMutableDictionary	*urls;
+        
+        NSLog(@"HooverController: Begin reading database file.");
+        while( siteName = [keyEnumerator nextObject] )
         {
-            NSMutableDictionary	*persistentSite = [persistentSitesDictionary objectForKey:siteName];
-            NSMutableDictionary	*searchSite = [NSMutableDictionary dictionary];
-            NSMutableDictionary	*url;
-            NSMutableDictionary	*pathsDictionary;
-            NSEnumerator 	*keyEnumerator;
-            NSString 		*keyString;
-            NSMutableArray	*keysToRemove = [NSMutableArray array];
+            NSAutoreleasePool 	*innerPool = [[NSAutoreleasePool alloc] init];
+            NSMutableDictionary	*persistentSite = [gdbmFile objectForKey:siteName];
 
-            //NSLog(@"Loading and testing site: %@",siteName);
-            //NSLog(@"Site contents: %@",[persistentSite description]);
-
-            pathsDictionary = [persistentSite objectForKey:@"unknownpaths"];
-            keyEnumerator = [pathsDictionary keyEnumerator];
-            while( keyString = [keyEnumerator nextObject] )
+            allsitescount++;
+            #if DEBUG
+                NSLog(@"HooverController: Loading site: %@",siteName);	// we don't have to test the site anymore
+                NSLog(@"HooverController: Site contents: %@",[persistentSite description]);
+            #endif
+            if( persistentSite )
             {
-                if( nil == [[pathsDictionary objectForKey:keyString] objectForKey:@"path"] )
+                if( [[persistentSite objectForKey:@"unknownpaths"] count])
                 {
-                    NSLog(@"Reading Error with site: %@",persistentSite);
-                    [keysToRemove addObject:keyString];
+                    NSDate *nextAccessDate = [persistentSite objectForKey:@"nextaccess"];
+
+                    if( ! nextAccessDate )
+                    {
+                        nextAccessDate = [NSDate distantPast];
+                    }
+                    [allSitesDatedQueue push:siteName withDate:nextAccessDate];
                 }
             }
-            [pathsDictionary removeObjectsForKeys:keysToRemove];
+            else
+            {
+                NSLog(@"HooverController: found invalid site in database:%@",[persistentSite description]);
+            }
+            [innerPool release];
+        }
+        NSLog(@"HooverController: Found %d sites in persistent property list.",allsitescount);
+        NSLog(@"HooverController: Found %d sites in persistent property list that have unkown urls",[allSitesDatedQueue count]);
+
+        
+        if( urls = [configurationDictionary objectForKey:@"urls"] )
+        {
+            NSEnumerator 	*objectEnumerator;
+            NSString		*urlString;
+            NSMutableDictionary	*urlDictionary;
             
-            pathsDictionary = [persistentSite objectForKey:@"knownpaths"];
-            keyEnumerator = [pathsDictionary keyEnumerator];
-            while( keyString = [keyEnumerator nextObject] )
+            NSLog(@"Even though we have a database: adding %d urls from configuration file.",[urls count]);
+            objectEnumerator = [urls objectEnumerator];
+            while( urlString = [objectEnumerator nextObject] )
             {
-                if( nil == [[pathsDictionary objectForKey:keyString] objectForKey:@"path"] )
+                NSAutoreleasePool *urlReadPool = [[NSAutoreleasePool alloc] init];
+                
+                if( urlDictionary = [HTMLScanner getDictionaryFromURL:urlString baseUrl:nil] )
                 {
-                    NSLog(@"Reading Error with site: %@",persistentSite);
-                    [keysToRemove addObject:keyString];
+                    [self addUrlToSearchlist:urlDictionary];
                 }
+
+                [urlReadPool release];
             }
-            [pathsDictionary removeObjectsForKeys:keysToRemove];
-
-            
-            if( url = [[persistentSite objectForKey:@"knownpaths"] objectForKey:@"/robots.txt"] )
-            {
-                RobotScanner *robotScanner;
-
-                if( [[url objectForKey:@"HTTP"] hasPrefix:@"200"] )
-                {
-                    if( robotScanner = [[RobotScanner alloc] initWithUrl:url userAgentName:userAgentName] )
-                        [searchSite setObject:robotScanner forKey:@"robotScanner"];
-                }
-            }
+        }
 
 
-            [searchSite setObject:[persistentSite objectForKey:@"sitename"] forKey:@"sitename"];
-            [searchSite setObject:[persistentSite objectForKey:@"host"] forKey:@"host"];
-            [searchSite setObject:[persistentSite objectForKey:@"port"] forKey:@"port"];
-            [searchSite setObject:[NSDate date] forKey:@"nextaccess"];
-
-            [allSitesSortedArray addObject:searchSite];
-            [allSitesDictionary setObject:searchSite forKey:[searchSite objectForKey:@"sitename"]];
+        
+        if( !(gdbmCache = [[GDBMCache gdbmCacheWithGDBMFile:gdbmFile] retain]) )
+        {
+            NSLog(@"HooverController: Couldn't create GDBMCache with GDBMFile object.");
+            return nil;
         }
     }
+    [gdbmCache setCacheLife:(NSTimeInterval)GDBMCACHE_TIME];
 
-    NSLog(@"Configuration file read.");
 
     fetcherController = [[FetcherController alloc] init];
     [NSThread detachNewThreadSelector:@selector(runWithHooverController:)
-                                  toTarget:fetcherController
-                                  withObject:self];
+                             toTarget:fetcherController
+                           withObject:self];
+    [NSThread detachNewThreadSelector:@selector(runTheRetrievingThread)
+                             toTarget:self
+                           withObject:nil];
+    [pool release];
+    
     return self;
 }
 
 
 - (void)addUrlToSearchlist:(NSMutableDictionary *)newUrl
 {
-    NSMutableDictionary *persistentSitesDictionary;
-    NSMutableDictionary *persistentSite ;
-    NSMutableDictionary *searchSite ;
-    NSString		*siteName;
-
-    persistentSitesDictionary = [propertyList rootDictionary];
-    
-    if( ! [generalScanner urlIsWanted:newUrl] )
-    {
-        //NSLog(@"General Scanner rejects: %@",[newUrl description]);
-        return;
-    }
+    NSAutoreleasePool		*pool = [[NSAutoreleasePool alloc] init];
+    NSMutableDictionary		*persistentSite;							// persistent Site is persistent and contains known/ unknown information
+    NSString			*siteName;
+        
     siteName = [NSString stringWithFormat:@"%@:%@",[newUrl objectForKey:@"host"],[newUrl objectForKey:@"port"]];
-    
-    if( ! (persistentSite = [persistentSitesDictionary objectForKey:siteName] ) )
+
+    if( persistentSite = [gdbmCache objectForKey:siteName] )
     {
-        persistentSite = [NSMutableDictionary dictionary];
+        RobotScanner *robotScanner;
+        
+        if( (!(robotScanner = [persistentSite objectForKey:@"robotScanner"])) || [robotScanner urlIsWanted:newUrl] )
+        {
+            [siteLock lock];
+            if( (![[persistentSite objectForKey:@"knownpaths"] objectForKey:[newUrl objectForKey:@"path"]])
+                && (![[persistentSite objectForKey:@"unknownpaths"] objectForKey:[newUrl objectForKey:@"path"]]) )
+            {
+                [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[newUrl objectForKey:@"path"],@"path",nil]
+                                                                  forKey:[newUrl objectForKey:@"path"]];
+                if(1 == [[persistentSite objectForKey:@"unknownpaths"] count])
+                {
+                    NSLog(@"HooverController: site %@ has unknown urls again",siteName);
+                    [allSitesDatedQueue push:siteName withDate:[persistentSite objectForKey:@"nextaccess"]];
+                }
+            }
+            [siteLock unlock];
+        }
+        #if DEBUG
+        else
+        {
+            NSLog(@"HooverController: RobotScanner rejects Url: %@",[newUrl description]);
+        }
+        #endif
+    }
+    else
+    {															// in case the site is unknown create
+        persistentSite = [NSMutableDictionary dictionary];								// persistent and sortedArray entries
         [persistentSite setObject:siteName forKey:@"sitename"];
         [persistentSite setObject:[newUrl objectForKey:@"host"] forKey:@"host"];
         [persistentSite setObject:[newUrl objectForKey:@"port"] forKey:@"port"];
-        searchSite = [persistentSite mutableCopy];
-
         [persistentSite setObject:[NSMutableDictionary dictionary] forKey:@"unknownpaths"];
         [persistentSite setObject:[NSMutableDictionary dictionary] forKey:@"knownpaths"];
-        [persistentSitesDictionary setObject:persistentSite forKey:[persistentSite objectForKey:@"sitename"]];
-
-        [searchSite setObject:[NSDate date] forKey:@"nextaccess"];
-        [allSitesSortedArray addObject:searchSite];
-        [allSitesDictionary setObject:searchSite forKey:[searchSite objectForKey:@"sitename"]];
+        [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[newUrl objectForKey:@"path"],@"path",nil]
+                                                           forKey:[newUrl objectForKey:@"path"]];
+        [gdbmCache setObject:persistentSite forKey:siteName];
+        [allSitesDatedQueue push:siteName withDate:[NSDate distantPast]];
     }
-
-
-    [newUrl removeObjectForKey:@"host"];
-    [newUrl removeObjectForKey:@"port"];
-    [newUrl removeObjectForKey:@"method"];
-    [newUrl removeObjectForKey:@"subpage"];
-
-    if(! [[persistentSite objectForKey:@"knownpaths"] objectForKey:[newUrl objectForKey:@"path"]] )
-    {
-        //NSLog(@"Adding: %@",[newUrl description]);
-        [[persistentSite objectForKey:@"unknownpaths"] setObject:newUrl forKey:[newUrl objectForKey:@"path"]];
-        //NSLog(@"Added: %@",[[persistentSite objectForKey:@"unknownpaths"] objectForKey:[newUrl objectForKey:@"path"]]);
-    }
+    [pool release];
 }
 
-- (void)runTheLoop;
-{
-    NSAutoreleasePool 	*outerPool;
 
-    while(1)
-    {
-        outerPool = [[NSAutoreleasePool alloc] init];
-
-        while( [sendingUrlsQueue count] && [self workOnSendingUrlsQueue] );			// First feed the fetcherController
-
-        if( CONDITION_QUEUE_NOT_EMPTY == [receivedUrlsQueueLock condition] )
-        {
-            [self workOnReceivedUrlsQueue];
-        }
-
-        [self putWorkInSendingUrlsQueue];
-        [outerPool release];
-    }
-}
 
 - (void)putWorkInSendingUrlsQueue;
 {
-    NSMutableDictionary	*knownDictionary;
-    NSMutableDictionary	*unknownDictionary;
-    NSMutableDictionary *searchSite;
-    NSMutableDictionary *persistentSitesDictionary;
-    NSMutableDictionary *persistentSite;
-    NSMutableDictionary	*url;
-    RobotScanner	*robotScanner;
+    //[NSThread setPriority:9];
+    while(1)
+    {	
+        NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
+        NSString		*siteName;
+        NSMutableDictionary 	*persistentSite;
+        NSMutableDictionary	*unknownDictionary;
+        NSMutableDictionary	*url;
 
+        siteName = [allSitesDatedQueue pop];
 
-    persistentSitesDictionary = [propertyList rootDictionary];
+        persistentSite = [gdbmCache objectForKey:siteName];
+        unknownDictionary = [persistentSite objectForKey:@"unknownpaths"];
 
-    if( [allSitesSortedArray count] )										// has work to do
-    {
-        searchSite = [allSitesSortedArray objectAtIndex:0];
-        persistentSite = [persistentSitesDictionary objectForKey:[searchSite objectForKey:@"sitename"]];
-
-        if( NSOrderedDescending == [(NSDate *)[searchSite objectForKey:@"nextaccess"] compare:[NSDate date]] )	// no work - wait
-        {													// for reply
-            if( CONDITION_QUEUE_EMPTY == [receivedUrlsQueueLock condition] )
-            {
-                if( ![sendingUrlsQueue count] )
-                {
-                    #if DEBUG
-                        NSLog(@"Waiting for Site %@ (first in line ) has nextaccess at %@",[searchSite objectForKey:@"sitename"],
-                                [[searchSite objectForKey:@"nextaccess"] description]);
-                    #endif
-                    if( YES == [receivedUrlsQueueLock lockWhenCondition:CONDITION_QUEUE_NOT_EMPTY
-                                                            beforeDate:[searchSite objectForKey:@"nextaccess"]] )
-                        [receivedUrlsQueueLock unlockWithCondition:[receivedUrlsQueue count]?CONDITION_QUEUE_NOT_EMPTY:CONDITION_QUEUE_EMPTY];
-                }
-                else
-                {
-                    #if DEBUG
-                         NSLog(@"Waiting one Second for FetcherController to come ready");
-                    #endif
-                    if( YES == [receivedUrlsQueueLock lockWhenCondition:CONDITION_QUEUE_NOT_EMPTY
-                                                             beforeDate:[NSDate dateWithTimeIntervalSinceNow:1.0]] )
-                        [receivedUrlsQueueLock unlockWithCondition:[receivedUrlsQueue count]?CONDITION_QUEUE_NOT_EMPTY:CONDITION_QUEUE_EMPTY];
-                }
-            }
-            return;
-       }
-        else						
-        {	
-            url = nil;											// 'hmmm work to do
-            unknownDictionary =  [persistentSite objectForKey:@"unknownpaths"];
-            knownDictionary = [persistentSite objectForKey:@"knownpaths"];
-
-            if( ! [knownDictionary objectForKey:@"/robots.txt"] )
-            {
-                url = [NSMutableDictionary dictionary];
-                [url setObject:@"/robots.txt" forKey:@"path"];
-                [unknownDictionary removeObjectForKey:[url objectForKey:@"path"]];
-            }
-            else
-            {
-                if( 0 == [unknownDictionary count] )
-                {
-                    #if DEBUG
-                    NSLog(@"Site %@ has no unknown urls right now.",[searchSite objectForKey:@"sitename"]);
-                    #endif
-                    [searchSite setObject:[NSDate distantFuture] forKey:@"nextaccess"];
-                    [allSitesSortedArray removeObject:searchSite];
-                    [allSitesSortedArray addObject:searchSite];
-                }
-                else
-                {
-                    url = [[[unknownDictionary objectEnumerator] nextObject] mutableCopy];
-                    [unknownDictionary removeObjectForKey:[url objectForKey:@"path"]];
-
-                    if( (robotScanner = [searchSite objectForKey:@"robotScanner"]) && ( [RobotScanner class] == [robotScanner class]) )
-                    {
-                        if( ! [robotScanner urlIsWanted:url] )
-                        {
-                            #if DEBUG
-                            NSLog(@"Site Scanner rejects: %@",[url description]);
-                            #endif
-                            [url setObject:@"rejected from siteScanner" forKey:@"status"];
-                            [knownDictionary setObject:url forKey:[url objectForKey:@"path"]];
-                            url=nil;
-                        }
-                    }
-                }
-            }
-
-            if( nil != url )
-            {
-                NSString	*ipaddress;
-
-                [url setObject:[searchSite objectForKey:@"sitename"] forKey:@"sitename"];
-                [url setObject:[searchSite objectForKey:@"host"] forKey:@"host"];
-                [url setObject:[searchSite objectForKey:@"port"] forKey:@"port"];
-                if( ipaddress = [searchSite objectForKey:@"ipaddress"] ) [url setObject:ipaddress forKey:@"ipaddress"];
-
-                [searchSite setObject:[NSDate distantFuture] forKey:@"nextaccess"];
-                [allSitesSortedArray removeObject:searchSite];
-                [allSitesSortedArray addObject:searchSite];
-
-                [sendingUrlsQueue addObject:url];
+        url = nil;												// 'hmmm work to do
+        [siteLock lock];
+        if( ! [[persistentSite objectForKey:@"knownpaths"] objectForKey:@"/robots.txt"] )				// in case we don't have the /robots.txt fetch it
+        {
+            url = [NSMutableDictionary dictionaryWithObject:@"/robots.txt" forKey:@"path"];
+        }
+        else
+        {
+            if( 0 == [unknownDictionary count] )								// in case we know the whole site
+            {													// we won't visit it again ( except we get new urls )
                 #if DEBUG
-  		 NSLog(@"HooverController stuffing url - (S:%d R:%d) in queues now.",[sendingUrlsQueue count],[receivedUrlsQueue count]);
+                    NSLog(@"HooverController: site %@ has no unknown urls right now.",siteName);
                 #endif
-           }
+            }
             else
-            {
-                //NSLog(@"Url == nil");
+            {													// we have some file to fetch,
+                url = [NSMutableDictionary dictionaryWithObject:[[[unknownDictionary objectEnumerator] nextObject] objectForKey:@"path"] forKey:@"path"];
             }
         }
-    }
-    else
-    {
-        NSLog(@"No more work to do. - This should not happen.");
+        [siteLock unlock];
+
+        NSAssert(nil != url,@"Url==nil" );
+        
+        {
+            NSString	*ipaddress;
+
+            [url setObject:siteName forKey:@"sitename"];
+            [url setObject:@"http" forKey:@"method"];
+            [url setObject:[persistentSite objectForKey:@"host"] forKey:@"host"];
+            [url setObject:[persistentSite objectForKey:@"port"] forKey:@"port"];
+            if( ipaddress = [persistentSite objectForKey:@"ipaddress"] )
+                [url setObject:ipaddress forKey:@"ipaddress"];
+
+            [fetcherController fetchLocalUrl:url];
+        }
+        [pool release];
     }
 }
 
@@ -403,209 +304,172 @@ static NSComparisonResult compareserver(NSMutableDictionary *server1, NSMutableD
 
 - (void)retrievedUrl:(NSMutableDictionary *)url;
 {
-    [receivedUrlsQueueLock lock];
-    [receivedUrlsQueue addObject:url];
-    [receivedUrlsQueueLock unlockWithCondition:CONDITION_QUEUE_NOT_EMPTY];
-
-    [writeToFileLock lock];
-    [writeToFileQueue addObject:url];
-    [writeToFileLock unlockWithCondition:CONDITION_QUEUE_NOT_EMPTY];
+    [receivedUrlsQueue push:url];
 }
 
 
 
-- (BOOL) workOnSendingUrlsQueue;
+
+- (void)runTheRetrievingThread;
 {
-    NSMutableDictionary *url;
-
-    url = [sendingUrlsQueue objectAtIndex:0];
-    if( [fetcherController fetchLocalUrl:url] )
+    [NSThread setPriority:15];
+    while(1)
     {
-        [sendingUrlsQueue removeObjectAtIndex:0];
-        return YES;
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        
+        [self workOnReceivedUrlsQueue];
+        [pool release];
     }
-    return NO;
 }
-
-
 
 - (void)workOnReceivedUrlsQueue;
 {
     NSMutableDictionary	*url;
-    static 		retrievedurlcounter = 0;
     double 		deltatime;
-    RobotScanner	*robotScanner;
     NSString		*siteName;
     NSString		*urlPath;
-    NSMutableDictionary	*searchSite;
-    NSMutableDictionary *persistentSitesDictionary;
     NSMutableDictionary	*persistentSite;
     NSMutableDictionary *persistentUrl;
 
-    [receivedUrlsQueueLock lock];
-    if( ! [receivedUrlsQueue count] )
-    {
-        NSLog(@"HooverController - workOnQueue called without work");
-        [receivedUrlsQueueLock unlockWithCondition:CONDITION_QUEUE_EMPTY];
-        return;
-    }
-
-    url = [[receivedUrlsQueue objectAtIndex:0] retain];
-    [receivedUrlsQueue removeObjectAtIndex:0];
-    [receivedUrlsQueueLock unlockWithCondition:[receivedUrlsQueue count]?CONDITION_QUEUE_NOT_EMPTY:CONDITION_QUEUE_EMPTY];
+    url 	= [receivedUrlsQueue pop];
+    siteName	= [url objectForKey:@"sitename"];
+    urlPath	= [url objectForKey:@"path"];
+    persistentSite = [gdbmCache objectForKey:siteName];
 
     #if DEBUG
-    NSLog(@"HooverController working on:%@%@ %@",[url objectForKey:@"sitename"],[url objectForKey:@"path"],[url objectForKey:@"status"]);
+        NSLog(@"HooverController: receivedQueue has %d items.",[receivedUrlsQueue count]);
+        NSLog(@"HooverController: popped %@%@ %@",siteName,urlPath,[url objectForKey:@"status"]);
+        //NSLog(@"Got url:%@",[url description]);
     #endif
-
-    if( ! (retrievedurlcounter = (retrievedurlcounter+1)%10000) )
-    {
-        NSLog(@"Saving persistent property list");
-        [propertyList save];
-        NSLog(@"Saving done.");
-    }
-    else if( ! (retrievedurlcounter%500) )
-    {
-        NSLog(@"Flushing persistent property list");
-        [propertyList flush];
-        NSLog(@"Flush done.");
-    }
-
     
-    persistentSitesDictionary = [propertyList rootDictionary];
-    siteName = [url objectForKey:@"sitename"];
-    persistentUrl = [NSMutableDictionary dictionary];
-    persistentSite = [persistentSitesDictionary objectForKey:siteName];
-    searchSite = [allSitesDictionary objectForKey:siteName];
-    
-    if( ! (urlPath = [url objectForKey:@"path"]) )
-    {
-        NSLog(@"Got URL without path:%@",[url description]);
-        [url release];
-        return;
-    }
-    [persistentUrl setObject:[url objectForKey:@"HTTP"] forKey:@"HTTP"];
-    [persistentUrl setObject:urlPath forKey:@"path"];
 
-        
-    if( [@"/robots.txt" isEqual:urlPath] )
+
+    if(! [[url objectForKey:@"status"] isEqual:@"invalid"] )								// fetched or redirected
     {
-        if(! [[url objectForKey:@"HTTP"] hasPrefix:@"200"] )
-        {
-            //NSLog(@"/robots.txt not found on:%@",siteName);
-        }
-        else
-        {
-            //NSLog(@"/robots.txt found on site:%@",siteName);
-            if( robotScanner = [[RobotScanner alloc] initWithUrl:url userAgentName:userAgentName] )
+        if( [@"/robots.txt" isEqual:urlPath] )										// url is 'robots.txt' so instanciate a
+        {														// robotScanner and save the 'robots.txt'
+            if( [url objectForKey:@"httpdata"] )										// persistent
             {
-                [persistentUrl setObject:[url objectForKey:@"contents"] forKey:@"contents"];
-                [searchSite setObject:robotScanner forKey:@"robotScanner"];
-                [robotScanner release];
-            }
-        }
-    }
+                RobotScanner *robotScanner;
 
-
-    if( [[url objectForKey:@"status"] isEqual:@"fetched"] )
-    {
-        if( [[url objectForKey:@"HTTP"] hasPrefix:@"30"] && [url objectForKey:@"Location"])
-        {
-            //NSLog(@"Redirection on url:%@",urlPath);
-            [persistentUrl setObject:[url objectForKey:@"Location"] forKey:@"Location"];
-            [[persistentSite objectForKey:@"unknownpaths"] setObject:persistentUrl forKey:urlPath];
-        }
-        else
-        {
-            [[persistentSite objectForKey:@"knownpaths"] setObject:persistentUrl forKey:urlPath];
-
-            if( [[url objectForKey:@"HTTP"] hasPrefix:@"200"] )
-            {
-                NSMutableArray	*newUrlArray;
-
-                if( newUrlArray = [url objectForKey:@"links"] )
+                if( robotScanner = [RobotScanner robotScannerWithUrl:url] )
                 {
-                    NSEnumerator	*objectEnumerator = [newUrlArray objectEnumerator];
-                    NSMutableDictionary	*newUrl;
-
-                    while( newUrl = [objectEnumerator nextObject] )
-                    {
-                        [self addUrlToSearchlist:newUrl];
-                    }
+                    [persistentSite setObject:robotScanner forKey:@"robotScanner"];					// recheck every url do not know on that site
+                    [siteLock lock];
+                    [[persistentSite objectForKey:@"unknownpaths"] removeObjectsForKeys:[robotScanner unwantedPaths:[persistentSite objectForKey:@"unknownpaths"]]];
+                    [siteLock unlock];
                 }
             }
         }
-        deltatime = 10*[[url objectForKey:@"transfertime"] doubleValue];
-        [searchSite setObject:[NSDate dateWithTimeIntervalSinceNow:deltatime] forKey:@"nextaccess"];
+        else
+        {
+            NSArray *linkArray;
+
+            if( linkArray = [url objectForKey:@"links"] )								// url contains links - so add them
+            {
+                NSEnumerator		*objectEnumerator = [linkArray objectEnumerator];
+                NSMutableDictionary	*newUrl;
+                
+                while( newUrl = [objectEnumerator nextObject] )
+                {
+                    [self addUrlToSearchlist:newUrl];
+                }
+            }
+        }
+
+        persistentUrl = [NSMutableDictionary dictionaryWithObject:urlPath forKey:@"path"];
+        [persistentUrl setObject:[url objectForKey:@"status"] forKey:@"status"];
+        
+        [[persistentSite objectForKey:@"knownpaths"] setObject:persistentUrl forKey:urlPath];				// url 'fetched' so it is known
+        [[persistentSite objectForKey:@"unknownpaths"] removeObjectForKey:urlPath];					// url now known - so remove it from unknown
+
+        if( ![url objectForKey:@"transfertime"] )
+        {
+            NSLog(@"HooverController: url has no transfertimekey:%@ ( using 1 second )",[url description]);
+            deltatime=1.0;
+        }
+        else
+        {
+            deltatime = (double)10.0 * [[url objectForKey:@"transfertime"] doubleValue];
+        }
+        
+        if( deltatime > MAXIMUM_RETRY_TIME )
+        {
+            deltatime = MAXIMUM_RETRY_TIME;
+        }
+
+        [persistentSite setObject:[NSDate dateWithTimeIntervalSinceNow:deltatime] forKey:@"nextaccess"];
+        [persistentSite removeObjectForKey:@"failedaccess"];
     }
     else
     {
-        [searchSite setObject:[NSDate dateWithTimeIntervalSinceNow:1000.0] forKey:@"nextaccess"];
-    }
-    [allSitesSortedArray removeObject:searchSite];
-    [allSitesSortedArray addObject:searchSite];
-    if(! [searchSite objectForKey:@"ipaddress"] && [url objectForKey:@"ipaddress"] )
-        [searchSite setObject:[url objectForKey:@"ipaddress"] forKey:@"ipaddress"];
-    [url release];
-}
+        NSDate *failedAccessDate = [persistentSite objectForKey:@"failedaccess"];
 
-
-
-- (void) runTheWriteToFileLoop;
-{
-    NSAutoreleasePool *outerPool = [[NSAutoreleasePool alloc] init];
-    NSFileHandle *fileHandle = [NSFileHandle fileHandleWithStandardOutput];
-
-    while(1)
-    {
-        NSAutoreleasePool *innerPool = [[NSAutoreleasePool alloc] init];
-        NSMutableDictionary *url;
-        
-        [writeToFileLock lockWhenCondition:CONDITION_QUEUE_NOT_EMPTY];
-        url = [[writeToFileQueue objectAtIndex:0] retain];
-        [writeToFileQueue removeObjectAtIndex:0];
-        [writeToFileLock unlockWithCondition:[writeToFileQueue count]?CONDITION_QUEUE_NOT_EMPTY:CONDITION_QUEUE_EMPTY];
-
-        if(  [[url objectForKey:@"HTTP"] hasPrefix:@"200"] && [[url objectForKey:@"content-type"] hasPrefix:@"text"] )
+        if(! failedAccessDate )
         {
-
-            [fileHandle writeData:[@"\nURL:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[[url objectForKey:@"sitename"] dataUsingEncoding:NSISOLatin1StringEncoding
-                                                                    allowLossyConversion:YES]];
-            [fileHandle writeData:[[url objectForKey:@"path"] dataUsingEncoding:NSISOLatin1StringEncoding
-                                                        allowLossyConversion:YES]];
-            [fileHandle writeData:[@"\nCONTENTTYPE:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[[url objectForKey:@"content-type"] dataUsingEncoding:NSISOLatin1StringEncoding
-                                                                allowLossyConversion:YES]];
-            [fileHandle writeData:[@"\nCONTENT:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[[url objectForKey:@"contents"] dataUsingEncoding:NSISOLatin1StringEncoding
-                                                            allowLossyConversion:YES]];
+            NSLog(@"HooverController: site %@ failed the first time",siteName);
+            [persistentSite setObject:[NSDate dateWithTimeIntervalSinceNow:FIRSTFAIL_TIME] forKey:@"nextaccess"];
         }
-        [url release];
-        [innerPool release];
+        else
+        {
+            NSLog(@"HooverController:  site %@ failed again",siteName);
+            [persistentSite setObject:[NSDate dateWithTimeIntervalSinceNow:-2.0*[failedAccessDate timeIntervalSinceNow]]
+                               forKey:@"nextaccess"];
+        }
+        [persistentSite setObject:[NSDate date] forKey:@"failedaccess"];
+
+        [siteLock lock];
+        if( [@"/robots.txt" isEqual:urlPath] )										// url is 'robots.txt' so instanciate a
+        {
+            [[persistentSite objectForKey:@"unknownpaths"] removeObjectForKey:urlPath];					// url now known - so remove it from unknown
+        }
+        [siteLock unlock];
     }
-    [outerPool release];
-    [NSThread exit];
+
+    if(! [persistentSite objectForKey:@"ipaddress"] && [url objectForKey:@"ipaddress"] )
+        [persistentSite setObject:[url objectForKey:@"ipaddress"] forKey:@"ipaddress"];
+
+    //NSLog(@"Persistent site now:%@",[persistentSite description]);
+
+    [siteLock lock];
+    if( [[persistentSite objectForKey:@"unknownpaths"] count] )
+    {
+        NSLog(@"HooverController: site %@ has next access:%@",siteName ,[persistentSite objectForKey:@"nextaccess"]);
+        [allSitesDatedQueue push:siteName withDate:[persistentSite objectForKey:@"nextaccess"]];
+    }
+    else
+    {
+        NSLog(@"HooverController: site %@ has no unknown urls now.",siteName);
+    }
+    [siteLock unlock];
+
 }
 
 
-- (NSString *)userAgentName;
+- (void)save;
 {
-    return userAgentName;
-}
-- (NSString *)userAgentMail;
-{
-    return userAgentMail;
-}
-- (NSMutableDictionary *)httpProxy;
-{
-    return httpProxy;
+    NSAutoreleasePool 	*pool = [[NSAutoreleasePool alloc] init];
+
+    NSLog(@"HooverController: -save");
+    [gdbmCache save];
+    NSLog(@"HooverController: database saved");
+    exit(1);
+    [pool release];
 }
 
-- (void)propertyListBecameInvalid:(NSNotification *)notificationObject;
+- (void)showCurrentStatus;
 {
-    //NSLog(@"PropertyList was saved: %@",[notificationObject name]);
-    //persistentSitesDictionary = [propertyList rootDictionary];
+    NSAutoreleasePool 	*pool = [[NSAutoreleasePool alloc] init];
+
+    NSLog(@"HooverController: showCurrentStatus: receivedQueue count %d.",[receivedUrlsQueue count]);
+    NSLog(@"HooverController: showCurrentStatus: sendQueue count %d.",[fetcherController count]);
+    NSLog(@"HooverController: showCurrentStatus: allSitesDatedQueue count %d.",[allSitesDatedQueue count]);
+    NSLog(@"HooverController: showCurrentStatus: gdbmCache cacheCount %d.",[gdbmCache cacheCount]);
+    [pool release];
 }
 
 @end
+
+
+
+

@@ -7,22 +7,20 @@
 # and Makefile.postamble (both optional), and Makefile will include them.
 #
 
-NAME = Hoover
+NAME = HTMLStripper
 
 PROJECTVERSION = 2.6
 PROJECT_TYPE = Tool
 LANGUAGE = English
 
-CLASSES = HooverController.m RobotScanner.m FetcherController.m\
-          DFetcher.m
+CLASSES = Categories.m HTMLDocument.m
 
-HFILES = HooverController.h RobotScanner.h FetcherController.h\
-         DFetcher.h
+HFILES = Categories.h HTMLDocument.h
 
-MFILES = Hoover_main.m
+MFILES = HTMLStripper_main.m
 
-OTHERSRCS = Makefile.preamble Makefile Makefile.postamble\
-            HooverConfiguration
+OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template\
+            h.template HTMLDocument.configuration
 
 
 MAKEFILEDIR = $(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles
@@ -33,8 +31,7 @@ DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
-FRAMEWORKS = -framework Foundation -framework HooverFramework\
-             -framework OmniBase -framework OmniNetworking
+FRAMEWORKS = -framework Foundation
 
 
 include $(MAKEFILEDIR)/platform.make

@@ -7,22 +7,16 @@
 # and Makefile.postamble (both optional), and Makefile will include them.
 #
 
-NAME = Hoover
+NAME = URLSyntaxChecker
 
 PROJECTVERSION = 2.6
 PROJECT_TYPE = Tool
 LANGUAGE = English
 
-CLASSES = HooverController.m RobotScanner.m FetcherController.m\
-          DFetcher.m
+MFILES = URLSyntaxChecker_main.m
 
-HFILES = HooverController.h RobotScanner.h FetcherController.h\
-         DFetcher.h
-
-MFILES = Hoover_main.m
-
-OTHERSRCS = Makefile.preamble Makefile Makefile.postamble\
-            HooverConfiguration
+OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template\
+            h.template
 
 
 MAKEFILEDIR = $(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles
@@ -33,8 +27,7 @@ DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
-FRAMEWORKS = -framework Foundation -framework HooverFramework\
-             -framework OmniBase -framework OmniNetworking
+FRAMEWORKS = -framework Foundation -framework HooverFramework
 
 
 include $(MAKEFILEDIR)/platform.make

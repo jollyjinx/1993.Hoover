@@ -1,0 +1,7 @@
+{
+	br	= { tagtext = "\n"; };
+	tr	= { tagtext = "\n"; };
+	a 	= { link = "href" };
+	img	= { link = "src"; optiontext = "alt" };
+	frame	= { link = "src"; optiontext = "name" };
+}

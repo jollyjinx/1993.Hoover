@@ -7,34 +7,34 @@
 # and Makefile.postamble (both optional), and Makefile will include them.
 #
 
-NAME = Hoover
+NAME = DatabaseBuilder
 
 PROJECTVERSION = 2.6
 PROJECT_TYPE = Tool
 LANGUAGE = English
 
-CLASSES = HooverController.m RobotScanner.m FetcherController.m\
-          DFetcher.m
+CLASSES = Categories.m GDBMFile.m HTMLDocument.m HTMLScanner.m\
+          OutputFileScanner.m
 
-HFILES = HooverController.h RobotScanner.h FetcherController.h\
-         DFetcher.h
+HFILES = Categories.h GDBMFile.h HTMLDocument.h HTMLScanner.h\
+         OutputFileScanner.h
 
-MFILES = Hoover_main.m
+MFILES = DatabaseBuilder_main.m
 
-OTHERSRCS = Makefile.preamble Makefile Makefile.postamble\
-            HooverConfiguration
+OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template\
+            h.template HTMLDocument.configuration
 
 
 MAKEFILEDIR = $(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles
 CODE_GEN_STYLE = DYNAMIC
 MAKEFILE = tool.make
-LIBS = 
+LIBS = -lgdbm
 DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
-FRAMEWORKS = -framework Foundation -framework HooverFramework\
-             -framework OmniBase -framework OmniNetworking
+HEADER_PATHS = -I/usr/local/include
+FRAMEWORKS = -framework Foundation
 
 
 include $(MAKEFILEDIR)/platform.make

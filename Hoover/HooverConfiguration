@@ -1,15 +1,9 @@
 { /*test*/
 	urls =  (
-			"http://watzmann:8000/blafasel.html",
+				"http://warlock.cis.uni-muenchen.de:9000/tagtest.html"
                 );
 	general = {
-			useragentname = "Hoover/0.1";
-			useragentmail = "Patrick Stein <jolly@cis.uni-muenchen.de>";
+			useragentname = "Hoover/0.2";
 			databasename =  "webdatabase" ;
-			includehosts = ( );
-			excludehosts = ( "gov", "nasa", "edu", "us", "ca", "uk", "au","com","net","mil");
-			includepaths = ();
-			excludepaths = ( "?", "cgi-bin", "cgi_bin" ,".gif",".tif",".ps",".gz",".mov",".jpeg",".jpg",".eps",".gz" );
-			nohttpproxy = { host="www.cis.uni-muenchen.de"; port = 8000 };
 		};
 }

@@ -2,40 +2,20 @@
     DYNAMIC_CODE_GEN = YES; 
     FILESTABLE = {
         BUNDLES = (); 
-        CLASSES = (
-            HooverController.m, 
-            SortedArray.m, 
-            HTMLScanner.m, 
-            RobotScanner.m, 
-            FetcherController.m, 
-            ThreadController.m, 
-            JPPL.m
+        CLASSES = (HooverController.m, RobotScanner.m, FetcherController.m, DFetcher.m); 
+        FRAMEWORKS = (
+            Foundation.framework, 
+            HooverFramework.framework, 
+            OmniBase.framework, 
+            OmniNetworking.framework
         ); 
-        FRAMEWORKS = (Foundation.framework); 
+        FRAMEWORKSEARCH = (); 
         HEADERSEARCH = (); 
-        H_FILES = (
-            HooverController.h, 
-            SortedArray.h, 
-            HTMLScanner.h, 
-            RobotScanner.h, 
-            FetcherController.h, 
-            ThreadController.h, 
-            Fetcher.h, 
-            JPPL.h
-        ); 
+        H_FILES = (HooverController.h, RobotScanner.h, FetcherController.h, DFetcher.h); 
         LIBS = (); 
+        OTHER_LIBS = (); 
         OTHER_LINKED = (Hoover_main.m); 
-        OTHER_SOURCES = (
-            Makefile.preamble, 
-            Makefile, 
-            Makefile.postamble, 
-            m.template, 
-            h.template, 
-            HooverConfiguration, 
-            SortedArray.description, 
-            HTMLScanner.describtion, 
-            siteDictionary.description
-        ); 
+        OTHER_SOURCES = (Makefile.preamble, Makefile, Makefile.postamble, HooverConfiguration); 
         PRECOMPILED_HEADERS = (); 
         PROJECT_HEADERS = (); 
         PUBLIC_HEADERS = (); 

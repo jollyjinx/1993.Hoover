@@ -7,34 +7,33 @@
 # and Makefile.postamble (both optional), and Makefile will include them.
 #
 
-NAME = Hoover
+NAME = GDBMTest
 
 PROJECTVERSION = 2.6
 PROJECT_TYPE = Tool
 LANGUAGE = English
 
-CLASSES = HooverController.m RobotScanner.m FetcherController.m\
-          DFetcher.m
+CLASSES = RobotScanner.m
 
-HFILES = HooverController.h RobotScanner.h FetcherController.h\
-         DFetcher.h
+HFILES = RobotScanner.h
 
-MFILES = Hoover_main.m
+MFILES = GDBMTest_main.m
 
-OTHERSRCS = Makefile.preamble Makefile Makefile.postamble\
-            HooverConfiguration
+OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template\
+            h.template
 
 
 MAKEFILEDIR = $(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles
 CODE_GEN_STYLE = DYNAMIC
 MAKEFILE = tool.make
-LIBS = 
+LIBS = -lgdbm
 DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
-FRAMEWORKS = -framework Foundation -framework HooverFramework\
-             -framework OmniBase -framework OmniNetworking
+HEADER_PATHS = -I/usr/local/include
+FRAMEWORK_PATHS = -F/Users/admin/jolly/Library/Frameworks
+FRAMEWORKS = -framework Foundation -framework HooverFramework
 
 
 include $(MAKEFILEDIR)/platform.make

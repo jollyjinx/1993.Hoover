@@ -1,39 +1,34 @@
-/* FetcherController.h created by jolly on Thu 06-Mar-1997 */
+/* DFetcher.h created by jolly on Tue 21-Oct-1997 */
 
 #import <Foundation/Foundation.h>
+#import <HooverFramework/HooverFramework.h>
 
-@class Fetcher,FetcherController,HooverController;
+@class DFetcher,FetcherController,HooverController;
 
+#import "DFetcher.h"
 #import "HooverController.h"
-#import "SortedArray.h"
-#import "Fetcher.h"
 
 @interface FetcherController : NSObject
 {
-    NSString		*connectionName;
-    NSConnection	*waitingConnection;
-    NSMutableDictionary	*intermediateConnectionDictionary;
-    NSMutableDictionary	*usedConnectionDictionary;
-
-    SortedArray		*remoteFetchersSortedArray;
-    NSMutableArray	*workQueue;
-    NSConditionLock	*workQueueLock;
-    NSMutableDictionary	*fetcherWorkDictionary;
+    SortedArray		*distributedFetchersSortedArray;
+    NSMutableDictionary	*distributedFetchersWorkDictionary;
+    NSConditionLock    	*distributedFetchersSortedArrayLock;
+    
+    Queue		*workQueue;
 
     HooverController	*hooverController;
 }
 
 - (void)runWithHooverController:(HooverController *)hc;
 
-- (BOOL)generateVendingConnection;
+- (unsigned int)count;
+- (void)fetchLocalUrl:(NSMutableDictionary *)url;
+- (void)retrievedUrl:(NSMutableDictionary *)url dFetcher:(DFetcher *)dFetcher;
 
-- (void)addFetcher:(Fetcher *)distantObject;
-- (BOOL)workOnQueue;
-- (BOOL)fetchLocalUrl:(NSMutableDictionary *)url;
-- (void)pingRemoteHosts;
-- (void)retrievedUrl:(bycopy NSMutableDictionary *)url;
+- (void)createVendingConnection;							
 
-- (BOOL)connection:(NSConnection *)parentConnection shouldMakeNewConnection:(NSConnection *)newConnnection;
-- (void)fetcherDidDie:(NSMutableDictionary *)deadFetcherDictionary;
+- (void)fetcherLogon:(DFetcher *)dFetcher;
+- (void)fetcherLogoff:(DFetcher *)dFetcher;
+
 
 @end

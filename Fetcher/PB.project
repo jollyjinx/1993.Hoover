@@ -1,0 +1,31 @@
+{
+    DYNAMIC_CODE_GEN = YES; 
+    FILESTABLE = {
+        BUNDLES = (); 
+        CLASSES = (Fetcher.m, Worker.m, HTTPClient.m, GeneralScanner.m); 
+        FRAMEWORKS = (Foundation.framework, HooverFramework.framework, OmniNetworking.framework); 
+        FRAMEWORKSEARCH = (); 
+        H_FILES = (Fetcher.h, Worker.h, HTTPClient.h, GeneralScanner.h); 
+        LIBS = (); 
+        OTHER_LIBS = (); 
+        OTHER_LINKED = (Fetcher_main.m); 
+        OTHER_SOURCES = (
+            Makefile.preamble, 
+            Makefile, 
+            Makefile.postamble, 
+            HTMLDocument.configuration, 
+            HTTPClient.configuration
+        ); 
+        SUBPROJECTS = (); 
+        TOOLS = (); 
+    }; 
+    LANGUAGE = English; 
+    LOCALIZABLE_FILES = {}; 
+    MAKEFILEDIR = "$(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles"; 
+    NEXTSTEP_BUILDTOOL = /bin/gnumake; 
+    PDO_UNIX_BUILDTOOL = $NEXT_ROOT/NextDeveloper/bin/make; 
+    PROJECTNAME = Fetcher; 
+    PROJECTTYPE = Tool; 
+    PROJECTVERSION = 2.6; 
+    WINDOWS_BUILDTOOL = $NEXT_ROOT/NextDeveloper/Executables/make; 
+}

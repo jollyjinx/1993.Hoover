@@ -1,34 +1,67 @@
 
 #import <Foundation/Foundation.h>
-
-#import "SortedArray.h"
+#import <HooverFramework/HooverFramework.h>
+#import <OmniNetworking/OmniNetworking.h>
 #import "HooverController.h"
-#import "HTMLScanner.h"
+#import <sys/signal.h>
 
-int main (int argc, const char *argv[])
+
+HooverController	*hoover;
+
+
+void signalhandler(int signalnumber)
 {
-   NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-   NSDictionary *configurationDictionary;
-   NSString *configurationFileName=@"HooverConfiguration";
-   HooverController *hoover;
-   
-   if( 2 == argc )
-   {
-       configurationFileName = [NSString stringWithCString:argv[1]];
-   }
+    NSLog(@"Received signal %i\n", signalnumber);
+    [hoover save];
+    exit(1);
+}
 
 
+void signalusr1(int signalnumber)
+{
+    NSLog(@"Received signal %i\n", signalnumber);
+    [hoover showCurrentStatus];
+}
+
+int main(int argc, const char *argv[])
+{
+    NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
+    NSDictionary	*configurationDictionary;
+    NSString		*configurationFileName = @"HooverConfiguration";
+    NSString		*commandlineArgument;
+    NSEnumerator	*enumerator = [[[NSProcessInfo processInfo] arguments] objectEnumerator];
+
+    
+    while( commandlineArgument = [enumerator nextObject])
+    {
+        if( [commandlineArgument isEqual:@"-configuration"] && (commandlineArgument = [enumerator nextObject]) )
+        {
+            configurationFileName = commandlineArgument;
+        }
+    }
 
    if( nil == ( configurationDictionary = [NSDictionary dictionaryWithContentsOfFile:configurationFileName] ))
    {
        NSLog(@"Can't read configuration file: %@",configurationFileName);
-       NSLog(@"Usage: %s [Hoverconfiguration]\n\tIf no configuration is omitted 'HooverConfiguration' is used.\n",argv[0]);
+       NSLog(@"Usage: %s [-configuration filename]\n\tIf no configuration is omitted 'HooverConfiguration' is used.\n",argv[0]);
    }
    else
    {
-       [NSRunLoop currentRunLoop];
-       hoover = [[HooverController alloc]  initWithConfiguration:configurationDictionary];
-       [hoover runTheLoop];
+       signal(SIGPIPE, SIG_IGN);
+       signal(SIGTERM, SIG_IGN);
+       signal(SIGINT, SIG_IGN);
+       signal(SIGUSR1, SIG_IGN);
+        
+       hoover = [[HooverController alloc] initWithConfiguration:configurationDictionary];
+       [NSThread detachNewThreadSelector:@selector(putWorkInSendingUrlsQueue)
+                                toTarget:hoover
+                              withObject:nil];
+       NSLog(@"Enableing Signals now.");
+       signal(SIGTERM, signalhandler);
+       signal(SIGINT, signalhandler);
+       signal(SIGUSR1, signalusr1);
+       while(1)
+           [NSThread sleepUntilDate:[NSDate distantFuture]];
        [hoover release];
    }
 
