@@ -1,7 +1,6 @@
 
 #import <Foundation/Foundation.h>
 #import <HooverFramework/HooverFramework.h>
-#import <OmniNetworking/OmniNetworking.h>
 #import "HooverController.h"
 #import <sys/signal.h>
 
@@ -47,20 +46,33 @@ int main(int argc, const char *argv[])
    }
    else
    {
-       signal(SIGPIPE, SIG_IGN);
-       signal(SIGTERM, SIG_IGN);
-       signal(SIGINT, SIG_IGN);
-       signal(SIGUSR1, SIG_IGN);
         
        hoover = [[HooverController alloc] initWithConfiguration:configurationDictionary];
        [NSThread detachNewThreadSelector:@selector(putWorkInSendingUrlsQueue)
                                 toTarget:hoover
                               withObject:nil];
        NSLog(@"Enableing Signals now.");
-       signal(SIGTERM, signalhandler);
-       signal(SIGINT, signalhandler);
-       signal(SIGUSR1, signalusr1);
-       while(1)
+#ifdef GNUSTEP
+       signal(SIGPIPE, SIG_IGN);
+         signal(SIGTERM, SIG_IGN);
+         signal(SIGINT, SIG_IGN);
+         signal(SIGUSR1, SIG_IGN);
+	
+		signal(SIGUSR1, *signalusr1 );
+		{
+			sigset_t	aset;
+			
+			sigemptyset(&aset);
+			sigaddset(&aset, SIGHUP);
+			pthread_sigmask(SIG_UNBLOCK, &aset, NULL);
+		}
+#else		
+
+         signal(SIGTERM, signalhandler);
+         signal(SIGINT, signalhandler);
+         signal(SIGUSR1, signalusr1);
+#endif
+         while(1)
            [NSThread sleepUntilDate:[NSDate distantFuture]];
        [hoover release];
    }

@@ -32,12 +32,12 @@ CODE_GEN_STYLE = DYNAMIC
 MAKEFILE = framework.make
 NEXTSTEP_INSTALLDIR = /LocalLibrary/Frameworks
 WINDOWS_INSTALLDIR = $(HOMEDRIVE)/LocalDeveloper/Frameworks
-LIBS = -lgdbm
+LIBS = 
 DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
-FRAMEWORKS = -framework Foundation
+FRAMEWORKS = -framework Foundation -framework GDBM
 PUBLIC_HEADERS = HooverFramework.h SortedArray.h Queue.h DatedQueue.h\
                  GDBMFile.h GDBMCache.h gdbm.h FileWriter.h\
                  Categories.h HTMLScanner.h TCPConnection.h\

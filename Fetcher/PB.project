@@ -5,10 +5,10 @@
         CLASSES = (Fetcher.m, Worker.m, HTTPClient.m, GeneralScanner.m); 
         FRAMEWORKS = (Foundation.framework, HooverFramework.framework, OmniNetworking.framework); 
         FRAMEWORKSEARCH = (); 
-        H_FILES = (Fetcher.h, Worker.h, HTTPClient.h, GeneralScanner.h, nametoaddress.h); 
+        H_FILES = (Fetcher.h, Worker.h, HTTPClient.h, GeneralScanner.h); 
         LIBS = (); 
         OTHER_LIBS = (); 
-        OTHER_LINKED = (Fetcher_main.m, nametoaddress.c); 
+        OTHER_LINKED = (Fetcher_main.m); 
         OTHER_SOURCES = (
             Makefile.preamble, 
             Makefile, 

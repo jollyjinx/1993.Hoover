@@ -15,12 +15,9 @@ LANGUAGE = English
 
 CLASSES = Fetcher.m Worker.m HTTPClient.m GeneralScanner.m
 
-HFILES = Fetcher.h Worker.h HTTPClient.h GeneralScanner.h\
-         nametoaddress.h
+HFILES = Fetcher.h Worker.h HTTPClient.h GeneralScanner.h
 
 MFILES = Fetcher_main.m
-
-CFILES = nametoaddress.c
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble\
             HTMLDocument.configuration HTTPClient.configuration

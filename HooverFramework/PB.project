@@ -17,7 +17,7 @@
             URL.m, 
             HTMLDocument.m
         ); 
-        FRAMEWORKS = (Foundation.framework); 
+        FRAMEWORKS = (Foundation.framework, GDBM.framework); 
         H_FILES = (
             HooverFramework.h, 
             SortedArray.h, 
@@ -34,7 +34,7 @@
             URL.h, 
             HTMLDocument.h
         ); 
-        OTHER_LIBS = (gdbm); 
+        OTHER_LIBS = (); 
         OTHER_SOURCES = (Makefile.preamble, Makefile, Makefile.postamble, m.template, h.template); 
         PRECOMPILED_HEADERS = (HooverFramework.h, AdvancedDatedQueue.h, HTMLDocument.h); 
         PROJECT_HEADERS = (HooverFramework.h); 

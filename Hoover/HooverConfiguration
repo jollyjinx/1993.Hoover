@@ -1,7 +1,7 @@
 { /*test*/
-	urls =  (
+/*	urls =  (
 				"http://warlock.cis.uni-muenchen.de:9000/tagtest.html"
-                );
+                );*/
 	general = {
 			useragentname = "Hoover/0.2";
 			databasename =  "webdatabase" ;

@@ -7,7 +7,6 @@
 #import <arpa/inet.h>
 #import <sys/socket.h>
 #import <libc.h>
-#import "nametoaddress.h"
 
 #define	CHAR_CR	0x0d
 #define CHAR_LF 0x0a
@@ -23,7 +22,7 @@
 
 static	NSMutableDictionary *httpClientDictionary;
 static	NSMutableDictionary *httpProxyDictionary;
-static	NSLock			*nameserverLookupLock;
+
 
 + (void) initialize;
 {
@@ -46,7 +45,6 @@ static	NSLock			*nameserverLookupLock;
     #if DEBUG
     NSLog(@"HTTPClient.configuration looks like:\n%@",[httpClientDictionary description]);
     #endif
-    nameserverLookupLock = [[NSLock alloc] init];
 }
 
 
@@ -59,44 +57,17 @@ static	NSLock			*nameserverLookupLock;
 - (NSFileHandle *)createConnectionToHost:(NSMutableDictionary *)hostDictionary;
 {
     NSString 		*ipAddress;
-    char 		*ipaddressstring;
     u_long		ipaddress;
     struct		sockaddr_in socketaddr;
     int			httpsocket;
     int			socketreuse =1;
-
     
     if( ! (ipAddress = [hostDictionary objectForKey:@"ipaddress"]) )
     {
-/*
-        [nameserverLookupLock lock];
-        if( 0 == (ipaddressstring = nametoaddress([[NSString stringWithFormat:@"%@.",[hostDictionary objectForKey:@"host"]] cString])) )
+        if( !(ipAddress = [[NSHost hostWithName:[NSString stringWithFormat:@"%@.",[hostDictionary objectForKey:@"host"]]] address]) )
         {
-            [nameserverLookupLock unlock];
-            if( !(ipAddress = [hostDictionary objectForKey:@"host"]) )
-            {
-                [NSException raise:@"HTTPClient" format:@"UnresolvedHostname"] ;
-            }
+            [NSException raise:@"HTTPClient" format:@"UnresolvedHostname"] ;
         }
-        else
-        {
-            [nameserverLookupLock unlock];
-            ipAddress = [NSString stringWithCString:ipaddressstring];
-        }
- 
-/**/
-/**/
-        [nameserverLookupLock lock];
-        if( (!(ipAddress = [[NSHost hostWithName:[NSString stringWithFormat:@"%@.",[hostDictionary objectForKey:@"host"]]] address]))
-            && (!(ipAddress = [[NSHost hostWithAddress:[NSString stringWithFormat:@"%@",[hostDictionary objectForKey:@"host"]]] address]))
-            )
-        {
-            [nameserverLookupLock unlock];
-           [NSException raise:@"HTTPClient" format:@"UnresolvedHostname"] ;
-        }
-        [nameserverLookupLock unlock];
-
-/**/
         [hostDictionary setObject:ipAddress forKey:@"ipaddress"];
     }
 
@@ -105,7 +76,6 @@ static	NSLock			*nameserverLookupLock;
         [NSException raise:@"HTTPClient" format:@"InvalidIPAddress"] ;
     }
 
-    
     socketaddr.sin_port = htons([[hostDictionary objectForKey:@"port"] intValue]);
     socketaddr.sin_family = AF_INET;
     socketaddr.sin_addr.s_addr  = ipaddress;
@@ -117,13 +87,11 @@ static	NSLock			*nameserverLookupLock;
     
     if( -1 == setsockopt(httpsocket, SOL_SOCKET, SO_KEEPALIVE, (char *)&socketreuse, sizeof(socketreuse)) )
     {
-        close(httpsocket);
         [NSException raise:@"HTTPClient" format:@"UnableToSetKeepalive"] ;
     }
 
     if( -1 == (connect(httpsocket,(struct sockaddr *)&socketaddr,sizeof(socketaddr))) )
     {
-        close(httpsocket);
         [NSException raise:@"HTTPClient" format:@"UnableToConnectSocket"];
     }
 

@@ -23,7 +23,7 @@
 {    
     [super init];
 
-    cacheLifeTime= 3600;												// default 20 Minutes
+    cacheLifeTime= 1000.0;												// default 20 Minutes
 
     gdbmFile 	= [aGDBMFile retain];
     cacheLock 	= [[NSRecursiveLock alloc] init];
