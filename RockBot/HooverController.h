@@ -12,6 +12,7 @@
     AdvancedDatedQueue		*allSitesDatedQueue;
     MTQueue			*receivedUrlsQueue;
     NSMutableDictionary		*sitesInformationDictionary;
+    NSMutableDictionary		*fetchedPagesDictionary;
     FetcherController		*fetcherController;
 
 //    EOEditingContext		*eoEditingContext;

@@ -19,7 +19,7 @@
             MD5Checksum.m, 
             RedBlackTree.m
         ); 
-        FRAMEWORKS = (Foundation.framework, System.framework,GDBM.framework); 
+        FRAMEWORKS = (Foundation.framework, System.framework, GDBM.framework); 
         HEADERSEARCH = (/usr/local/include); 
         H_FILES = (
             HooverFramework.h, 

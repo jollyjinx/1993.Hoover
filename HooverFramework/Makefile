@@ -40,7 +40,7 @@ PROF_LIBS = $(LIBS)
 
 
 HEADER_PATHS = -I/usr/local/include
-FRAMEWORKS = -framework Foundation -framework GDBM -framework System
+FRAMEWORKS = -framework Foundation -framework System -framework GDBM
 PUBLIC_HEADERS = HooverFramework.h SortedArray.h DatedQueue.h\
                  GDBMFile.h GDBMCache.h gdbm.h FileWriter.h\
                  Categories.h HTMLScanner.h TCPConnection.h\

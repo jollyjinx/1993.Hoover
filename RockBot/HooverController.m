@@ -22,7 +22,7 @@
 #define	REFETCH_FACTOR		5.0
 #define	FAILEDFETCH_MINIMUM_TIMETOWAIT	800.0
 #define	FAILEDFETCH_MAXIMUM_TIMETOWAIT	300000.0
-#define AVERAGE_PAGE_LOADTIME	20
+#define AVERAGE_PAGE_LOADTIME	5
 
 @implementation HooverController : NSObject
 
@@ -49,6 +49,7 @@
     allSitesDatedQueue		= [[AdvancedDatedQueue alloc] init];
     receivedUrlsQueue		= [[MTQueue alloc] init];
     sitesInformationDictionary	= [[NSMutableDictionary alloc] init];
+    fetchedPagesDictionary	= [[NSMutableDictionary alloc] init];
 
     eofLock			= [[NSLock alloc] init];
     
@@ -142,7 +143,7 @@
                         {
                             [siteDictionary setObject:[NSMutableArray array] forKey:@"pages"];
                         }
-                        [allSitesDatedQueue push:siteDictionary withDate:[NSDate distantPast]];
+                        [allSitesDatedQueue push:[siteDictionary objectForKey:@"siteid"] withDate:[NSDate distantPast]];
                     }
                     [channelDataPool release];
                 }
@@ -182,16 +183,27 @@
 
                         if( [pageArray count] <= ([currentStage stageIntervall]/AVERAGE_PAGE_LOADTIME) )
                         {
+                            NSString		*fetchedStage;
                             NSMutableDictionary	*newPage = [NSMutableDictionary dictionaryWithObjectsAndKeys:[aPage objectForKey:@"pageid"],@"pageid",
                                                                                                       [aPage objectForKey:@"shopid"],@"shopid",
                                                                                                       [aPage objectForKey:@"siteid"],@"siteid",
                                                                                                       [aPage objectForKey:@"path"],@"path",
+                                                                                                      [aPage objectForKey:@"currentStage"],@"currentStage",
                                 nil];
                             if( [aPage objectForKey:@"linkdepth"] )
                                 [newPage setObject:[aPage objectForKey:@"linkdepth"] forKey:@"linkdepth"];
 
-                            if( ! [[siteDictionary objectForKey:@"fetchedpages"] objectForKey:[aPage objectForKey:@"pageid"]] )
+                            if( nil == (fetchedStage = [fetchedPagesDictionary objectForKey:[aPage objectForKey:@"pageid"]]) )
+                            {
                                 [pageArray insertObject:newPage atIndex:0];
+                            }
+                            else
+                            {
+                                if( ! [fetchedStage isEqual:[aPage objectForKey:@"currentStage"]] )
+                                {
+                                    [pageArray insertObject:newPage atIndex:0];
+                                }
+                            }
                             if(0== ++pagecount%1000) NSLog(@"HooverController stageWorkLoop: added page no. %d",pagecount);
                         }
                         else
@@ -205,16 +217,6 @@
                 [pagePool release];
             }
 
-            {
-                NSEnumerator *objectEnumerator = [sitesInformationDictionary objectEnumerator];
-                NSMutableDictionary *aSite;
-
-                while( aSite = [objectEnumerator nextObject] )
-                {
-                    [aSite setObject:[NSMutableDictionary dictionary] forKey:@"fetchedpages"];
-                }
-            }
-            
 
             [eoEditingContext invalidateAllObjects];
             [eoPool release];
@@ -227,11 +229,12 @@
         while( NSOrderedDescending == [stageEndDate compare:[NSDate date]] )
         {
             NSAutoreleasePool	*innerPool = [[NSAutoreleasePool alloc] init];
-            NSMutableDictionary	*siteDictionary;
+            NSString		*siteId;
             
-            if( siteDictionary = [allSitesDatedQueue popBeforeDate:stageEndDate] )
+            if( siteId = [allSitesDatedQueue popBeforeDate:stageEndDate] )
             {
-                #if DEBUG
+                NSMutableDictionary	*siteDictionary = [sitesInformationDictionary objectForKey:siteId];
+               #if DEBUG
                 NSLog(@"HooverController stageWorkLoop: Trying site : %@",siteDictionary);
                 #endif
 
@@ -346,7 +349,7 @@
                     [siteDictionary setObject:[url objectForKey:@"transferdate"] forKey:@"robotsdate"];
                     [siteDictionary setObject:[url objectForKey:@"robotsdata"] forKey:@"robotsdata"];
 
-                    [allSitesDatedQueue push:siteDictionary withDate:[[url objectForKey:@"transferdate"] addTimeInterval:REFETCH_FACTOR*[[url objectForKey:@"transfertime"] floatValue]]];
+                    [allSitesDatedQueue push:[siteDictionary objectForKey:@"siteid"] withDate:[[url objectForKey:@"transferdate"] addTimeInterval:REFETCH_FACTOR*[[url objectForKey:@"transfertime"] floatValue]]];
 
                     {
                         BOOL savedflag = NO;
@@ -375,8 +378,8 @@
             {
                 NSTimeInterval	timetowait =  [[url objectForKey:@"crawltimefactor"] doubleValue]*[[url objectForKey:@"transfertime"] doubleValue];
 
-                NSLog(@"HooverController runTheRetrievingThread: Got page %@ for site %@ have %d",[url objectForKey:@"pageid"],[url objectForKey:@"shopid"],[[siteDictionary objectForKey:@"fetchedpages"] count]);
-                [[siteDictionary objectForKey:@"fetchedpages"] setObject:@"!" forKey:[url objectForKey:@"pageid"]];	// @"!" is just a short constant string
+                //NSLog(@"HooverController runTheRetrievingThread: Got page %@ for site %@ have %d",[url objectForKey:@"pageid"],[url objectForKey:@"shopid"],[fetchedPagesDictionary count]);
+                [fetchedPagesDictionary setObject:[url objectForKey:@"currentStage"] forKey:[url objectForKey:@"pageid"]];	// @"!" is just a short constant string
                 
                 if( timetowait < [[url objectForKey:@"crawltimeminimum"] doubleValue] )
                 {
@@ -387,7 +390,7 @@
                     timetowait = [[url objectForKey:@"crawltimemaximum"] doubleValue];
                 }
 
-                [allSitesDatedQueue push:siteDictionary withDate:[[url objectForKey:@"transferdate"] addTimeInterval:timetowait]];
+                [allSitesDatedQueue push:[siteDictionary objectForKey:@"siteid"] withDate:[[url objectForKey:@"transferdate"] addTimeInterval:timetowait]];
             }
         }
         else // invalid status
@@ -403,7 +406,7 @@
                 timetowait = [[url objectForKey:@"crawltimemaximum"] doubleValue];
             }
 
-            [allSitesDatedQueue push:siteDictionary withDate:[NSDate dateWithTimeIntervalSinceNow:timetowait]];
+            [allSitesDatedQueue push:[siteDictionary objectForKey:@"siteid"] withDate:[NSDate dateWithTimeIntervalSinceNow:timetowait]];
         }
         [pool release];
     }
@@ -427,6 +430,7 @@
     NSLog(@"HooverController: showCurrentStatus: receivedQueue count %d.",[receivedUrlsQueue count]);
     NSLog(@"HooverController: showCurrentStatus: sendQueue count %d.",[fetcherController count]);
     NSLog(@"HooverController: showCurrentStatus: allSitesDatedQueue count %d.",[allSitesDatedQueue count]);
+    NSLog(@"HooverController: showCurrentStatus: fetchedPagesDictionary count %d.",[fetchedPagesDictionary count]);
     [pool release];
 }
 

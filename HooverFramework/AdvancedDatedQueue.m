@@ -11,7 +11,6 @@
 - initWithObject:(id)anObject andDate:(NSDate *)aDate;
 - (NSComparisonResult)compare:(id)anObject;
 - contentObject;
-- (void)setDate:(NSDate *)aDate;
 - (NSDate *) contentDate;
 @end
 
@@ -39,12 +38,6 @@
     return self;
 }
 
-
-- (void)setDate:(NSDate *)aDate;
-{
-    [contentDate release];
-    NSAssert( contentDate = [aDate retain]	, @"AdvancedDatedQueueLeaf: -setDate: got called without Date");
-}
 
 - (NSComparisonResult)compare:(id)anObject;
 {
@@ -76,10 +69,11 @@
 {
     [super init];
     
-    queueLock = [[NSConditionLock alloc] initWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
-    singlePopLock = [[NSConditionLock alloc] init];
-    queueArray = [[RedBlackTree alloc] init];
-    queueDictionary = [[NSMutableDictionary alloc] init];
+    queueLock 		= [[NSConditionLock alloc] initWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
+    singlePopLock	= [[NSConditionLock alloc] init];
+    queueRedBlackTree		= [[RedBlackTree alloc] init];
+    queueDictionary	= [[NSMutableDictionary alloc] init];
+
     return self;
 }
 
@@ -87,7 +81,7 @@
 {
     [queueLock release];
     [singlePopLock release];
-    [queueArray release];
+    [queueRedBlackTree release];
     [queueDictionary release];
     [super dealloc];
 }
@@ -95,58 +89,24 @@
 
 - pop;
 {
-    NSDate *aDate = [NSDate distantFuture];
-    
-    [singlePopLock lock];
-
-    while(1)
-    {
-        if( YES == [queueLock lockWhenCondition:FIRST_IN_QUEUE_IS_UNKNOWN beforeDate:aDate] )
-        {
-            aDate = (NSDate *)[[[[queueArray firstObject] contentDate] retain] autorelease];
-            [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
-        }
-        else
-        {
-            [queueLock lock];
-            
-            if( 0 == [queueArray count] )
-            {
-                aDate = [NSDate distantFuture];
-                [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
-            }
-            else
-            {
-                AdvancedDatedQueueLeaf	*aLeaf = [queueArray firstObject];
-
-                if( NSOrderedDescending == [(NSDate*)[NSDate date] compare:(NSDate*)[aLeaf contentDate]] )
-                {
-                    NSObject *contentObject = [[aLeaf contentObject] retain];
-
-                    [queueArray removeObject:aLeaf];
-                    [queueDictionary removeObjectForKey:contentObject];
-
-                    [queueLock unlockWithCondition:([queueArray count]?FIRST_IN_QUEUE_IS_UNKNOWN:FIRST_IN_QUEUE_IS_KNOWN)];
-                    [singlePopLock unlock];
-                    return [contentObject autorelease];
-                }
-                [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_UNKNOWN];
-            }                
-        }
-    }
+    return [self popBeforeDate:[NSDate distantFuture]];
 }
 
 - popBeforeDate:(NSDate *)endDate;
 {
     NSDate *aDate=endDate;
-    
-    [singlePopLock lock];
+
+    if( NO == [singlePopLock lockBeforeDate:endDate] )
+    {
+        return nil;
+    }
+        
 
     while(1)
     {
         if( YES == [queueLock lockWhenCondition:FIRST_IN_QUEUE_IS_UNKNOWN beforeDate:aDate] )
         {
-            aDate = (NSDate *)[[[[queueArray firstObject] contentDate] retain] autorelease];
+            aDate = (NSDate *)[[[[queueRedBlackTree firstObject] contentDate] retain] autorelease];
             [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
         }
         else
@@ -154,29 +114,33 @@
             NSDate	*nowDate;
 
             [queueLock lock];
+            NSAssert2([queueRedBlackTree count] == [queueDictionary count], @"AdvancedDatedQueue popBeforeDate: queueRedBlackTree count:%d, queueDictionary count:%d",[queueRedBlackTree count],[queueDictionary count]);
             nowDate = [NSDate date];
             
-            if( 0 == [queueArray count] )
+            if( 0 == [queueRedBlackTree count] )
             {
                 [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
                 aDate = endDate;
             }
             else
             {
-                AdvancedDatedQueueLeaf	*aLeaf = [queueArray firstObject];
+                AdvancedDatedQueueLeaf	*aLeaf = [queueRedBlackTree firstObject];
 
                 if( NSOrderedDescending == [nowDate compare:(NSDate*)[aLeaf contentDate]] )
                 {
                     NSObject *contentObject = [[aLeaf contentObject] retain];
 
-                    [queueArray removeObject:aLeaf];
+                    [queueRedBlackTree removeObject:aLeaf];
                     [queueDictionary removeObjectForKey:contentObject];
 
-                    [queueLock unlockWithCondition:([queueArray count]?FIRST_IN_QUEUE_IS_UNKNOWN:FIRST_IN_QUEUE_IS_KNOWN)];
+                    NSAssert2([queueRedBlackTree count] == [queueDictionary count], @"AdvancedDatedQueue popBeforeDate: queueRedBlackTree count:%d, queueDictionary count:%d",[queueRedBlackTree count],[queueDictionary count]);
+                    [queueLock unlockWithCondition:([queueRedBlackTree count]?FIRST_IN_QUEUE_IS_UNKNOWN:FIRST_IN_QUEUE_IS_KNOWN)];
                     [singlePopLock unlock];
+
                     return [contentObject autorelease];
                 }
 
+                NSAssert2([queueRedBlackTree count] == [queueDictionary count], @"AdvancedDatedQueue popBeforeDate: queueRedBlackTree count:%d, queueDictionary count:%d",[queueRedBlackTree count],[queueDictionary count]);
                 [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_UNKNOWN];
             }
 
@@ -204,15 +168,15 @@
     NSAssert( aLeaf = [queueDictionary objectForKey:anObject], @"AdvancedDatedQueue: -removeObjectIdenticalTo: got called with unknown Object" );
 
     [queueDictionary removeObjectForKey:anObject];
-    [queueArray removeObject:aLeaf];
+    [queueRedBlackTree removeObject:aLeaf];
 
-    if( 0 == [queueArray count] )
+    if( 0 == [queueRedBlackTree count] )
     {
         [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
     }
     else
     {
-        [queueLock unlockWithCondition:(([queueArray firstObject]==aLeaf)?FIRST_IN_QUEUE_IS_UNKNOWN:[queueLock condition])];
+        [queueLock unlockWithCondition:(([queueRedBlackTree firstObject]==aLeaf)?FIRST_IN_QUEUE_IS_UNKNOWN:[queueLock condition])];
     }
 }
 
@@ -222,9 +186,9 @@
     [queueLock lock];
 
     [queueDictionary release];
-    [queueArray release];
+    [queueRedBlackTree release];
     
-    queueArray		= [[RedBlackTree alloc] init];
+    queueRedBlackTree		= [[RedBlackTree alloc] init];
     queueDictionary	= [[NSMutableDictionary alloc] init];
     
     [queueLock unlockWithCondition:FIRST_IN_QUEUE_IS_KNOWN];
@@ -234,31 +198,35 @@
 
 - (void) push:(id)anObject withDate:(NSDate *)aDate;
 {
-    AdvancedDatedQueueLeaf *aLeaf;
-    
+    AdvancedDatedQueueLeaf	*oldLeaf,*newLeaf;
+    int				lockcondition;
     [queueLock lock];
-
-    if( aLeaf = [queueDictionary objectForKey:anObject] )
+    lockcondition = [queueLock condition];
+    
+    if( oldLeaf = [queueDictionary objectForKey:anObject] )
     {
-        [queueArray removeObject:aLeaf];
-        [aLeaf setDate:aDate];
-        [queueArray addObject:aLeaf];
+        if( [queueRedBlackTree firstObject] == oldLeaf )
+        {
+            lockcondition = FIRST_IN_QUEUE_IS_UNKNOWN;
+        }
+        [queueRedBlackTree removeObject:oldLeaf];
+        [queueDictionary removeObjectForKey:anObject];
     }
-    else
-    {
-        aLeaf = [[AdvancedDatedQueueLeaf alloc] initWithObject:anObject andDate:aDate];
 
-        [queueArray addObject:aLeaf];
-        [queueDictionary setObject:aLeaf forKey:anObject];
-        [aLeaf release];
-    }
-    [queueLock unlockWithCondition:(([queueArray firstObject]==aLeaf)?FIRST_IN_QUEUE_IS_UNKNOWN:[queueLock condition])];
+    newLeaf = [[AdvancedDatedQueueLeaf alloc] initWithObject:anObject andDate:aDate];
+    [queueRedBlackTree addObject:newLeaf];
+    [queueDictionary setObject:newLeaf forKey:anObject];
+    [newLeaf release];
+
+    NSAssert2([queueRedBlackTree count] == [queueDictionary count], @"AdvancedDatedQueue push:withDate: queueRedBlackTree count:%d, queueDictionary count:%d",[queueRedBlackTree count],[queueDictionary count]);
+
+    [queueLock unlockWithCondition:(([queueRedBlackTree firstObject]==newLeaf)?FIRST_IN_QUEUE_IS_UNKNOWN:lockcondition)];
 }
 
 
 - (unsigned int) count;
 {
-    return [queueArray count];
+    return [queueRedBlackTree count];
 }
 
 

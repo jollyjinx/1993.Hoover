@@ -6,7 +6,7 @@
 {
     NSConditionLock	*queueLock;
     NSLock		*singlePopLock;
-    RedBlackTree 	*queueArray;
+    RedBlackTree 	*queueRedBlackTree;
     NSMutableDictionary	*queueDictionary;
 }
 - pop;

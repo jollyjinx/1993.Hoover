@@ -34,7 +34,6 @@ PROF_LIBS = $(LIBS)
 
 
 HEADER_PATHS = -I/usr/local/include
-NEXTSTEP_PB_CFLAGS = -O4
 FRAMEWORKS = -framework EOAccess -framework EOControl\
              -framework Foundation -framework HooverFramework
 
