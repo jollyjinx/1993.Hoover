@@ -1,10 +1,9 @@
-
 #import <Foundation/Foundation.h>
 #import <HooverFramework/HooverFramework.h>
 
 #define MAXURLLENGTH 10000
 
-int main (int argc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     NSAutoreleasePool		*pool;
     NSArray			*commandlineArguments;
@@ -36,6 +35,7 @@ int main (int argc, const char *argv[])
             //NSLog(@"String read: %@",[NSString stringWithCString:linebuffer]);
             if( aLink = [HTMLScanner getDictionaryFromURL:[NSString stringWithCString:linebuffer] baseUrl:nil] )
             {
+                //NSLog(@"Host : %@ has Address : %@ ",[aLink objectForKey:@"host"],[[NSHost hostWithName:[NSString stringWithFormat:@"%@.",[aLink objectForKey:@"host"]]] address]);
                 //NSLog(@"URLObject contains: %@",[aLink description]);
                 [stdoutFilehandle writeData:[@"http://" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
 

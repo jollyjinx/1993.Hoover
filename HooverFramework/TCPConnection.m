@@ -1,8 +1,8 @@
+#import <HooverFramework/TCPConnection.h>
 
-#import "TCPConnection.h"
-
-#import <libc.h>
 #import <sys/types.h>
+#import <netinet/in.h>
+#import <arpa/inet.h>
 #import <sys/socket.h>
 
 @implementation TCPConnection

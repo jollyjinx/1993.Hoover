@@ -1,5 +1,5 @@
 
-#import "DatedQueue.h"
+#import <HooverFramework/DatedQueue.h>
 
 #define	QUEUE_IS_UNKNOWN	0
 #define QUEUE_IS_KNOWN		1

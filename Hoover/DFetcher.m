@@ -50,13 +50,13 @@ static 	NSConditionLock	*keyLock;			// key stuff due to the fact that we get sto
     [super init];
 
     fetcherController 	= [fc retain];
-    key			= [[DFetcher getNewKey] retain];
-    stopRunningQueue   	= [[Queue alloc] init];
+    key					= [[DFetcher getNewKey] retain];
+    stopRunningQueue   	= [[MTQueue alloc] init];
     currentworkLoadLock	= [[NSLock alloc] init];
-    currentworkload	= 0;
-    maximumworkload	= 0;
-    sendQueue		= [[Queue alloc] init];
-    hostName		= nil;
+    currentworkload		= 0;
+    maximumworkload		= 0;
+    sendQueue			= [[MTQueue alloc] init];
+    hostName			= nil;
 
     return self;
 }
@@ -74,9 +74,10 @@ static 	NSConditionLock	*keyLock;			// key stuff due to the fact that we get sto
 - (void)initiateConnection:(NSData *)data;
 {
     NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
-    TCPConnection	*sendPort;
-    TCPConnection	*receivePort;
+    TCPConnection		*sendPort;
+    TCPConnection		*receivePort;
     NSMutableDictionary	*connectionDictionary;
+	NSString			*errorString;
 
     if( ! (connectionDictionary = [NSUnarchiver unarchiveObjectWithData:data]))
     {
@@ -103,11 +104,14 @@ static 	NSConditionLock	*keyLock;			// key stuff due to the fact that we get sto
                            withObject:receivePort];
  
     [fetcherController fetcherLogon:self];
-    NSLog(@"DFetcher exits due to : %@",[stopRunningQueue pop]);
+	
+	errorString = [stopRunningQueue pop];
+    NSLog(@"DFetcher to host %@ exits due to : %@",hostName, errorString);
     [stopRunningQueue push:@"release me"];
     [sendQueue push:@"release me"];
-    [fetcherController fetcherLogoff:self];
+    [fetcherController fetcherLogoff:self reason:[@"DFetcher: Lost Connection to Fetcher due to:" stringByAppendingString:errorString]];
     [pool release];
+	[NSThread exit];
 }
 
 - (NSString *)hostName;
@@ -150,7 +154,7 @@ static 	NSConditionLock	*keyLock;			// key stuff due to the fact that we get sto
     while( [sendPort isValid] && (![stopRunningQueue count]) )
     {
         NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
-        id			urlToSend;
+        id					urlToSend;
 
         urlToSend = [sendQueue pop];
         if( urlToSend )
@@ -164,6 +168,7 @@ static 	NSConditionLock	*keyLock;			// key stuff due to the fact that we get sto
         [pool release];
     }
     [stopRunningQueue push:@"sendThreadExit"];
+	[NSThread exit];
 }
 
 
@@ -192,6 +197,7 @@ static 	NSConditionLock	*keyLock;			// key stuff due to the fact that we get sto
         [pool release];
     }
     [stopRunningQueue push:@"receiveThreadExit"];
+	[NSThread exit];
 }
 
 

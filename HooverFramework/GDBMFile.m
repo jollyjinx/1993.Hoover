@@ -1,6 +1,6 @@
 /* JPPL.m created by jolly on Fri 09-May-1997 */
 
-#import "GDBMFile.h"
+#import <HooverFramework/GDBMFile.h>
 
 @implementation GDBMFile
 

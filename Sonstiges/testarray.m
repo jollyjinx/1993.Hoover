@@ -1,6 +1,24 @@
 #import <Foundation/Foundation.h>
+#import <HooverFoundation/HooverFoundation.h>
 
-#import "SortedArray.h"
+@interface LockTest:NSObject
+- (void)popp:(AdvancedDatedQueue *)aQueue;
+@end
+
+@implementation LockTest:NSObject
+
+- popp:(AdvancedDatedQueue *)aQueue
+{
+	NSLog(@"Beginning with popping.");
+	while(1)
+	{
+		NSDate *aDate;
+		
+		aDate = [aQueue pop];
+		NSLog("Popped at Date:%@ ( should be %@ )",[NSDate date],aDate);
+	}
+}
+@end
 
 int main (int argc, const char *argv[])
 {

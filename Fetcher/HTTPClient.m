@@ -6,7 +6,7 @@
 
 #import <arpa/inet.h>
 #import <sys/socket.h>
-#import <libc.h>
+#import "nametoaddress.h"
 
 #define	CHAR_CR	0x0d
 #define CHAR_LF 0x0a
@@ -22,7 +22,7 @@
 
 static	NSMutableDictionary *httpClientDictionary;
 static	NSMutableDictionary *httpProxyDictionary;
-
+//static	NSLock			*nameserverLookupLock;
 
 + (void) initialize;
 {
@@ -45,6 +45,7 @@ static	NSMutableDictionary *httpProxyDictionary;
     #if DEBUG
     NSLog(@"HTTPClient.configuration looks like:\n%@",[httpClientDictionary description]);
     #endif
+    //nameserverLookupLock = [[NSLock alloc] init];
 }
 
 
@@ -57,17 +58,48 @@ static	NSMutableDictionary *httpProxyDictionary;
 - (NSFileHandle *)createConnectionToHost:(NSMutableDictionary *)hostDictionary;
 {
     NSString 		*ipAddress;
+    char 		*ipaddressstring;
     u_long		ipaddress;
     struct		sockaddr_in socketaddr;
     int			httpsocket;
     int			socketreuse =1;
+
     
     if( ! (ipAddress = [hostDictionary objectForKey:@"ipaddress"]) )
     {
-        if( !(ipAddress = [[NSHost hostWithName:[NSString stringWithFormat:@"%@.",[hostDictionary objectForKey:@"host"]]] address]) )
+/*
+        [nameserverLookupLock lock];
+        if( 0 == (ipaddressstring = nametoaddress([[NSString stringWithFormat:@"%@.",[hostDictionary objectForKey:@"host"]] cString])) )
         {
-            [NSException raise:@"HTTPClient" format:@"UnresolvedHostname"] ;
+            [nameserverLookupLock unlock];
+            if( !(ipAddress = [hostDictionary objectForKey:@"host"]) )
+            {
+                [NSException raise:@"HTTPClient" format:@"UnresolvedHostname"] ;
+            }
         }
+        else
+        {
+            [nameserverLookupLock unlock];
+            ipAddress = [NSString stringWithCString:ipaddressstring];
+        }
+
+/**/
+
+        //[nameserverLookupLock lock];
+		
+		NSLog(@"hostWithName: %@",[NSHost hostWithName:[NSString stringWithFormat:@"%@.",[hostDictionary objectForKey:@"host"]]]);
+		NSLog(@"hostWithAddress: %@ %@",[NSHost hostWithAddress:[hostDictionary objectForKey:@"host"]],[hostDictionary objectForKey:@"host"]);
+		
+        if( (!(ipAddress = [[NSHost hostWithName:[NSString stringWithFormat:@"%@.",[hostDictionary objectForKey:@"host"]]] address]))
+            && (!(ipAddress = [[NSHost hostWithAddress:[NSString stringWithFormat:@"%@",[hostDictionary objectForKey:@"host"]]] address]))
+            )
+        {
+           //[nameserverLookupLock unlock];
+           [NSException raise:@"HTTPClient" format:@"UnresolvedHostname"] ;
+        }
+        //[nameserverLookupLock unlock];
+
+/**/
         [hostDictionary setObject:ipAddress forKey:@"ipaddress"];
     }
 
@@ -76,6 +108,7 @@ static	NSMutableDictionary *httpProxyDictionary;
         [NSException raise:@"HTTPClient" format:@"InvalidIPAddress"] ;
     }
 
+    
     socketaddr.sin_port = htons([[hostDictionary objectForKey:@"port"] intValue]);
     socketaddr.sin_family = AF_INET;
     socketaddr.sin_addr.s_addr  = ipaddress;
@@ -87,11 +120,13 @@ static	NSMutableDictionary *httpProxyDictionary;
     
     if( -1 == setsockopt(httpsocket, SOL_SOCKET, SO_KEEPALIVE, (char *)&socketreuse, sizeof(socketreuse)) )
     {
+        close(httpsocket);
         [NSException raise:@"HTTPClient" format:@"UnableToSetKeepalive"] ;
     }
 
     if( -1 == (connect(httpsocket,(struct sockaddr *)&socketaddr,sizeof(socketaddr))) )
     {
+        close(httpsocket);
         [NSException raise:@"HTTPClient" format:@"UnableToConnectSocket"];
     }
 
@@ -117,6 +152,7 @@ static	NSMutableDictionary *httpProxyDictionary;
     if( !httpProxyDictionary )
     {
         requestString = [NSMutableString stringWithFormat:@"GET %@ HTTP/1.0\r\n",[url objectForKey:@"path"]];
+		[requestString appendFormat:@"Host: %@\r\n",[url objectForKey:@"host"]];
     }
     else
     {
@@ -170,12 +206,13 @@ static	NSMutableDictionary *httpProxyDictionary;
 - (NSMutableDictionary *)parseHTTPResponse:(NSData *)httpHeader;
 {
     NSMutableDictionary	*headerDictionary = [NSMutableDictionary dictionary];
-    NSString 		*httpHeaderString;
-    NSArray		*lineArray;
-    NSEnumerator	*lineEnumerator;
-    NSString		*stringToTest;
+    NSString 			*httpHeaderString;
+    NSArray				*lineArray;
+    NSEnumerator		*lineEnumerator;
+    NSString			*stringToTest;
 
-    httpHeaderString = [NSString stringWithData:httpHeader encoding:NSISOLatin1StringEncoding];
+    //httpHeaderString = [NSString stringWithData:httpHeader encoding:NSISOLatin1StringEncoding];
+    httpHeaderString = [NSString stringWithData:httpHeader encoding:[NSString defaultCStringEncoding]];
     httpHeaderString = [[httpHeaderString componentsSeparatedByString:@"\r"] componentsJoinedByString:@""];
 
     lineArray = [httpHeaderString componentsSeparatedByString:@"\n"]; 

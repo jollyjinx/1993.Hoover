@@ -5,7 +5,7 @@
 #import "Fetcher.h"
 #import "Worker.h"
 
-#import <libc.h>			// for getpid
+#import <unistd.h>			// for getpid
 
 
 @implementation Fetcher
@@ -38,9 +38,9 @@
     receivePort		= [inPort retain];
     sendPort		= [outPort retain];
 
-    stopRunningQueue	= [[Queue alloc] init];
-    sendQueue		= [[Queue alloc] init];
-    receiveQueue	= [[Queue alloc] init];
+    stopRunningQueue	= [[MTQueue alloc] init];
+    sendQueue		= [[MTQueue alloc] init];
+    receiveQueue	= [[MTQueue alloc] init];
 
     [NSThread detachNewThreadSelector:@selector(runSendingThread)
                              toTarget:self

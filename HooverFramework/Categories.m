@@ -1,6 +1,6 @@
 /* Categories.m created by jolly on Wed 17-Dec-1997 */
 
-#import "Categories.h"
+#import <HooverFramework/Categories.h> 
 
 @implementation NSString(stringWithDataCreation)
 
