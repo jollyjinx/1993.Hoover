@@ -35,6 +35,7 @@ DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
+HEADER_PATHS = -I/usr/local/include
 FRAMEWORKS = -framework Foundation -framework HooverFramework\
              -framework System
 

@@ -5,6 +5,7 @@
         CLASSES = (Fetcher.m, Worker.m, HTTPClient.m, RobotScanner.m, GeneralScanner.m); 
         FRAMEWORKS = (Foundation.framework, HooverFramework.framework, System.framework); 
         FRAMEWORKSEARCH = (); 
+        HEADERSEARCH = (/usr/local/include); 
         H_FILES = (
             Fetcher.h, 
             Worker.h, 

@@ -1,0 +1,95 @@
+{
+    attributes = (
+        {
+            allowsNull = Y; 
+            columnName = crawl_factor; 
+            externalType = float8; 
+            name = crawlTimeFactor; 
+            valueClassName = NSNumber; 
+            valueType = d; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = crawl_max_wait; 
+            externalType = float8; 
+            name = crawlTimeMaximum; 
+            valueClassName = NSNumber; 
+            valueType = d; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = crawl_min_wait; 
+            externalType = float8; 
+            name = crawlTimeMinimum; 
+            valueClassName = NSNumber; 
+            valueType = d; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = exclude_paths; 
+            externalType = varchar; 
+            name = excludePaths; 
+            valueClassName = NSString; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = exclude_sites; 
+            externalType = varchar; 
+            name = excludeSites; 
+            valueClassName = NSString; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = include_paths; 
+            externalType = varchar; 
+            name = includePaths; 
+            valueClassName = NSString; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = include_sites; 
+            externalType = varchar; 
+            name = includeSites; 
+            valueClassName = NSString; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = maximum_link_depth; 
+            externalType = int4; 
+            name = maximumLinkDepth; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = name; 
+            externalType = varchar; 
+            name = name; 
+            valueClassName = NSString; 
+        }, 
+        {
+            columnName = shop_crawl_information_id; 
+            externalType = int4; 
+            name = shopCrawlInformationId; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }
+    ); 
+    attributesUsedForLocking = (shopCrawlInformationId); 
+    className = EOGenericRecord; 
+    classProperties = (
+        shopCrawlInformationId, 
+        name, 
+        crawlTimeMinimum, 
+        crawlTimeMaximum, 
+        includeSites, 
+        excludeSites, 
+        includePaths, 
+        excludePaths, 
+        maximumLinkDepth, 
+        crawlTimeFactor
+    ); 
+    externalName = shop_crawl_information; 
+    name = ShopCrawlInformation; 
+    primaryKeyAttributes = (shopCrawlInformationId); 
+}

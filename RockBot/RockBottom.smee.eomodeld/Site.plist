@@ -1,0 +1,47 @@
+{
+    attributes = (
+        {
+            allowsNull = Y; 
+            columnName = port; 
+            externalType = int2; 
+            name = port; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = robots_data; 
+            externalType = oid; 
+            name = robotsData; 
+            valueClassName = NSString; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = robots_date; 
+            externalType = timestamp; 
+            name = robotsDate; 
+            valueClassName = NSCalendarDate; 
+        }, 
+        {
+            columnName = site_id; 
+            externalType = int4; 
+            name = siteID; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = site_name; 
+            externalType = varchar; 
+            name = siteName; 
+            valueClassName = NSString; 
+            width = 200; 
+        }
+    ); 
+    attributesUsedForLocking = (siteID); 
+    className = EOGenericRecord; 
+    classProperties = (port, robotsData, robotsDate, siteID, siteName); 
+    externalName = site; 
+    name = Site; 
+    primaryKeyAttributes = (siteID); 
+}

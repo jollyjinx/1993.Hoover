@@ -264,7 +264,11 @@
                         [aPage setObject:[NSNumber numberWithInt:10000] forKey:@"crawltimemaximum"];
                         [aPage setObject:[NSNumber numberWithInt:10] forKey:@"crawltimefactor"];
 
-                        if( [siteDictionary objectForKey:@"robotsdata"] )	[aPage setObject:[siteDictionary objectForKey:@"robotsdata"] forKey:@"robotsdata"];
+                        if( [siteDictionary objectForKey:@"robotsdata"] )
+                        {
+                        	[aPage setObject:[siteDictionary objectForKey:@"robotsdata"] forKey:@"robotsdata"];
+                            NSLog(@"Robots txt : %@", [siteDictionary objectForKey:@"robotsdata"]);
+                        }
                         if( [siteDictionary objectForKey:@"ipaddress"] )		[aPage setObject:[siteDictionary objectForKey:@"ipaddress"] forKey:@"ipaddress"];
 
                         [fetcherController fetchLocalUrl:aPage];
@@ -336,14 +340,14 @@
                 }
                 else
                 {
-                    if( [[url objectForKey:@"robotsdata"] length] > 8000 )
-                    {
-                        NSLog(@"Robots Data exceeds limit for url: %@ ",url);
-                    }
-                    else
-                    {
-                        [eoSite takeValue:[url objectForKey:@"robotsdata"] forKey:@"robotsData"];
-                    }
+                    //if( [[url objectForKey:@"robotsdata"] length] > 8000 )
+                    //{
+                    //    NSLog(@"Robots Data exceeds limit for url: %@ ",url);
+                    //}
+                    //else
+                    //{
+                    [eoSite takeValue:[url objectForKey:@"robotsdata"] forKey:@"robotsData"];
+                    //}
                     [eoSite takeValue:[url objectForKey:@"transferdate"] forKey:@"robotsDate"];
                     [siteDictionary setObject:[url objectForKey:@"ipaddress"] forKey:@"ipaddress"];
                     [siteDictionary setObject:[url objectForKey:@"transferdate"] forKey:@"robotsdate"];

@@ -32,6 +32,7 @@
     [super init];
 
     fileWriter		= [[FileWriter alloc] initWithFilenamePrefix:@"fetched/fetched.out" urlsPerFile:1000];
+    //fileWriter		= [[FileWriter alloc] initWithFilenamePrefix:@"fetched.out" urlsPerFile:1000];
 
     receivePort		= [inPort retain];
     sendPort		= [outPort retain];
