@@ -111,14 +111,16 @@
         NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         NSMutableDictionary *url = [receiveQueue pop];
 
+        #if DEBUG
         NSLog(@"Have to retrieve:%@",[url description]);
-    
+        #endif
+        
         [[Worker worker] retrieveUrl:url];
         [fileWriter writeUrlDatatoFile:[[url copy] autorelease]];
         
-        if(![@"/robots.txt" isEqual:[url objectForKey:@"path"]])
-            [url removeObjectForKey:@"httpdata"];			// to keep this program small in memory
-
+        if(![@"/robots.txt" isEqual:[url objectForKey:@"path"]])				// The contents of robots.txt will get sent to the HooverController
+            [url removeObjectForKey:@"httpdata"];					// everything else will send the url without contents back
+        
         {
             NSMutableArray	*newLinkArray;
             NSEnumerator	*oldLinkEnumerator;
@@ -132,7 +134,7 @@
                 {
                     [newLinkArray addObject:aLink];
                 }
-                #if DEBUG > 1
+                #if DEBUG
                 else
                 {
                     NSLog(@"General Scanner rejects: %@",[aLink description]);

@@ -3,10 +3,10 @@
 #import <HooverFramework/HTMLScanner.h>
 #import <HooverFramework/HTMLDocument.h>
 
-#define DIGIT_CHARACTERS       	@"0123456789"
+#define DIGIT_CHARACTERS		@"0123456789"
 #define ALPPHA_CHARACTERS		@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 #define SCHEME_CHARACTERS		@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-."
-#define HOSTNUMBER_CHARACTERS	@"0123456789."
+#define HOSTNUMBER_CHARACTERS		@"0123456789."
 #define HOSTNAME_CHARACTERS		@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._"
 
 // Be aware that hostname characters contain an underscore '_' which is not included in the RFC 1808 !
@@ -63,7 +63,7 @@ static NSDictionary		*toplevelDomainDictionary;
 
 + (NSMutableDictionary *)getDictionaryFromURL:(NSString*)urlString baseUrl:(NSMutableDictionary *)baseUrl;
 {
-    NSString *schemeString,*siteString,*portString,*subpageString;
+    NSString *schemeString,*siteString,*portString,*subpageString,*domainString;
     NSString *pathString;
     NSScanner *urlScanner = [NSScanner scannerWithString:urlString];
     unsigned int	linkdepth = 0;
@@ -111,13 +111,17 @@ static NSDictionary		*toplevelDomainDictionary;
         
         if( ![urlScanner scanCharactersFromSet:hostnameCharacterSet intoString:&siteString] )
         {
+            #if DEBUG
             NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: improper formatted hostname: %@",urlString);
+            #endif
             return nil;
         }
 
         if( nil == (domainArrayEnumerator = [[[siteString lowercaseString] componentsSeparatedByString:@"."] objectEnumerator]) )
         {
+            #if DEBUG
             NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: improper formatted hostname: %@",urlString);
+            #endif
             return nil;
         }
         siteString = [domainArrayEnumerator nextObject];
@@ -131,7 +135,9 @@ static NSDictionary		*toplevelDomainDictionary;
         
         if( [siteString length] < 5 )
         {
+            #if DEBUG
             NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: hostname too short. %@",urlString);
+            #endif
             return nil;
         }
        
@@ -146,7 +152,9 @@ static NSDictionary		*toplevelDomainDictionary;
             
             if( (nil==domainName) || ( (nil==[toplevelDomainDictionary objectForKey:domainName]) && (2!=[domainName length])) )
             {
+                #if DEBUG
                 NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: wrong internet domain: %@",urlString);
+                #endif
                 return nil;
             }
         }
@@ -158,7 +166,9 @@ static NSDictionary		*toplevelDomainDictionary;
             
             if( ![urlScanner scanInt:&portnumber] || [urlScanner isAtEnd])
             {
+                #if DEBUG
                 NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: improper formatted url: %@ - portnumber not detected using port 80",urlString);
+                #endif
                 portString = @"80";
             }
             else
@@ -176,22 +186,36 @@ static NSDictionary		*toplevelDomainDictionary;
     {
         if( baseUrl )
         {
-            schemeString = [baseUrl objectForKey:@"method"];
+            if(! (schemeString = [baseUrl objectForKey:@"method"]) )
+            {
+                schemeString = @"http";
+            }
             siteString = [baseUrl objectForKey:@"host"];
             portString = [baseUrl objectForKey:@"port"];
         }
         else
         {
+            #if DEBUG
             NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: Relative URL without baseUrl:%@",urlString);
+            #endif
             return nil;
         }
     }
 
+    {
+        unsigned int domaincount;
+        NSMutableArray *domainArray = [siteString componentsSeparatedByString:@"."];
+        if( 2 > (domaincount =[domainArray count]) )
+            return nil;
+        domainString = [NSString stringWithFormat:@"%@.%@",[domainArray objectAtIndex:domaincount-2],[domainArray objectAtIndex:domaincount-1],nil];
+    }
 
 
     if( [urlScanner isAtEnd] )
     {
+        #if DEBUG
         NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: improper formatted url: %@ - missing '/' inserted",urlString);
+        #endif
         pathString = @"/";
         subpageString = nil;
     }
@@ -210,11 +234,15 @@ static NSDictionary		*toplevelDomainDictionary;
                 {
                     pathString = [@"/" stringByAppendingString:pathString];
                 }
-                //NSLog(@"Relative URL on %@ encountered %@ expanded to %@",[baseUrl objectForKey:@"path"],urlString,pathString);
+                #if DEBUG > 1
+                NSLog(@"Relative URL on %@ encountered %@ expanded to %@",[baseUrl objectForKey:@"path"],urlString,pathString);
+                #endif
             }
             else
-            {
+            {	
+                #if DEBUG
                 NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: Relative URL encountered with no path %@",urlString);
+                #endif
                 return nil;
             }
         }
@@ -222,7 +250,9 @@ static NSDictionary		*toplevelDomainDictionary;
         {
             if( ! [urlScanner scanCharactersFromSet:pathCharacterSet intoString:&pathString] )
             {
-                //NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: Did not find a path in relative url %@",urlString);
+                #if DEBUG > 1
+                NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: Did not find a path in relative url %@",urlString);
+                #endif
                 pathString = @"/";
             }
         }
@@ -237,30 +267,39 @@ static NSDictionary		*toplevelDomainDictionary;
             subpageString = @"";
         }
 		
-		if(! (pathString = [HTMLDocument decodeHTMLTags:pathString]) )									// be Netscape and IE compatible ( http://www.wowowo.de/test?bla&amp;test )
-		{
+	if(! (pathString = [HTMLDocument decodeHTMLTags:pathString]) )									// be Netscape and IE compatible ( http://www.wowowo.de/test?bla&amp;test )
+	{
+            #if DEBUG
             NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: Pathstring could not be decoded from HTML ( NetscapeCompatibility ) :%@",urlString);
+            #endif
             return nil;
         }
 		
-		if( ! (pathString = [self recodeISOLatin1:pathString]) )
+	if( ! (pathString = [self recodeISOLatin1:pathString]) )
         {
+            #if DEBUG
             NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: Pathstring could not be converted to ISOLatin1:%@",urlString);
+            #endif
             return nil;
         }
         if( ! (pathString = [self normalizePath:pathString]) )
         {
+            #if DEBUG
             NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: Pathstring could not be normalized:%@",urlString);
+            #endif
             return nil;
         }
     }
 
+    
+    
     //NSLog(@"url seems to be now:%@ : %@ : %@ %@ %@",schemeString, siteString, portString, pathString,[NSString stringWithFormat:@"%d",linkdepth] );
         return [NSMutableDictionary dictionaryWithObjectsAndKeys:
             schemeString,@"method",
             siteString,@"host",
             portString,@"port",
             pathString,@"path",
+            domainString,@"domainname",
             [NSString stringWithFormat:@"%d",linkdepth],@"linkdepth",
             // subpageString,@"subpage",
             nil];
@@ -327,9 +366,9 @@ static NSDictionary		*toplevelDomainDictionary;
 
 + (NSString *)recodeISOLatin1:(NSString *)pathString;
 {
-    NSScanner			*pathScanner;
+    NSScanner		*pathScanner;
     NSMutableString 	*convertedString = [NSMutableString string];
-    NSMutableString		*appendString;
+    NSMutableString	*appendString;
     
     if( nil == pathString ) return nil;
     
@@ -358,7 +397,9 @@ static NSDictionary		*toplevelDomainDictionary;
 
             if( 2 > [pathString length]-hexrange.location )
             {
+                #if DEBUG
                 NSLog(@"HTMLScanner recodeISOLatin1: %% encoding without hex in: %@ - ",pathString);
+                #endif
                 return nil;
             }
             [pathScanner setScanLocation:[pathScanner scanLocation]+2];
@@ -367,7 +408,9 @@ static NSDictionary		*toplevelDomainDictionary;
             hexScanner = [NSScanner scannerWithString:hexString];
             if( ! [hexScanner scanHexInt:&i] )
             {
+                #if DEBUG
                 NSLog(@"HTMLScanner recodeISOLatin1: %% hex encoding wrong in: %@",pathString);
+                #endif
                 return nil;
             }
             aunichar=i;
@@ -395,7 +438,9 @@ static NSDictionary		*toplevelDomainDictionary;
             }
             else
             {
+                #if DEBUG
                 NSLog(@"HTMLScanner recodeISOLatin1: character above 255 in path: %@",pathString);
+                #endif
                 return nil;
             }
         }
@@ -425,27 +470,32 @@ static NSDictionary		*toplevelDomainDictionary;
 
         if( 2 > [htmlString length]-hexrange.location )
         {
+            #if DEBUG
             NSLog(@"improper formatted html in: %@ - %% encoding without hex.",htmlString);
+            #endif
             return nil;
         }
         hexString = [htmlString substringWithRange:hexrange];
         hexScanner = [NSScanner scannerWithString:hexString];
         if( ! [hexScanner scanHexInt:&i] )
         {
+            #if DEBUG
             NSLog(@"improper formatted html in: %@ - %% hex encoding wrong.",htmlString);
+            #endif
             return nil;
         }
         c=i;
         if(c<0x20)
         {
+            #if DEBUG
             NSLog(@"improper formatted html in: %@ - %% hex encoding encodes control character.",htmlString);
+            #endif
             //return nil;
         }
 
         hexrange.location--;
         hexrange.length++;
         [htmlString replaceCharactersInRange:hexrange withString:[NSString stringWithData:[NSData dataWithBytes:&c length:1]
-        //                                                                        encoding:[NSString defaultCStringEncoding]]];
                                                                                  encoding:NSISOLatin1StringEncoding]];
         htmlScanner = [NSScanner scannerWithString:htmlString];
         [htmlScanner setCharactersToBeSkipped:[[NSCharacterSet characterSetWithCharactersInString:@"%"] invertedSet]];

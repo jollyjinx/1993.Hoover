@@ -16,4 +16,6 @@
 #import "TCPConnection.h"
 
 #import "HFUDPSocket.h"
+#import "MD5Checksum.h"
 
+#import "EODatabaseFile.h"

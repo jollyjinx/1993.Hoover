@@ -32,5 +32,6 @@ if($urlname)
 	printf "Hoover-Url: %s Size: %d\n",$urlname,length($pagecontent);
 	print $pagecontent."\n";
 }
+close(STDOUT);
 
 exit;

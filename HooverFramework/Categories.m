@@ -21,3 +21,13 @@
 }
 
 @end
+
+@implementation NSDictionary(dictionaryWithString)
+
++(NSDictionary *)dictionaryWithString:(NSString *)aString;
+{
+    NSLog(@"dictionaryWithString: called");
+    return [[aString propertyList] autorelease];
+}
+
+@end

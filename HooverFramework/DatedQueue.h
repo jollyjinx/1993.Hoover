@@ -9,6 +9,7 @@
     SortedArray 	*queueArray;
 }
 - pop;
+- popBeforeDate:(NSDate *)endDate;
 - (void) push:(id)anObject withDate:(NSDate *)date;
 - (unsigned int) count;
 

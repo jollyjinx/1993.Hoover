@@ -8,6 +8,17 @@
 	tr	= { tagtext = "\n" };
 	th	= { tagtext = "\t" };
 	td	= { tagtext = "\t" };
+	
+	"pre" =  { parsingstate = "ParsingASCII" };
+	"/pre" = { parsingstate = "ParsingHTML" };
+	"html" = { parsingstate = "ParsingHTML" };
+
+	
+	select	= { parsingstate = "ParsingHIDE" };
+	"/select" = { parsingstate = "ParsingHTML" };
+	script	= { parsingstate = "ParsingHIDE" };
+	"/script" = { parsingstate = "ParsingHTML" };
+	
 /*
 	table	= { tagtext = "<TABLE>"; showtag = "Yes" };
 	"/table"= { tagtext = "</TABLE>" };

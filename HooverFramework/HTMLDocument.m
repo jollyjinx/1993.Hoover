@@ -43,7 +43,7 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
     }
 
 
-        NSLog(@"HTMLDocumentconfiguration looks like:\n%@",[htmlDocumentConfiguration description]);
+    NSLog(@"HTMLDocumentconfiguration looks like:\n%@",[htmlDocumentConfiguration description]);
 }
 
 + (HTMLDocument *)documentWithData:(NSData *)htmlData;
@@ -93,20 +93,27 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
                 {
                     if( [htmlScanner scanHexInt:&integer] )
                         [convertedString appendString:[NSString stringWithCharacters:&unicodechar length:1]];
+                    #if DEBUG
                     else
                         NSLog(@"HTMLDocument decodeHTMLTags:couldn't scan hexInt in String: %@",stringToDecode);
+                    #endif
                 }
                 else
                 {
                     if( [htmlScanner scanInt:&integer] )
                         [convertedString appendString:[NSString stringWithCharacters:&unicodechar length:1]];
+                    #if DEBUG
                     else
                         NSLog(@"HTMLDocument decodeHTMLTags:couldn't scan hexInt in String: %@",stringToDecode);
+                    #endif
                 }
                 [htmlScanner setCaseSensitive:YES];
+           
             	if( ! [htmlScanner scanString:@";" intoString:NULL] )
             	{
-                	//NSLog(@"HTMLDocument decodeHTMLTags: TagCharacters not delimited, inserting missing ';'.",stringToDecode);
+                    #if DEBUG
+                    NSLog(@"HTMLDocument decodeHTMLTags: TagCharacters not delimited, inserting missing ';'.",stringToDecode);
+                    #endif
             	}
             }
             else
@@ -115,26 +122,32 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
 
                 if( ! [htmlScanner scanCharactersFromSet:tagCommandCharacterSet intoString:&tagValue] )
                 {
+                    #if DEBUG
                     NSLog(@"HTMLDocument decodeHTMLTags:couldn't scan any valid TagCharacters  in String. ( won't change )");
-					[convertedString appendString:@"&"];
+                    #endif
+                    [convertedString appendString:@"&"];
                 }
                 else
                 {
-					NSString *tagConversion;
+                    NSString *tagConversion;
 					
                     if( ! (tagConversion = [escapedCharactersDictionary objectForKey:tagValue] ) )
                     {
+                        #if DEBUG
                         NSLog(@"HTMLDocument decodeHTMLTags: Tag %@ not known ( won't change ).",tagValue);
-						[convertedString appendString:@"&"];
-						[convertedString appendString:tagValue];
+			#endif	
+                        [convertedString appendString:@"&"];
+                        [convertedString appendString:tagValue];
                     }
                     else
                     {
                         [convertedString appendString:tagConversion];
-            			 if( ! [htmlScanner scanString:@";" intoString:NULL] )
-         				 {
-							//NSLog(@"HTMLDocument decodeHTMLTags: TagCharacters not delimited, inserting missing ';'.",stringToDecode);
-          				 }
+                        if( ! [htmlScanner scanString:@";" intoString:NULL] )
+                        {
+                            #if DEBUG
+                            NSLog(@"HTMLDocument decodeHTMLTags: TagCharacters not delimited, inserting missing ';'.",stringToDecode);
+                            #endif
+                        }
                     }
                 }
             }
@@ -200,7 +213,9 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
             {
                 if( ! [htmlScanner scanUpToString:@"-->" intoString:&tagValue] )
                 {
+                    #if DEBUG
                     NSLog(@"Found HTML remark without end.");
+                    #endif
                 }
                 else
                 {
@@ -220,7 +235,7 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
                     if( [tagScanner scanUpToString:@" " intoString:&tagName] )
                     {
                         NSMutableDictionary *optionDictionary = [NSMutableDictionary dictionary];
-                        htmlTagArray = [NSMutableArray arrayWithObjects:[tagName lowercaseString],optionDictionary,nil];
+                        htmlTagArray = [NSMutableArray arrayWithObjects:[tagName lowercaseString],optionDictionary,nil];		// htmlTagArray  (tagname,{option=value,option2=value2,..},nil)
                         [htmlArray addObject:htmlTagArray];
 
                         while( NO == [tagScanner isAtEnd] )
@@ -258,7 +273,7 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
                                         else
                                         {
                                             if( [tagScanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]
-                                                                        intoString:&optionValue] )  							// read in: option=value
+                                                                           intoString:&optionValue] )  							// read in: option=value
                                             {
                                                 [optionDictionary setObject:optionValue forKey:[optionKey lowercaseString]];
                                             }
@@ -294,7 +309,7 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
 {
     NSMutableArray	*urlArray = [NSMutableArray array];
     NSEnumerator	*objectEnumerator = [[self htmlArray] objectEnumerator];
-	NSDictionary	*tagDictionary;
+    NSDictionary	*tagDictionary;
     NSMutableArray	*tagArray;
     NSString		*linkTag;
     NSString		*linkContent;
@@ -315,13 +330,17 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
 
 
 
+enum { ParsingASCII, ParsingHTML, ParsingHIDE };
+
+
 - (NSMutableString *)textRepresentation;
 {
     NSMutableString	*textRepresentation = [NSMutableString string];
     NSEnumerator	*objectEnumerator = [[self htmlArray] objectEnumerator];
-    id			aTag;										// a Tag is either a string including the nontagged text or an array containing ( tagname, {optionkey=optionvalue;optionkey=otpionvalue})
-    BOOL		preformatted = YES;
+    id			aTag;	// a Tag is either a string including the nontagged text or an array containing ( tagname, {optionkey=optionvalue;optionkey=otpionvalue})
+    unsigned char	parsingstate = ParsingASCII;
     
+
     while( aTag = [objectEnumerator nextObject] )
     {
         NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
@@ -330,54 +349,57 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
         
         if( [aTag isKindOfClass:[NSString class]] )							// all NSStrings are plain text - except for
         {																		// codings ( &uuml; )
-            if( YES == preformatted )
+            switch( parsingstate )
             {
-                [textRepresentation appendString:aTag];
-            }
-            else
-            {
-                NSScanner *aScanner = [NSScanner scannerWithString:aTag];
-                NSString *asciiString;
+                case ParsingASCII	:	[textRepresentation appendString:aTag];break;
+                case ParsingHIDE	:	break;
+                default		        :	{
+                                                    NSScanner *aScanner = [NSScanner scannerWithString:aTag];
+                                                    NSString *asciiString;
 
-                [aScanner setCharactersToBeSkipped:NULL];
-                
-                while( NO == [aScanner isAtEnd] )
-                {
-                    if( [aScanner scanUpToCharactersFromSet:nonprintableCharacterSet intoString:&asciiString] )
-                    {
-                        [textRepresentation appendString:asciiString];
-                        if([aScanner scanCharactersFromSet:nonprintableCharacterSet intoString:NULL])
-                        {
-                            [textRepresentation appendString:@" "];
-                        }
-                    }
-                    else
-                    {
-                        [aScanner scanCharactersFromSet:nonprintableCharacterSet intoString:NULL];
-                    }
-                }
+                                                    [aScanner setCharactersToBeSkipped:NULL];
+
+                                                    while( NO == [aScanner isAtEnd] )
+                                                    {
+                                                        if( [aScanner scanUpToCharactersFromSet:nonprintableCharacterSet intoString:&asciiString] )
+                                                        {
+                                                            [textRepresentation appendString:asciiString];
+                                                            if([aScanner scanCharactersFromSet:nonprintableCharacterSet intoString:NULL])
+                                                            {
+                                                                [textRepresentation appendString:@" "];
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            [aScanner scanCharactersFromSet:nonprintableCharacterSet intoString:NULL];
+                                                        }
+                                                    }
+                                                }
             }
         }
-        else		// we have a tag now 
+        else	// we have a tag now 
         {
-            if( [@"pre" isEqualToString:[aTag objectAtIndex:0]] )
-            {
-                //NSLog(@"Found Preformatted -END");
-                preformatted = YES;
-            }
-            else if([@"html" isEqualToString:[aTag objectAtIndex:0]] || [@"/pre" isEqualToString:[aTag objectAtIndex:0]] )
-            {
-                //NSLog(@"Found  Preformatted -END");
-                preformatted = NO;
-            }
-
             if( textDictionary = [htmlDocumentConfiguration objectForKey:[aTag objectAtIndex:0]] )	
             {
                 NSString	*optionText;
                 NSString	*tagText;
                 NSString	*replacementString;
 
-
+                if( optionText = [textDictionary objectForKey:@"parsingstate"] )
+                {
+                    if( [@"ParsingASCII" isEqual:optionText] )
+                    {
+                        parsingstate=ParsingASCII;
+                    }
+                    if( [@"ParsingHIDE" isEqual:optionText] )
+                    {
+                        parsingstate=ParsingHIDE;
+                    }
+                    if( [@"ParsingHTML" isEqual:optionText] )
+                    {
+                        parsingstate=ParsingHTML;
+                    }
+                }
                 if( [textDictionary objectForKey:@"showtag"] )
                 {
                     NSDictionary *optionDictionary = [aTag objectAtIndex:1];

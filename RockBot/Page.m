@@ -1,0 +1,159 @@
+// Page.m
+//
+// Created on Sat Jan 27 17:09:20 CET 2001 by NeXT EOModeler Version 305
+
+#import "Page.h"
+
+#import "Site.h"
+
+@implementation Page
+
+// EditingContext-based archiving support.  Useful for WebObjects
+// applications that store state in the page or in cookies.
+
+- (void)encodeWithCoder:(NSCoder *)aCoder {
+	[EOEditingContext encodeObject:self withCoder:aCoder];
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+	return [EOEditingContext initObject:self withCoder:aDecoder];
+}
+
+- (void)setPageID:(int) value
+{
+    [self willChange];
+    pageID = value;
+}
+- (int) pageID { return pageID; }
+
+- (void)setSiteID:(int) value
+{
+    [self willChange];
+    siteID = value;
+}
+- (int) siteID { return siteID; }
+
+- (void)setShopID:(int) value
+{
+    [self willChange];
+    shopID = value;
+}
+- (int) shopID { return shopID; }
+
+- (void)setCurrentStage:(int) value
+{
+    [self willChange];
+    currentStage = value;
+}
+- (int) currentStage { return currentStage; }
+
+- (void)setFetchStatus:(int) value
+{
+    [self willChange];
+    fetchStatus = value;
+}
+- (int) fetchStatus { return fetchStatus; }
+
+- (void)setLinkDepth:(int) value
+{
+    [self willChange];
+    linkDepth = value;
+}
+- (int) linkDepth { return linkDepth; }
+
+- (void)setFollowLinks:(int) value
+{
+    [self willChange];
+    followLinks = value;
+}
+- (int) followLinks { return followLinks; }
+
+- (void)setCrawlTimeFactor:(double) value
+{
+    [self willChange];
+    crawlTimeFactor = value;
+}
+- (double) crawlTimeFactor { return crawlTimeFactor; }
+
+- (void)setCrawlTimeMaximum:(double) value
+{
+    [self willChange];
+    crawlTimeMaximum = value;
+}
+- (double) crawlTimeMaximum { return crawlTimeMaximum; }
+
+- (void)setCrawlTimeMinimum:(double) value
+{
+    [self willChange];
+    crawlTimeMinimum = value;
+}
+- (double) crawlTimeMinimum { return crawlTimeMinimum; }
+
+- (void)setPath:(NSString *)value
+{
+    [self willChange];
+    [path autorelease];
+    path = [value retain];
+}
+- (NSString *)path { return path; }
+
+- (void)setMd5Page:(NSString *)value
+{
+    [self willChange];
+    [md5Page autorelease];
+    md5Page = [value retain];
+}
+- (NSString *)md5Page { return md5Page; }
+
+- (void)setLastDownloaded:(NSCalendarDate *)value
+{
+    [self willChange];
+    [lastDownloaded autorelease];
+    lastDownloaded = [value retain];
+}
+- (NSCalendarDate *)lastDownloaded { return lastDownloaded; }
+
+- (void)setDateInserted:(NSCalendarDate *)value
+{
+    [self willChange];
+    [dateInserted autorelease];
+    dateInserted = [value retain];
+}
+- (NSCalendarDate *)dateInserted { return dateInserted; }
+
+- (void)setShop:(id)value
+{
+    // a to-one relationship
+    [self willChange];
+    [shop autorelease];
+    shop = [value retain];
+}
+- (id)shop { return shop; }
+
+- (void)setSite:(Site *)value
+{
+    // a to-one relationship
+    [self willChange];
+    [site autorelease];
+    site = [value retain];
+}
+- (Site *)site { return site; }
+- (void)unableToSetNilForKey:(NSString *)aKey
+{
+    [self takeValue:@"0" forKey:aKey];
+}
+
+
+- (void)dealloc
+{
+    [path release];
+    [md5Page release];
+    [lastDownloaded release];
+    [dateInserted release];
+    [shop release];
+    [site release];
+    
+    [super dealloc];
+}
+
+@end

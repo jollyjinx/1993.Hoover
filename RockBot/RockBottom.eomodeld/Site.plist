@@ -1,0 +1,54 @@
+{
+    attributes = (
+        {
+            allowsNull = Y; 
+            columnName = port; 
+            externalType = int2; 
+            name = port; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = robots_data; 
+            externalType = varchar; 
+            name = robotsData; 
+            valueClassName = NSString; 
+        }, 
+        {
+            columnName = robots_date; 
+            externalType = timestamp; 
+            name = robotsDate; 
+            valueClassName = NSCalendarDate; 
+        }, 
+        {
+            columnName = site_id; 
+            externalType = int4; 
+            name = siteID; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = site_name; 
+            externalType = varchar; 
+            name = siteName; 
+            valueClassName = NSString; 
+        }
+    ); 
+    attributesUsedForLocking = (siteID); 
+    className = Site; 
+    classProperties = (port, robotsData, robotsDate, siteID, siteName, pages); 
+    externalName = site; 
+    name = Site; 
+    primaryKeyAttributes = (siteID); 
+    relationships = (
+        {
+            destination = Page; 
+            isToMany = Y; 
+            joinSemantic = EOInnerJoin; 
+            joins = ({destinationAttribute = siteID; sourceAttribute = siteID; }); 
+            name = pages; 
+        }
+    ); 
+}

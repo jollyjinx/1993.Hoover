@@ -1,0 +1,20 @@
+{ /*test*/
+	/*urls =  (
+			"http://evosonic.jinx.de/servers/"
+              );*/
+	general = {
+			followlinks 	= "No";
+			lastmodified 	= "Wed, 10 Jan 2001 00:00:00 GMT";
+			stayonsites 	= "Yes";		// if set to "Yes" we will only follow links that are on the same host where we got the links from
+			allpathsallowed = "No";			// if set to "No" paths in links we get from the Internet have to be in the paths of the
+											// original urls provided via commandline
+			maximumlinkdepth = 5;			// links will be followed to the depth ( including redirects ) Start at 0 
+											// Example:	http://www.jinx.de/			linkdepth=0
+											//			http://www.jinx.de/~jolly	linkdepth=1 
+											//			http://www.jinx.de/~jolly/	linkdepth=2
+									
+			useragentname 	= "RockBot/1.01.0";	// this is the name we match against in the robots.txt 
+												// it is not the one well tell the other sites - that's in the HTTPClient.configuration
+			eomodel 		=  "Hoover.eomodeld" ;
+		};
+}

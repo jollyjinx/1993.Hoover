@@ -1,0 +1,35 @@
+{
+    DYNAMIC_CODE_GEN = YES; 
+    FILESTABLE = {
+        BUNDLES = (); 
+        CLASSES = (HooverController.m, RobotScanner.m, FetcherController.m, DFetcher.m); 
+        FRAMEWORKS = (Foundation.framework, HooverFramework.framework); 
+        FRAMEWORKSEARCH = (); 
+        HEADERSEARCH = (); 
+        H_FILES = (HooverController.h, RobotScanner.h, FetcherController.h, DFetcher.h); 
+        LIBS = (); 
+        OTHER_LIBS = (); 
+        OTHER_LINKED = (Hoover_main.m); 
+        OTHER_SOURCES = (
+            Makefile.preamble, 
+            Makefile, 
+            Makefile.postamble, 
+            HooverConfiguration, 
+            Hoover.eomodeld
+        ); 
+        PRECOMPILED_HEADERS = (); 
+        PROJECT_HEADERS = (); 
+        PUBLIC_HEADERS = (); 
+        SUBPROJECTS = (); 
+        TOOLS = (); 
+    }; 
+    LANGUAGE = English; 
+    LOCALIZABLE_FILES = {}; 
+    MAKEFILEDIR = "$(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles"; 
+    NEXTSTEP_BUILDTOOL = /bin/gnumake; 
+    PDO_UNIX_BUILDTOOL = $NEXT_ROOT/NextDeveloper/bin/make; 
+    PROJECTNAME = Hoover; 
+    PROJECTTYPE = Tool; 
+    PROJECTVERSION = 2.6; 
+    WINDOWS_BUILDTOOL = $NEXT_ROOT/NextDeveloper/Executables/make; 
+}

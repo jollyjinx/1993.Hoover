@@ -16,9 +16,16 @@
             HTMLDocument.m, 
             MTQueue.m, 
             HFUDPSocket.m, 
-            MD5Checksum.m
+            MD5Checksum.m, 
+            EODatabaseFile.m
         ); 
-        FRAMEWORKS = (Foundation.framework, GDBM.framework, System.framework); 
+        FRAMEWORKS = (
+            EOAccess.framework, 
+            EOControl.framework, 
+            Foundation.framework, 
+            GDBM.framework, 
+            System.framework
+        ); 
         H_FILES = (
             HooverFramework.h, 
             SortedArray.h, 
@@ -34,7 +41,8 @@
             HTMLDocument.h, 
             MTQueue.h, 
             HFUDPSocket.h, 
-            MD5Checksum.h
+            MD5Checksum.h, 
+            EODatabaseFile.h
         ); 
         OTHER_LIBS = (); 
         OTHER_SOURCES = (
@@ -45,7 +53,7 @@
             h.template, 
             HTMLDocument.configuration
         ); 
-        PRECOMPILED_HEADERS = (HooverFramework.h, AdvancedDatedQueue.h, HTMLDocument.h); 
+        PRECOMPILED_HEADERS = (HooverFramework.h); 
         PROJECT_HEADERS = (HooverFramework.h); 
         PUBLIC_HEADERS = (
             HooverFramework.h, 
@@ -61,7 +69,9 @@
             AdvancedDatedQueue.h, 
             HTMLDocument.h, 
             MTQueue.h, 
-            HFUDPSocket.h
+            HFUDPSocket.h, 
+            MD5Checksum.h, 
+            EODatabaseFile.h
         ); 
     }; 
     LANGUAGE = English; 

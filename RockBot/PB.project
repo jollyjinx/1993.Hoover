@@ -1,0 +1,54 @@
+{
+    DYNAMIC_CODE_GEN = YES; 
+    FILESTABLE = {
+        BUNDLES = (); 
+        CLASSES = (
+            HooverController.m, 
+            FetcherController.m, 
+            DFetcher.m, 
+            StageInformation.m, 
+            Page.m, 
+            Site.m
+        ); 
+        FRAMEWORKS = (
+            EOAccess.framework, 
+            EOControl.framework, 
+            Foundation.framework, 
+            HooverFramework.framework
+        ); 
+        FRAMEWORKSEARCH = (); 
+        HEADERSEARCH = (); 
+        H_FILES = (
+            HooverController.h, 
+            FetcherController.h, 
+            DFetcher.h, 
+            StageInformation.h, 
+            Page.h, 
+            Site.h
+        ); 
+        LIBS = (); 
+        OTHER_LIBS = (); 
+        OTHER_LINKED = (Hoover_main.m); 
+        OTHER_SOURCES = (
+            Makefile.preamble, 
+            Makefile, 
+            Makefile.postamble, 
+            HooverConfiguration, 
+            RockBottom.eomodeld
+        ); 
+        PRECOMPILED_HEADERS = (); 
+        PROJECT_HEADERS = (); 
+        PUBLIC_HEADERS = (); 
+        SUBPROJECTS = (); 
+        TOOLS = (); 
+    }; 
+    LANGUAGE = English; 
+    LOCALIZABLE_FILES = {}; 
+    MAKEFILEDIR = "$(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles"; 
+    NEXTSTEP_BUILDTOOL = /bin/gnumake; 
+    PDO_UNIX_BUILDTOOL = $NEXT_ROOT/NextDeveloper/bin/make; 
+    PROJECTNAME = Hoover; 
+    PROJECTTYPE = Tool; 
+    PROJECTVERSION = 2.6; 
+    WINDOWS_BUILDTOOL = $NEXT_ROOT/NextDeveloper/Executables/make; 
+}

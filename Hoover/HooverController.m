@@ -71,6 +71,9 @@
     [receivedUrlsQueue release];
     [fetcherController release];
     [allSitesDatedQueue release];
+    [allMD5SumsDictionary release];
+    [lastmodified release];
+    
     [siteLock release];
     [super dealloc];
 }
@@ -93,7 +96,8 @@
             linebuffer[strlen(linebuffer)-1]=0;
             if( aLink = [HTMLScanner getDictionaryFromURL:[NSString stringWithCString:linebuffer] baseUrl:nil] )
             {
-                [self addUrlToSearchlist:aLink freePath:YES];
+               [aLink setObject:lastmodified forKey:@"lastmodified"];
+               [self addUrlToSearchlist:aLink freePath:YES];
             }
 
             while( [fetcherController count] > 30 )		// keep the Hoover not to busy just loading robot.txt files
@@ -128,6 +132,7 @@
     pool		= [[NSAutoreleasePool alloc] init];
     receivedUrlsQueue	= [[MTQueue alloc] init];
     allSitesDatedQueue	= [[DatedQueue alloc] init];
+    allMD5SumsDictionary= [[NSMutableDictionary alloc] init];
     siteLock		= [[NSLock alloc] init];
     
     if( !(generalConfiguration = [configurationDictionary objectForKey:@"general"]) )
@@ -158,6 +163,16 @@
         maximumlinkdepth = [[generalConfiguration objectForKey:@"maximumlinkdepth"] intValue];
     }
     NSLog(@"HooverController: Follow links to depth: %@",(maximumlinkdepth?[[NSNumber numberWithInt:maximumlinkdepth] description]:@"indefenitly"));
+
+    if([generalConfiguration objectForKey:@"lastmodified"])
+    {
+        lastmodified = [[generalConfiguration objectForKey:@"lastmodified"] retain];
+    }
+    else
+    {
+        lastmodified = [[[NSDate dateWithTimeIntervalSinceReferenceDate:0.0] descriptionWithCalendarFormat:@"%a, %d %b %Y %H:%M:%S %Z" timeZone:[NSTimeZone timeZoneWithAbbreviation:@"GMT"] locale:nil] retain];
+    }
+    NSLog(@"HooverController: Fetches urls modified since: %@",lastmodified);
 
 
     if( !(gdbmFile = [GDBMFile gdbmFileWithPath:[generalConfiguration objectForKey:@"databasename"] create:YES readOnly:NO]) )    
@@ -357,7 +372,10 @@
 
                 if( pathisok )
                 {
-                    [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:newPath,@"path",[newUrl objectForKey:@"linkdepth"],@"linkdepth",nil]
+                    [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:newPath,@"path"
+                        ,[newUrl objectForKey:@"linkdepth"],@"linkdepth"
+                        ,[newUrl objectForKey:@"lastmodified"],@"lastmodified"
+                        ,nil]
                                                                     forKey:newPath];
                     if(1 == [[persistentSite objectForKey:@"unknownpaths"] count])
                     {
@@ -379,11 +397,15 @@
     {															// in case the site is unknown create
         persistentSite = [NSMutableDictionary dictionary];								// persistent and sortedArray entries
         [persistentSite setObject:siteName forKey:@"sitename"];
+        [persistentSite setObject:[newUrl objectForKey:@"domainname"] forKey:@"domainname"];
         [persistentSite setObject:[newUrl objectForKey:@"host"] forKey:@"host"];
         [persistentSite setObject:[newUrl objectForKey:@"port"] forKey:@"port"];
         [persistentSite setObject:[NSMutableDictionary dictionary] forKey:@"unknownpaths"];
         [persistentSite setObject:[NSMutableDictionary dictionary] forKey:@"knownpaths"];
-        [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[newUrl objectForKey:@"path"],@"path",[newUrl objectForKey:@"linkdepth"],@"linkdepth",nil]
+        [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[newUrl objectForKey:@"path"],@"path"
+            ,[newUrl objectForKey:@"linkdepth"],@"linkdepth"
+            ,[newUrl objectForKey:@"lastmodified"],@"lastmodified"
+            ,nil]
                                                           forKey:[newUrl objectForKey:@"path"]];
         [gdbmCache setObject:persistentSite forKey:siteName];
         [allSitesDatedQueue push:siteName withDate:[NSDate date]];
@@ -429,7 +451,25 @@
             }
             else
             {													// we have some file to fetch,
-                url = [NSMutableDictionary dictionaryWithDictionary:[[unknownDictionary objectEnumerator] nextObject]];
+                NSEnumerator *objectEnumerator = [unknownDictionary objectEnumerator];				// get the one with the lowest linkdepth
+
+                NSDictionary *testUrl,*favoredUrl;
+                int favoredDepth;
+                
+                favoredUrl = [objectEnumerator nextObject];
+                favoredDepth = [[favoredUrl objectForKey:@"linkdepth"] intValue];
+
+                while( 1!=favoredDepth && (testUrl = [objectEnumerator nextObject]) )
+                {
+                    int testDepth = [[testUrl objectForKey:@"linkdepth"] intValue];
+
+                    if( testDepth < favoredDepth )
+                    {
+                        favoredUrl = testUrl;
+                        favoredDepth = testDepth;
+                    }
+                }
+                url = [NSMutableDictionary dictionaryWithDictionary:favoredUrl];
             }
         }
         [siteLock unlock];
@@ -438,8 +478,9 @@
         
         {
             NSString	*ipaddress;
-            [url setObject:siteName forKey:@"sitename"];
             [url setObject:@"http" forKey:@"method"];
+            [url setObject:siteName forKey:@"sitename"];
+            [url setObject:[persistentSite objectForKey:@"domainname"] forKey:@"domainname"];
             [url setObject:[persistentSite objectForKey:@"host"] forKey:@"host"];
             [url setObject:[persistentSite objectForKey:@"port"] forKey:@"port"];
             if( ipaddress = [persistentSite objectForKey:@"ipaddress"] )
@@ -476,9 +517,9 @@
 - (void)workOnReceivedUrlsQueue;
 {
     NSMutableDictionary	*url;
-    double 				deltatime;
-    NSString			*siteName;
-    NSString			*urlPath;
+    double		deltatime;
+    NSString		*siteName;
+    NSString		*urlPath;
     NSMutableDictionary	*persistentSite;
     NSMutableDictionary *persistentUrl;
 
@@ -487,6 +528,7 @@
     urlPath		= [url objectForKey:@"path"];
     persistentSite	= [gdbmCache objectForKey:siteName];
 
+   
     #if DEBUG
         NSLog(@"HooverController: receivedQueue has %d items.",[receivedUrlsQueue count]);
         NSLog(@"HooverController: popped %@%@ %@",siteName,urlPath,[url objectForKey:@"status"]);
@@ -497,6 +539,25 @@
 
     if(! [[url objectForKey:@"status"] isEqual:@"invalid"] )							// fetched or redirected
     {
+        BOOL followthisurl = YES;
+        {
+            NSString *md5Sum = [url objectForKey:@"md5sum"];
+
+            if( md5Sum )
+            {
+                if( [allMD5SumsDictionary objectForKey:md5Sum] )
+                {
+                    NSLog(@"Url retrieved has same md5 than old object url: %@%@ date of old url:%@",siteName,urlPath,[allMD5SumsDictionary objectForKey:md5Sum]);
+                    followthisurl = NO;
+                }
+                else
+                {
+                    [allMD5SumsDictionary setObject:[NSDate date] forKey:md5Sum ];
+                }
+            }
+        }
+
+        
         if( [@"/robots.txt" isEqual:urlPath] )									// url is 'robots.txt' so instanciate a
         {													// robotScanner and save the 'robots.txt'
             if( [url objectForKey:@"httpdata"] )									// persistent
@@ -516,8 +577,9 @@
         {
             NSArray *linkArray;
 
-           
-            if( followlinks && (linkArray = [url objectForKey:@"links"]) )							// url contains links - so add them
+            
+            
+            if( followthisurl && followlinks && (linkArray = [url objectForKey:@"links"]) )							// url contains links - so add them
             {
                 NSEnumerator		*objectEnumerator = [linkArray objectEnumerator];
                 NSMutableDictionary	*newUrl;
@@ -526,8 +588,8 @@
                 {
                     if(stayonsites)
                     {
-                        if( (NSOrderedSame == [(NSString *)[url objectForKey:@"host"] compare:(NSString *)[newUrl objectForKey:@"host"]])
-                            || (NSOrderedSame == [(NSString *)[url objectForKey:@"ipaddress"] compare:(NSString *)[newUrl objectForKey:@"host"]] ) )
+                        if( (NSOrderedSame == [(NSString *)[url objectForKey:@"domainname"] compare:(NSString *)[newUrl objectForKey:@"domainname"]])
+                            || (NSOrderedSame == [(NSString *)[url objectForKey:@"ipaddress"] compare:(NSString *)[newUrl objectForKey:@"host"]]) )
                             [self addUrlToSearchlist:newUrl];
                     }
                     else

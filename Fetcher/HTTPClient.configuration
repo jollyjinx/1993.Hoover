@@ -1,16 +1,18 @@
 {
-	useragentname = "RockBot/1.00.0";								// this is the useragent name we will provide the connected hosts
-	useragentmail = "rockbot@rockbottom.de";						// this is the useragentmail we will provide the connected hosts
+	useragentname 	= "RockBot/1.01.1";						// this is the useragent name we will provide the connected hosts
+	useragentmail 	= "rockbot@rockbottom.de";					// this is the useragentmail we will provide the connected hosts
+	refererurl	= "http://www.rockbottom.de/";					// 
 //	httpproxy = { host="evosonic.jinx.de"; port = 80 };				// if we are using a proxy to crawl the web set this
 
-	includehosts = ( );										// the hosts we crawl need to have the extensions provided inside this array
+	includehosts = ( 	"de.shopping.yahoo.com",
+				"de.auctions.yahoo.com" );				// the hosts we crawl need to have the extensions provided inside this array
 
-	excludehosts = ( ); 									// the hosts we crawl must not have the extensions provided inside this array
+	excludehosts = ( ".yahoo.com" ); 						// the hosts we crawl must not have the extensions provided inside this array
 
-	includepaths = ( );										// paths with not even one of the strings inside this array will not be crawled
+	includepaths = ( );								// paths with not even one of the strings inside this array will not be crawled
 
 	//excludepaths = ( "?", "cgi-bin", "cgi_bin");					// paths with one of the strings inside this array will not be crawled
-	excludeextensions = (   "mov","avi","mpeg","mpg","movie","rm",
+	excludeextensions = (   "mov","avi","mpeg","mpg","movie","rm","asf",
                             "gif","tif", "tiff","jpeg","jpg","png","bmp","pbm","ras","raw","xbm",
                             "gz","gzip","tar","tgz","zip","exe","z","bzip2",
                             "bin","sit","sea","hex",

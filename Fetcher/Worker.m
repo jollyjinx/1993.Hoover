@@ -37,17 +37,67 @@
 
     if( [[[url objectForKey:@"httpheader"] objectForKey:@"content-type"] hasPrefix:@"text"] )
     {
-        NSMutableArray	*urlArray = [NSMutableArray array];
         HTMLDocument	*htmlDocument = [HTMLDocument documentWithData:[url objectForKey:@"httpdata"]];
-        NSEnumerator	*objectEnumerator = [[htmlDocument urlArray] objectEnumerator];
-       // NSEnumerator	*objectEnumerator = [[htmlDocument urlArray] objectEnumerator];
-            NSString		*urlString;
-            NSDictionary	*dict;
-        
-//       NSLog(@"Document textRepresentation%@ %@",[[htmlDocument htmlArray] description],[htmlDocument textRepresentation]);
-//       NSLog(@"Document textRepresentation%@",[htmlDocument textRepresentation]);
+        BOOL		index = YES;		// per se'  indexing and following the page is allowed
+        BOOL		follow = YES;
 
-#if SHOULD_WRITE_TEXTUAL_REPRESENTATION            
+        // Follow the Robots meta tag
+        {
+            NSEnumerator	*objectEnumerator = [[htmlDocument htmlArray] objectEnumerator];
+            NSDictionary	*tagDictionary;
+            NSMutableArray	*tagArray;
+            NSString		*optionText,*optionName;
+
+            while( tagArray = [objectEnumerator nextObject] )
+            {
+                if( [tagArray isKindOfClass:[NSArray class]] )
+                {
+                    if( (NSOrderedSame == [@"meta" caseInsensitiveCompare:[tagArray objectAtIndex:0]])
+                        && ( tagDictionary = [tagArray objectAtIndex:1] )
+                        && ( optionName = [tagDictionary objectForKey:@"name"] )
+                        && ( NSOrderedSame == [@"robots" caseInsensitiveCompare: optionName] )
+                        && ( optionText = [tagDictionary objectForKey:@"content"] )
+                        && ( [optionText cStringLength] >= 4) )
+                    {
+                        NSRange aRange;
+
+                        aRange = [optionText rangeOfString:@"none" options:NSCaseInsensitiveSearch];
+                        if( NSNotFound != aRange.location )
+                        {	
+                            index = NO;
+                            follow = NO;
+                            objectEnumerator = nil;
+                        }
+                        else
+                        {
+                            aRange = [optionText rangeOfString:@"nofollow" options:NSCaseInsensitiveSearch];
+                            if( NSNotFound != aRange.location )
+                                follow = NO;
+                            aRange = [optionText rangeOfString:@"noindex" options:NSCaseInsensitiveSearch];
+                            if( NSNotFound != aRange.location )
+                                index = NO;
+                        }
+                    }
+                    else
+                    {
+                        if( [@"body" isEqualToString:[tagArray objectAtIndex:0]] )
+                            objectEnumerator = nil;
+                    }
+                }
+            }
+        }
+
+
+        if( NO==index )
+        {
+            [url removeObjectForKey:@"httpdata"];
+            #if DEBUG
+            NSLog(@"Wont index data on %@:%@:%@",[url objectForKey:@"hostname"],[url objectForKey:@"port"],[url objectForKey:@"path"]);
+            #endif
+        }
+
+#if SHOULD_WRITE_TEXTUAL_REPRESENTATION
+        if( YES == index )
         {
             NSString *htmlDocumentText = [htmlDocument textRepresentation];
             if(nil != htmlDocumentText)
@@ -56,25 +106,37 @@
                 [url setObject:@" " forKey:@"textRepresentation"];
         }
 #endif
-
-     //  NSLog(@"SGML context:\n%@",[[htmlDocument htmlArray] description]);
-
-        while( urlString = [objectEnumerator nextObject] )
+        if( YES == follow )
         {
-            NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
+            NSMutableArray	*urlArray = [NSMutableArray array];
+            NSEnumerator	*objectEnumerator = [[htmlDocument urlArray] objectEnumerator];
+            NSString		*urlString;
+            NSDictionary	*dict;
 
-            if( dict = [HTMLScanner getDictionaryFromURL:urlString baseUrl:url] )
+            while( urlString = [objectEnumerator nextObject] )
             {
-                [urlArray addObject:dict];
-            }
-            [pool release];
-        }
-        if([urlArray count])
-        {
-            //NSLog(@"Links contained:\n%@",[urlArray description]);
-            [url setObject:urlArray forKey:@"links"];
-        }
+                NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
 
+                if( dict = [HTMLScanner getDictionaryFromURL:urlString baseUrl:url] )
+                {
+                    [urlArray addObject:dict];
+                }
+                [pool release];
+            }
+            if([urlArray count])
+            {
+                #if DEBUG > 1
+                NSLog(@"Links contained:\n%@",[urlArray description]);
+                #endif
+                [url setObject:urlArray forKey:@"links"];
+            }
+        }
+        else
+        {
+            #if DEBUG
+            NSLog(@"Wont follow links on %@:%@:%@",[url objectForKey:@"hostname"],[url objectForKey:@"port"],[url objectForKey:@"path"]);
+            #endif
+        }
     }
 /**/
         

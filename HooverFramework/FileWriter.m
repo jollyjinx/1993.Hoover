@@ -1,7 +1,6 @@
 
 #import "FileWriter.h"
 #import "HTMLScanner.h"
-#import "MD5Checksum.h"
 @implementation FileWriter
 
 - (id)init;
@@ -25,7 +24,7 @@
 {
     while( [writeToFileQueue count] > 10 )
     {
-        NSLog(@"Filewriter busy - waiting\n");
+        NSLog(@"Filewriter writeUrlDatatoFile: busy - waiting\n");
         [NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:10.0]];
     }
     [writeToFileQueue push:urlDictionary];
@@ -44,58 +43,86 @@
         
         url = [writeToFileQueue pop];
 
-        if( [[[url objectForKey:@"httpheader"] objectForKey:@"content-type"] hasPrefix:@"text"] && [url objectForKey:@"httpdata"] )
+        if( [url objectForKey:@"httpheader"] )
         {
-            [fileHandle writeData:[@"\nHoover-Url:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[[url objectForKey:@"sitename"] dataUsingEncoding:NSISOLatin1StringEncoding
-                                                               allowLossyConversion:YES]];
-            [fileHandle writeData:[[HTMLScanner encodeISOLatin1:[url objectForKey:@"path"]] dataUsingEncoding:NSISOLatin1StringEncoding
-                                                           allowLossyConversion:YES]];
+            BOOL	gotexception = NO;
 
-            [fileHandle writeData:[@"\nHoover-TransferDate:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[[[url objectForKey:@"transferdate"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[@"\nHoover-TransferTime:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[[[url objectForKey:@"transfertime"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[@"\nHoover-MD5Checksum:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[[MD5Checksum md5String:[url objectForKey:@"httpdata"]] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[@"\nHoover-ContentLength:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[[NSString stringWithFormat:@"%d",[[url objectForKey:@"httpdata"] length]] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-/*
-            if( [url objectForKey:@"links"] && [[url objectForKey:@"links"] count]  )
+            do
             {
-                NSDictionary 	*aLink;
-                NSEnumerator	*enumerator;
+            NS_DURING
+                [fileHandle writeData:[@"\nHoover-PageStart\nHoover-Url:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[url objectForKey:@"host"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[@":" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[[url objectForKey:@"port"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[HTMLScanner encodeISOLatin1:[url objectForKey:@"path"]] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
 
-                enumerator = [[url objectForKey:@"links"] objectEnumerator];
+                [fileHandle writeData:[@"\nHoover-ShopID:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[[url objectForKey:@"shopid"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[@"\nHoover-SiteID:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[[url objectForKey:@"siteid"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[@"\nHoover-PageID:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[[url objectForKey:@"pageid"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                
+                [fileHandle writeData:[@"\nHoover-TransferDate:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[[url objectForKey:@"transferdate"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[@"\nHoover-TransferTime:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[[url objectForKey:@"transfertime"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[@"\nHoover-MD5Checksum:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[url objectForKey:@"md5sum"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[@"\nHoover-LinkDepth:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[[url objectForKey:@"linkdepth"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
 
-                [fileHandle writeData:[@"\nHoover-Links:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                while(aLink = [enumerator nextObject])
+
+                [fileHandle writeData:[@"\nHoover-ContentLength:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[NSString stringWithFormat:@"%d",[[url objectForKey:@"httpdata"] length]] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+
+                [fileHandle writeData:[@"\nHoover-HTTPResponse:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                [fileHandle writeData:[[[url objectForKey:@"httpheader"] objectForKey:@"HTTP"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                
+                
+                if( [url objectForKey:@"links"] && [[url objectForKey:@"links"] count]  )
                 {
-                    [fileHandle writeData:[[aLink objectForKey:@"host"] dataUsingEncoding:NSISOLatin1StringEncoding
-                                                                         allowLossyConversion:YES]];
+                    NSDictionary 	*aLink;
+                    NSEnumerator	*enumerator;
 
-                    if( ![@"80" isEqual:[aLink objectForKey:@"port"]] )
+                    enumerator = [[url objectForKey:@"links"] objectEnumerator];
+
+                    [fileHandle writeData:[@"\nHoover-Links:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    while(aLink = [enumerator nextObject])
                     {
-                        [fileHandle writeData:[@":" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                        [fileHandle writeData:[[aLink objectForKey:@"port"] dataUsingEncoding:NSISOLatin1StringEncoding
+                        [fileHandle writeData:[[aLink objectForKey:@"host"] dataUsingEncoding:NSISOLatin1StringEncoding
                                                                          allowLossyConversion:YES]];
+
+                        if( 80 != [[aLink objectForKey:@"port"] intValue] )
+                        {
+                            [fileHandle writeData:[@":" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                            [fileHandle writeData:[[[url objectForKey:@"port"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        }
+                        [fileHandle writeData:[[HTMLScanner encodeISOLatin1:[aLink objectForKey:@"path"]] dataUsingEncoding:NSISOLatin1StringEncoding
+                                                                                                       allowLossyConversion:YES]];
+                        [fileHandle writeData:[@"\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
                     }
-                    [fileHandle writeData:[[HTMLScanner encodeISOLatin1:[aLink objectForKey:@"path"]] dataUsingEncoding:NSISOLatin1StringEncoding
-                                                                     allowLossyConversion:YES]];
-                    [fileHandle writeData:[@"\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
                 }
-            }
- */
-            if([url objectForKey:@"textRepresentation"])
-            {	
-                [fileHandle writeData:[@"\nHoover-TextualRepresentation:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                [fileHandle writeData:[[url objectForKey:@"textRepresentation"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            }
-            
-            [fileHandle writeData:[@"\nHoover-Httpdata:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[url objectForKey:@"httpdata"]];
 
+                if([url objectForKey:@"textRepresentation"])
+                {	
+                    [fileHandle writeData:[@"\nHoover-TextualRepresentation:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    [fileHandle writeData:[[url objectForKey:@"textRepresentation"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                }
+                [fileHandle writeData:[@"\nHoover-PageEnd\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
 
+               // [fileHandle writeData:[@"\nHoover-Httpdata:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+               // [fileHandle writeData:[url objectForKey:@"httpdata"]];
+                NS_HANDLER
+                    gotexception = YES;
+                    NSLog(@"%@.Exception writing file:%@",[localException reason],[url description]);
+                    if( ! [[localException name] isEqualToString:NSFileHandleOperationException] )
+                        [localException raise];	/* Re-raise the exception. */
+                    NSLog(@"Will be waiting on file to get ready");
+                    [NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:10.0]];
+                NS_ENDHANDLER
+            }
+            while( gotexception );
         }
         [innerPool release];
     }

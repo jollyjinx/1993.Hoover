@@ -1,0 +1,53 @@
+{
+    attributes = (
+        {
+            allowsNull = Y; 
+            columnName = shop_crawl_information_id; 
+            externalType = int4; 
+            name = shopCrawlInformationId; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            columnName = shop_id; 
+            externalType = int4; 
+            name = shopID; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = shop_name; 
+            externalType = varchar; 
+            name = shopName; 
+            valueClassName = NSString; 
+        }
+    ); 
+    attributesUsedForLocking = (shopID); 
+    className = EOGenericRecord; 
+    classProperties = (shopID, shopName, shopCrawlInformationId, shopcrawlinformation, pages); 
+    externalName = shop; 
+    name = Shop; 
+    primaryKeyAttributes = (shopID); 
+    relationships = (
+        {
+            destination = Page; 
+            isToMany = Y; 
+            joinSemantic = EOInnerJoin; 
+            joins = ({destinationAttribute = shopID; sourceAttribute = shopID; }); 
+            name = pages; 
+        }, 
+        {
+            destination = ShopCrawlInformation; 
+            isToMany = N; 
+            joinSemantic = EOInnerJoin; 
+            joins = (
+                {
+                    destinationAttribute = shopCrawlInformationId; 
+                    sourceAttribute = shopCrawlInformationId; 
+                }
+            ); 
+            name = shopcrawlinformation; 
+        }
+    ); 
+}

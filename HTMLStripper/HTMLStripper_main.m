@@ -32,7 +32,7 @@ int main (int argc, char** argv, char** env)
             char urlname[1024];
             char urldate[1024];
             int	urlsize;
-            
+
             if( 2 == fscanf(inputstream,"Hoover-Url: %s Size: %d",urlname,&urlsize) )
             {
                 void *urlcontent;
@@ -67,7 +67,7 @@ dataUsingEncoding:NSUnicodeStringEncoding allowLossyConversion:YES] encoding: NS
             }
             else
             {
-                fscanf(inputstream,"\n");
+                fgetc(inputstream);
             }
         }
     }

@@ -1,0 +1,32 @@
+{
+    attributes = (
+        {
+            columnName = id; 
+            externalType = int4; 
+            name = id; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = object; 
+            externalType = oid; 
+            name = object; 
+            valueClassName = NSData; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = sitename; 
+            externalType = varchar; 
+            name = sitename; 
+            valueClassName = NSString; 
+            width = 128; 
+        }
+    ); 
+    attributesUsedForLocking = (id); 
+    className = EOGenericRecord; 
+    classProperties = (object, sitename); 
+    externalName = gdbmstore; 
+    name = GDBMStore; 
+    primaryKeyAttributes = (id); 
+}

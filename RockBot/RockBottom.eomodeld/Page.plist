@@ -1,0 +1,147 @@
+{
+    attributes = (
+        {
+            allowsNull = Y; 
+            definition = shop.shopcrawlinformation.crawlTimeFactor; 
+            externalType = float8; 
+            name = crawlTimeFactor; 
+            valueClassName = NSNumber; 
+            valueType = d; 
+        }, 
+        {
+            allowsNull = Y; 
+            definition = shop.shopcrawlinformation.crawlTimeMaximum; 
+            externalType = float8; 
+            name = crawlTimeMaximum; 
+            valueClassName = NSNumber; 
+            valueType = d; 
+        }, 
+        {
+            allowsNull = Y; 
+            definition = shop.shopcrawlinformation.crawlTimeMinimum; 
+            externalType = float8; 
+            name = crawlTimeMinimum; 
+            valueClassName = NSNumber; 
+            valueType = d; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = current_stage; 
+            externalType = int4; 
+            name = currentStage; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            columnName = date_inserted; 
+            externalType = timestamp; 
+            name = dateInserted; 
+            valueClassName = NSCalendarDate; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = fetch_state; 
+            externalType = int4; 
+            name = fetchStatus; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = follow_links; 
+            externalType = int2; 
+            name = followLinks; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = last_downloaded; 
+            externalType = timestamp; 
+            name = lastDownloaded; 
+            serverTimeZone = NSLocalTimeZone; 
+            valueClassName = NSCalendarDate; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = link_depth; 
+            externalType = link_depth; 
+            name = linkDepth; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = md5_page; 
+            externalType = varchar; 
+            name = md5Page; 
+            valueClassName = NSString; 
+        }, 
+        {
+            columnName = page_id; 
+            externalType = int4; 
+            name = pageID; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            columnName = path; 
+            externalType = varchar; 
+            name = path; 
+            valueClassName = NSString; 
+        }, 
+        {
+            columnName = shop_id; 
+            externalType = int4; 
+            name = shopID; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            columnName = site_id; 
+            externalType = int4; 
+            name = siteID; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }
+    ); 
+    attributesUsedForLocking = (pageID); 
+    className = Page; 
+    classProperties = (
+        pageID, 
+        path, 
+        siteID, 
+        md5Page, 
+        shopID, 
+        currentStage, 
+        fetchStatus, 
+        lastDownloaded, 
+        dateInserted, 
+        linkDepth, 
+        followLinks, 
+        shop, 
+        site, 
+        crawlTimeFactor, 
+        crawlTimeMaximum, 
+        crawlTimeMinimum
+    ); 
+    externalName = page; 
+    name = Page; 
+    primaryKeyAttributes = (pageID); 
+    relationships = (
+        {
+            destination = Shop; 
+            isToMany = N; 
+            joinSemantic = EOInnerJoin; 
+            joins = ({destinationAttribute = shopID; sourceAttribute = shopID; }); 
+            name = shop; 
+        }, 
+        {
+            destination = Site; 
+            isToMany = N; 
+            joinSemantic = EOInnerJoin; 
+            joins = ({destinationAttribute = siteID; sourceAttribute = siteID; }); 
+            name = site; 
+        }
+    ); 
+}

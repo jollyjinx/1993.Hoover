@@ -109,6 +109,39 @@
 }
 
 
+- popBeforeDate:(NSDate *)endDate;
+{
+    NSDate		*aDate = [NSDate distantFuture];
+    DatedQueueLeaf	*aLeaf;
+    
+    [singlePopLock lock];
+    [queueLock lock];
+    [queueLock unlockWithCondition:([queueArray count]?QUEUE_IS_UNKNOWN:QUEUE_IS_KNOWN)];
+    do
+    {
+        if( [queueLock lockWhenCondition:QUEUE_IS_UNKNOWN beforeDate:endDate] )
+        {
+            aDate = (NSDate *)[[queueArray objectAtIndex:0] contentDate];
+            [queueLock unlockWithCondition:QUEUE_IS_KNOWN];
+        }
+    }
+    while( (NSOrderedDescending == [endDate compare:[NSDate date]]) && (NSOrderedDescending == [aDate compare:[NSDate date]]) );
+
+    if(NSOrderedDescending == [aDate compare:[NSDate date]])
+    {
+        [singlePopLock unlock];
+        return nil;
+    }
+
+    [queueLock lock];
+    aLeaf = [[[queueArray objectAtIndex:0] retain] autorelease];
+    [queueArray removeObjectAtIndex:0];
+    [queueLock unlockWithCondition:([queueArray count]?QUEUE_IS_UNKNOWN:QUEUE_IS_KNOWN)];
+
+    [singlePopLock unlock];
+    return [aLeaf contentObject];
+}
+
 
 - (void) push:(id)anObject withDate:(NSDate *)aDate;
 {

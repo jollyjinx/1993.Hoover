@@ -1,6 +1,7 @@
 /* HTTPClient.m created by jolly on Thu 18-Dec-1997 */
 
 #import "HTTPClient.h"
+#import <HooverFramework/MD5Checksum.h>
 #import <HooverFramework/Categories.h>
 #import <HooverFramework/HTMLScanner.h>
 
@@ -154,6 +155,11 @@ static	NSLock			*nameserverLookupLock;
     [requestString appendFormat:@"Connection: close\r\n"];
     [requestString appendFormat:@"From: %@\r\n",[httpClientDictionary objectForKey:@"useragentmail"]];
     [requestString appendFormat:@"User-Agent: %@\r\n",[httpClientDictionary objectForKey:@"useragentname"]];
+    [requestString appendFormat:@"Referer: %@\r\n",[httpClientDictionary objectForKey:@"refererurl"]];
+    if( nil != [url objectForKey:@"lastmodified"] )
+    {
+        [requestString appendFormat:@"If-Modified-Since: %@\r\n",[url objectForKey:@"lastmodified"]];
+    }
     [requestString appendString:@"\r\n"];
 
     [conncectionFileHandle writeData:[requestString dataUsingEncoding:NSISOLatin1StringEncoding]];
@@ -190,7 +196,10 @@ static	NSLock			*nameserverLookupLock;
 
                 [url setObject:[self parseHTTPResponse:httpHeader] forKey:@"httpheader"];
                 if( [[[url objectForKey:@"httpheader"] objectForKey:@"HTTP"] hasPrefix:@"200"] )
+                {
                     [url setObject:httpContents forKey:@"httpdata"];
+                    [url setObject:[MD5Checksum md5String:httpContents] forKey:@"md5sum"];
+                }
                 beginofdata = endofdata;
             }	
         }

@@ -1,0 +1,6 @@
+{
+    EOModelVersion = 2.1; 
+    adaptorName = PostgreSQL; 
+    connectionDictionary = {databaseName = jolly; hostName = smee; }; 
+    entities = ({className = EOGenericRecord; name = GDBMStore; }); 
+}
