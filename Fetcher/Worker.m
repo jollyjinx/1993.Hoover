@@ -21,6 +21,7 @@
         if( (! [[localException name] isEqualToString:@"HTTPClient"] )
             && (! [[localException name] isEqualToString:NSFileHandleOperationException] ))
             [localException raise];	/* Re-raise the exception. */
+        [url setObject:[localException reason] forKey:@"errorreason"];
     NS_ENDHANDLER
     [pool release];
 
@@ -29,17 +30,18 @@
         NSLog(@"Got failure while retieving url:%@",[url description]);
         return;
     }
-    
+/*
     if( [[[url objectForKey:@"httpheader"] objectForKey:@"content-type"] hasPrefix:@"text"] )
     {
         NSMutableArray	*urlArray = [NSMutableArray array];
         HTMLDocument	*htmlDocument = [HTMLDocument documentWithData:[url objectForKey:@"httpdata"]];
         NSEnumerator	*objectEnumerator = [[htmlDocument urlArray] objectEnumerator];
-        NSString	*urlString;
-        NSDictionary	*dict;
+       NSString	*urlString;
+       NSDictionary	*dict;
         
 //       NSLog(@"Document textRepresentation%@ %@",[[htmlDocument htmlArray] description],[htmlDocument textRepresentation]);
 //       NSLog(@"Document textRepresentation%@",[htmlDocument textRepresentation]);
+/*
         {
             NSString *htmlDocumentText = [htmlDocument textRepresentation];
             if(nil != htmlDocumentText)
@@ -47,8 +49,8 @@
             else
                 [url setObject:@" " forKey:@"textRepresentation"];
         }
-
-       /* */
+*/
+/*
      //  NSLog(@"SGML context:\n%@",[[htmlDocument htmlArray] description]);
 
         while( urlString = [objectEnumerator nextObject] )
@@ -66,8 +68,10 @@
             //NSLog(@"Links contained:\n%@",[urlArray description]);
             [url setObject:urlArray forKey:@"links"];
         }
-    }
 
+    }
+/**/
+        
     if( [[[url objectForKey:@"httpheader"] objectForKey:@"HTTP"] hasPrefix:@"30"] && [[url objectForKey:@"httpheader"] objectForKey:@"location"] )
     {
         NSMutableDictionary *redirectionUrl = nil;
