@@ -1,13 +1,13 @@
 
-#import "FileWriter.h"
-#import "HTMLScanner.h"
+#import <HooverFramework/FileWriter.h>
+#import <HooverFramework/HTMLScanner.h>
 
 @implementation FileWriter
 
 - (id)init;
 {
     [super init];
-    writeToFileQueue = [[Queue alloc] init];
+    writeToFileQueue = [[MTQueue alloc] init];
     [NSThread detachNewThreadSelector:@selector(_runTheWriteToFileLoop)
                              toTarget:self
                            withObject:nil];

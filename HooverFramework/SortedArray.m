@@ -1,6 +1,6 @@
 /* SortedArray.m created by jolly on Fri 01-Mar-1996 */
 
-#import "SortedArray.h"
+#import <HooverFramework/SortedArray.h>
 
 #define COMPARE_FUNCTION 1
 #define COMPARE_SELECTOR 2

@@ -1,0 +1,5 @@
+TOOL_NAME=Hoover
+# ADDITIONAL_CPPFLAGS += -DDEBUG=1
+ADDITIONAL_TOOL_LIBS += -lHooverFramework -lgnustep-base -lgdbm
+Hoover_OBJC_FILES= DFetcher.m FetcherController.m HooverController.m Hoover_main.m RobotScanner.m
+Hoover_HEADER_FILES= DFetcher.h FetcherController.h HooverController.h RobotScanner.h

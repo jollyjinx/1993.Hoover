@@ -1,9 +1,9 @@
 { /*test*/
-/*	urls =  (
-				"http://warlock.cis.uni-muenchen.de:9000/tagtest.html"
-                );*/
+	/*urls =  (
+			"http://evosonic.jinx.de/servers/"
+              );*/
 	general = {
-			useragentname = "Hoover/0.2";
-			databasename =  "webdatabase" ;
+				useragentname = "iCrawlTheNet/0.0.1";
+				databasename =  "webdatabase" ;
 		};
 }
