@@ -5,6 +5,7 @@
 	general = {
 			useragentname 	= "RockBot/1.01.0";	// this is the name we match against in the robots.txt 
 												// it is not the one well tell the other sites - that's in the HTTPClient.configuration
-			eomodel 		=  "RockBottom.telly.eomodeld" ;
+			// eomodel 		=  "RockBottom.telly.eomodeld" ;
+			eomodel 		=  "RockBottom.smee.eomodeld" ;
 		};
 }

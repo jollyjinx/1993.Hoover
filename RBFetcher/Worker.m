@@ -26,7 +26,23 @@ static GeneralScanner *generalScanner;
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     RobotScanner *robotScanner;
-    
+
+    if( ![[url objectForKey:@"path"] isEqual:@"/robots.txt"] && [url objectForKey:@"robotsdata"] )
+    {
+        NSAssert1(nil != (robotScanner = [RobotScanner robotScannerWithDescription:[url objectForKey:@"robotsdata"]]),@"Worker retrieveUrl: Assertion failed RobotScanner robotScannerWithDescription: failed. url= %@",[url description]);
+
+        if( !([robotScanner urlIsWanted:url] && [generalScanner urlIsWanted:url]) )
+        {
+            [url setObject:@"fetched" forKey:@"status"];
+            [url setObject:[NSCalendarDate date] forKey:@"transferdate"];
+            [url setObject:[NSNumber numberWithDouble:(double).01] forKey:@"transfertime"];
+            [url setObject:[NSDictionary dictionaryWithObject:@"1000" forKey:@"HTTP"] forKey:@"httpheader"];
+            NSLog(@"Robots or General Scanner disallowed url.%@",[url description]);
+            [pool release];
+            return;
+        }
+    }
+
     NS_DURING
         [[HTTPClient httpClient] retrieveUrl:url];
     NS_HANDLER

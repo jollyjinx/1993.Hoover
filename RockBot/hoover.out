@@ -1,0 +1,293 @@
+Apr 24 17:18:22 Hoover[1768] Enableing Signals now.
+Apr 24 17:18:23 Hoover[1768] HooverController init done - starting background threads.
+Apr 24 17:18:23 Hoover[1768] HFUDPSocket -setLocalPortNumber:allowingAddressReuse: setsocketopt() failed
+Apr 24 17:18:23 Hoover[1768] Waiting for incoming packet.
+Apr 24 17:18:23 Hoover[1768] PostgreSQLAdaptor loaded. Version:Release 1.13 (v152)
+Apr 24 17:18:23 Hoover[1768] Using sequence ID 0.
+Apr 24 17:18:23 Hoover[1768] HooverController stageWorkLoop: Entering now Stage: 2
+Apr 24 17:18:23 Hoover[1768] encodingsDict is '{
+    NSASCII = 1; 
+    NSISOLatin1 = 5; 
+    NSISOLatin2 = 9; 
+    NSMacOSRoman = 30; 
+    NSNEXTSTEP = 2; 
+}'
+Apr 24 17:18:23 Hoover[1768] encodingString is 'NSASCII'
+Apr 24 17:18:24 Hoover[1768] HooverController stageWorkLoop: Sites now 121
+Apr 24 17:18:24 Hoover[1768] HooverController stageWorkLoop: init pages
+Apr 24 17:18:24 Hoover[1768] HooverController stageWorkLoop: eoPool release done
+Apr 24 17:18:24 Hoover[1768] HooverController stageWorkLoop: entering the sendLoop now.
+Apr 24 17:18:27 Hoover[1768] Waiting for incoming packet.
+Apr 24 17:18:27 Hoover[1768] Got invitation from: {hostname = tinkerbell; inport = 3867; maximumworkload = 80; outport = 3868; }
+Apr 24 17:18:27 Hoover[1768] Fetcher got born.
+Apr 24 17:18:28 Hoover[1768] TCPConnection: read error:No such file or directory  ( read 0 )
+Apr 24 17:18:28 Hoover[1768] DFetcher to host tinkerbell exits due to : receive - no data
+Apr 24 17:18:28 Hoover[1768] Sending 80 urls back from tinkerbell.
+Apr 24 17:18:30 Hoover[1768] Waiting for incoming packet.
+Apr 24 17:18:30 Hoover[1768] Got invitation from: {hostname = tinkerbell; inport = 3877; maximumworkload = 80; outport = 3878; }
+Apr 24 17:18:30 Hoover[1768] Fetcher got born.
+Apr 24 17:18:30 Hoover[1768] TCPConnection: read error:No such file or directory  ( read 0 )
+Apr 24 17:18:30 Hoover[1768] DFetcher to host tinkerbell exits due to : receive - no data
+Apr 24 17:18:30 Hoover[1768] Sending 38 urls back from tinkerbell.
+Apr 24 17:18:50 Hoover[1783] Enableing Signals now.
+Apr 24 17:18:51 Hoover[1783] HooverController init done - starting background threads.
+Apr 24 17:18:51 Hoover[1783] HFUDPSocket -setLocalPortNumber:allowingAddressReuse: setsocketopt() failed
+Apr 24 17:18:51 Hoover[1783] Waiting for incoming packet.
+Apr 24 17:18:51 Hoover[1783] PostgreSQLAdaptor loaded. Version:Release 1.13 (v152)
+Apr 24 17:18:51 Hoover[1783] Using sequence ID 0.
+Apr 24 17:18:51 Hoover[1783] HooverController stageWorkLoop: Entering now Stage: 2
+Apr 24 17:18:51 Hoover[1783] encodingsDict is '{
+    NSASCII = 1; 
+    NSISOLatin1 = 5; 
+    NSISOLatin2 = 9; 
+    NSMacOSRoman = 30; 
+    NSNEXTSTEP = 2; 
+}'
+Apr 24 17:18:51 Hoover[1783] encodingString is 'NSASCII'
+Apr 24 17:18:51 Hoover[1783] HooverController stageWorkLoop: Sites now 121
+Apr 24 17:18:51 Hoover[1783] HooverController stageWorkLoop: init pages
+Apr 24 17:18:52 Hoover[1783] HooverController stageWorkLoop: eoPool release done
+Apr 24 17:18:52 Hoover[1783] HooverController stageWorkLoop: entering the sendLoop now.
+Apr 24 17:18:57 Hoover[1783] Waiting for incoming packet.
+Apr 24 17:18:57 Hoover[1783] Got invitation from: {hostname = tinkerbell; inport = 3885; maximumworkload = 80; outport = 3886; }
+Apr 24 17:18:57 Hoover[1783] Fetcher got born.
+Apr 24 17:19:00 Hoover[1783] HooverController stageWorkLoop: popped site with no work: siteID=17 currentStage=2
+Apr 24 17:19:00 Hoover[1783] HooverController stageWorkLoop: popped site with no work: siteID=18 currentStage=2
+Apr 24 17:19:00 Hoover[1783] HooverController stageWorkLoop: popped site with no work: siteID=41 currentStage=2
+Apr 24 17:19:03 Hoover[1783] *** Assertion failure in -[AdvancedDatedQueue popBeforeDate:], AdvancedDatedQueue.m:136
+Apr 24 17:19:03 Hoover[1783] *** Uncaught exception: <NSInternalInconsistencyException> AdvancedDatedQueue popBeforeDate: queueRedBlackTree count:78, queueDictionary count:77
+stack: 0x18067c81 0x18067b3a 0x5087612 0x508785d 0x18064c23 0x1806381a 0x18064346 0x50a09 0x431b 0x6da4 0x333e 
+exiting!
+Apr 24 17:24:44 Hoover[1929] Enableing Signals now.
+Apr 24 17:24:44 Hoover[1929] HooverController init done - starting background threads.
+Apr 24 17:24:44 Hoover[1929] HFUDPSocket -setLocalPortNumber:allowingAddressReuse: setsocketopt() failed
+Apr 24 17:24:44 Hoover[1929] Waiting for incoming packet.
+Apr 24 17:24:46 Hoover[1929] PostgreSQLAdaptor loaded. Version:Release 1.13 (v152)
+Apr 24 17:24:46 Hoover[1929] Using sequence ID 0.
+Apr 24 17:24:46 Hoover[1929] Waiting for incoming packet.
+Apr 24 17:24:46 Hoover[1929] Got invitation from: {hostname = tinkerbell; inport = 4042; maximumworkload = 80; outport = 4043; }
+Apr 24 17:24:46 Hoover[1929] Fetcher got born.
+Apr 24 17:24:46 Hoover[1929] HooverController stageWorkLoop: Entering now Stage: 2
+Apr 24 17:24:46 Hoover[1929] encodingsDict is '{
+    NSASCII = 1; 
+    NSISOLatin1 = 5; 
+    NSISOLatin2 = 9; 
+    NSMacOSRoman = 30; 
+    NSNEXTSTEP = 2; 
+}'
+Apr 24 17:24:46 Hoover[1929] encodingString is 'NSASCII'
+Apr 24 17:24:46 Hoover[1929] HooverController stageWorkLoop: Sites now 121
+Apr 24 17:24:46 Hoover[1929] HooverController stageWorkLoop: init pages
+Apr 24 17:24:46 Hoover[1929] HooverController stageWorkLoop: eoPool release done
+Apr 24 17:24:46 Hoover[1929] HooverController stageWorkLoop: entering the sendLoop now.
+Apr 24 17:24:48 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=42 currentStage=2
+Apr 24 17:24:48 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=34 currentStage=2
+Apr 24 17:24:49 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=85 currentStage=2
+Apr 24 17:24:49 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=7 currentStage=2
+Apr 24 17:24:49 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=18 currentStage=2
+Apr 24 17:24:50 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=8 currentStage=2
+Apr 24 17:24:51 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=56 currentStage=2
+Apr 24 17:24:52 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=40 currentStage=2
+Apr 24 17:24:52 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=28 currentStage=2
+Apr 24 17:24:53 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=39 currentStage=2
+Apr 24 17:24:53 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=35 currentStage=2
+Apr 24 17:24:53 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=4 currentStage=2
+Apr 24 17:24:54 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=54 currentStage=2
+Apr 24 17:24:54 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=12 currentStage=2
+Apr 24 17:24:54 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=58 currentStage=2
+Apr 24 17:24:54 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=3 currentStage=2
+Apr 24 17:24:54 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=27 currentStage=2
+Apr 24 17:24:55 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=36 currentStage=2
+Apr 24 17:24:55 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=26 currentStage=2
+Apr 24 17:24:55 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=37 currentStage=2
+Apr 24 17:24:55 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=33 currentStage=2
+Apr 24 17:24:55 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=88 currentStage=2
+Apr 24 17:24:56 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=25 currentStage=2
+Apr 24 17:24:56 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=69 currentStage=2
+Apr 24 17:24:56 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=11 currentStage=2
+Apr 24 17:24:57 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=108 currentStage=2
+Apr 24 17:24:57 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=62 currentStage=2
+Apr 24 17:24:57 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=10 currentStage=2
+Apr 24 17:24:57 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=71 currentStage=2
+Apr 24 17:24:57 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=73 currentStage=2
+Apr 24 17:24:57 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=70 currentStage=2
+Apr 24 17:24:58 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=66 currentStage=2
+Apr 24 17:24:58 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=17 currentStage=2
+Apr 24 17:24:58 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=41 currentStage=2
+Apr 24 17:24:58 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=93 currentStage=2
+Apr 24 17:24:58 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=72 currentStage=2
+Apr 24 17:25:00 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=82 currentStage=2
+Apr 24 17:25:01 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=92 currentStage=2
+Apr 24 17:25:02 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=78 currentStage=2
+Apr 24 17:25:02 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=63 currentStage=2
+Apr 24 17:25:03 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=111 currentStage=2
+Apr 24 17:25:03 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=117 currentStage=2
+Apr 24 17:25:03 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=75 currentStage=2
+Apr 24 17:25:04 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=80 currentStage=2
+Apr 24 17:25:05 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=61 currentStage=2
+Apr 24 17:25:06 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=114 currentStage=2
+Apr 24 17:25:06 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=31 currentStage=2
+Apr 24 17:25:07 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=43 currentStage=2
+Apr 24 17:25:07 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=107 currentStage=2
+Apr 24 17:25:08 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=104 currentStage=2
+Apr 24 17:25:08 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=79 currentStage=2
+Apr 24 17:25:08 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=47 currentStage=2
+Apr 24 17:25:09 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=22 currentStage=2
+Apr 24 17:25:09 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=44 currentStage=2
+Apr 24 17:25:10 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=52 currentStage=2
+Apr 24 17:25:10 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=2 currentStage=2
+Apr 24 17:25:11 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=59 currentStage=2
+Apr 24 17:25:14 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=94 currentStage=2
+Apr 24 17:25:15 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=115 currentStage=2
+Apr 24 17:25:15 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=74 currentStage=2
+Apr 24 17:25:16 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=86 currentStage=2
+Apr 24 17:25:22 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=14 currentStage=2
+Apr 24 17:25:22 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=99 currentStage=2
+Apr 24 17:25:23 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=76 currentStage=2
+Apr 24 17:25:26 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=116 currentStage=2
+Apr 24 17:25:27 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=15 currentStage=2
+Apr 24 17:25:28 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=6 currentStage=2
+Apr 24 17:25:32 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=96 currentStage=2
+Apr 24 17:25:32 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=89 currentStage=2
+Apr 24 17:25:34 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=120 currentStage=2
+Apr 24 17:25:34 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=106 currentStage=2
+Apr 24 17:25:35 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=109 currentStage=2
+Apr 24 17:25:35 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=112 currentStage=2
+Apr 24 17:25:38 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=97 currentStage=2
+Apr 24 17:25:39 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=102 currentStage=2
+Apr 24 17:25:40 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=121 currentStage=2
+Apr 24 17:25:41 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=105 currentStage=2
+Apr 24 17:25:41 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=24 currentStage=2
+Apr 24 17:25:45 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=64 currentStage=2
+Apr 24 17:25:47 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=55 currentStage=2
+Apr 24 17:25:52 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=60 currentStage=2
+Apr 24 17:25:52 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=119 currentStage=2
+Apr 24 17:25:57 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=45 currentStage=2
+Apr 24 17:25:58 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=1 currentStage=2
+Apr 24 17:25:59 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=30 currentStage=2
+Apr 24 17:26:03 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=95 currentStage=2
+Apr 24 17:26:03 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=91 currentStage=2
+Apr 24 17:26:08 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=29 currentStage=2
+Apr 24 17:26:23 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=21 currentStage=2
+Apr 24 17:26:26 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=84 currentStage=2
+Apr 24 17:26:34 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=68 currentStage=2
+Apr 24 17:26:36 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=103 currentStage=2
+Apr 24 17:26:59 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=100 currentStage=2
+Apr 24 17:27:03 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=53 currentStage=2
+Apr 24 17:27:06 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=51 currentStage=2
+Apr 24 17:27:07 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=9 currentStage=2
+Apr 24 17:27:52 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=20 currentStage=2
+Apr 24 17:27:54 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=57 currentStage=2
+Apr 24 17:27:58 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=110 currentStage=2
+Apr 24 17:28:23 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=5 currentStage=2
+Apr 24 17:28:23 Hoover[1929] HooverController stageWorkLoop: Entering now Stage: 3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: Sites now 121
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: init pages
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: eoPool release done
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: entering the sendLoop now.
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=63 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=110 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=80 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=106 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=18 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=83 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=58 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=91 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=26 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=25 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=56 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=94 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=49 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=6 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=84 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=86 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=4 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=1 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=27 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=5 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=10 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=114 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=111 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=72 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=41 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=100 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=117 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=75 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=95 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=101 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=22 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=79 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=20 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=12 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=69 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=82 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=8 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=14 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=74 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=3 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=103 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=119 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=121 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=118 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=116 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=9 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=64 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=45 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=96 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=17 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=24 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=36 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=108 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=62 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=61 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=102 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=52 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=33 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=70 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=31 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=44 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=34 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=30 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=99 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=28 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=15 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=21 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=7 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=43 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=55 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=107 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=104 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=53 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=66 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=50 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=54 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=120 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=93 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=59 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=68 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=11 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=40 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=57 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=60 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=42 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=97 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=47 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=109 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=73 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=112 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=88 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=29 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=23 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=71 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=89 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=2 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=105 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=51 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=39 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=115 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=35 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=76 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=37 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=78 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=92 currentStage=3
+Apr 24 17:28:24 Hoover[1929] HooverController stageWorkLoop: popped site with no work: siteID=85 currentStage=3

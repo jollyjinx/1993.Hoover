@@ -16,7 +16,7 @@
 #define	FETCH_STATUS_FETCHING	1
 #define	FETCH_STATUS_FETCHED	2
 
-#define ROBOTS_REFETCH_TIME	864000.0
+#define ROBOTS_REFETCH_TIME	86400.0
 #define ROBOTS_PATH		@"/robots.txt"
 
 #define	REFETCH_FACTOR		5.0
@@ -266,8 +266,8 @@
 
                         if( [siteDictionary objectForKey:@"robotsdata"] )
                         {
-                        	[aPage setObject:[siteDictionary objectForKey:@"robotsdata"] forKey:@"robotsdata"];
-                            NSLog(@"Robots txt : %@", [siteDictionary objectForKey:@"robotsdata"]);
+                            [aPage setObject:[siteDictionary objectForKey:@"robotsdata"] forKey:@"robotsdata"];
+                           // NSLog(@"Robots txt : %@", [siteDictionary objectForKey:@"robotsdata"]);
                         }
                         if( [siteDictionary objectForKey:@"ipaddress"] )		[aPage setObject:[siteDictionary objectForKey:@"ipaddress"] forKey:@"ipaddress"];
 

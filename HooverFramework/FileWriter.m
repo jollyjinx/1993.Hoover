@@ -2,6 +2,7 @@
 
 #import "FileWriter.h"
 #import "HTMLScanner.h"
+#import "MD5Checksum.h"
 
 #define QUEUE_MAXIMUM	20
 #define QUEUE_WAIT	1.0
@@ -111,26 +112,43 @@
                 }
                 else
                 {
-                    [fileHandle writeData:[@"\nHoover-ShopID:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[[[url objectForKey:@"shopid"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[@"\nHoover-PageID:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[[[url objectForKey:@"pageid"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    if( [url objectForKey:@"shopid"])
+                    {
+                        [fileHandle writeData:[@"\nHoover-ShopID:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[[[url objectForKey:@"shopid"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    }
+                    if([url objectForKey:@"pageid"])
+                    {
+                        [fileHandle writeData:[@"\nHoover-PageID:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[[[url objectForKey:@"pageid"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    }
+                    if([url objectForKey:@"linkdepth"])
+                    {
+                        [fileHandle writeData:[@"\nHoover-LinkDepth:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[[[url objectForKey:@"linkdepth"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    }
+                    if( [url objectForKey:@"transferdate"] && [url objectForKey:@"transfertime"] )
+                    {
+                        [fileHandle writeData:[@"\nHoover-TransferDate:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[[[url objectForKey:@"transferdate"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[@"\nHoover-TransferTime:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[[[url objectForKey:@"transfertime"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    }
+                    if( [url objectForKey:@"httpdata"] )
+                    {
+                        [fileHandle writeData:[@"\nHoover-ContentLength:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[[NSString stringWithFormat:@"%d",[[url objectForKey:@"httpdata"] length]] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[@"\nHoover-MD5Checksum:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[[url objectForKey:@"md5sum"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    }
+                    
 
-                    [fileHandle writeData:[@"\nHoover-TransferDate:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[[[url objectForKey:@"transferdate"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[@"\nHoover-TransferTime:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[[[url objectForKey:@"transfertime"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[@"\nHoover-MD5Checksum:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[[url objectForKey:@"md5sum"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[@"\nHoover-LinkDepth:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[[[url objectForKey:@"linkdepth"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
 
-
-                    [fileHandle writeData:[@"\nHoover-ContentLength:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[[NSString stringWithFormat:@"%d",[[url objectForKey:@"httpdata"] length]] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-
-                    [fileHandle writeData:[@"\nHoover-HTTPResponse:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-                    [fileHandle writeData:[[[url objectForKey:@"httpheader"] objectForKey:@"HTTP"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    if( [url objectForKey:@"httpheader"] && [[url objectForKey:@"httpheader"] objectForKey:@"HTTP"] )
+                    {
+                        [fileHandle writeData:[@"\nHoover-HTTPResponse:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[[[url objectForKey:@"httpheader"] objectForKey:@"HTTP"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                    }
 
 
                     if( [url objectForKey:@"links"] && [[url objectForKey:@"links"] count]  )
@@ -158,7 +176,9 @@
                     }
 
                     if([url objectForKey:@"textRepresentation"])
-                    {	
+                    {
+                        [fileHandle writeData:[@"\nHoover-TextMD5Checksum:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+                        [fileHandle writeData:[[MD5Checksum md5String:[[url objectForKey:@"textRepresentation"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
                         [fileHandle writeData:[@"\nHoover-TextualRepresentation:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
                         [fileHandle writeData:[[url objectForKey:@"textRepresentation"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
                     }
