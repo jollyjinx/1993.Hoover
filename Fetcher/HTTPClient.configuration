@@ -1,6 +1,6 @@
 {
 	useragentname = "RockBot/1.00.0";								// this is the useragent name we will provide the connected hosts
-	useragentmail = "<rockbot@rockbottom.de>";						// this is the useragentmail we will provide the connected hosts
+	useragentmail = "rockbot@rockbottom.de";						// this is the useragentmail we will provide the connected hosts
 //	httpproxy = { host="evosonic.jinx.de"; port = 80 };				// if we are using a proxy to crawl the web set this
 
 	includehosts = ( );										// the hosts we crawl need to have the extensions provided inside this array

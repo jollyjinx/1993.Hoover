@@ -108,13 +108,16 @@
                 	[url setObject:@"redirected" forKey:@"status"];
                 	if( redirectionUrl = [HTMLScanner getDictionaryFromURL:redirectionString baseUrl:url] )
                 	{
-                    	[url setObject:[NSMutableArray arrayWithObjects:redirectionUrl,nil] forKey:@"links"];
+                            [url setObject:[NSMutableArray arrayWithObjects:redirectionUrl,nil] forKey:@"links"];
                 	}
             	}
             	else
             	{
-                	NSLog(@"Unknown Redirection: %@",redirectionString);
-                	[url setObject:@"invalid" forKey:@"status"];
+                	[url setObject:@"redirected" forKey:@"status"];
+                	if( redirectionUrl = [HTMLScanner getDictionaryFromURL:redirectionString baseUrl:url] )
+                	{
+                            [url setObject:[NSMutableArray arrayWithObjects:redirectionUrl,nil] forKey:@"links"];
+                	}
             	}
             }
         }

@@ -19,8 +19,10 @@
     DatedQueue			*allSitesDatedQueue;
     NSLock			*siteLock;
 
+    BOOL			followlinks;
     BOOL			stayonsites;
     BOOL			allpathsallowed;
+    unsigned int		maximumlinkdepth;
 }
 
 - (id)initWithConfiguration:(NSDictionary *)configurationDictionary;

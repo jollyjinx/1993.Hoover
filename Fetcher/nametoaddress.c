@@ -39,7 +39,7 @@ static inline unsigned long getDNSUnsignedLong(char *p)
 	return ntohl(datum);
 }
 
-int nametoaddress(char *hostname)
+char* nametoaddress(const char *hostname)
 {
 	char *cp, *eom;
 	struct in_addr a;
@@ -47,7 +47,6 @@ int nametoaddress(char *hostname)
 	HEADER *h;
 	short nquestions, nanswers, type, class;
 	char name[MaxDNSHostNameLength];
-	char scratch[32];
 	int alias;
 	char r[MaxDNSReplyPacketSize];
 

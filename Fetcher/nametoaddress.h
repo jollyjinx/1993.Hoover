@@ -1,1 +1,1 @@
-int nametoaddress(char *hostname);
+char* nametoaddress(const char *hostname);

@@ -172,7 +172,7 @@
     while( url = [objectEnumerator nextObject] )
     {
         [url setObject:@"invalid" forKey:@"status"];
-		[url setObject:errorString forKey:@"errorreason"];
+        [url setObject:errorString forKey:@"errorreason"];
         [hooverController retrievedUrl:url];
     }
 

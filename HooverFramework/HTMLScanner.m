@@ -66,7 +66,18 @@ static NSDictionary				*toplevelDomainDictionary;
     NSString *schemeString,*siteString,*portString,*subpageString;
     NSString *pathString;
     NSScanner *urlScanner = [NSScanner scannerWithString:urlString];
+    unsigned int	linkdepth = 0;
 
+    if( nil != baseUrl )
+    {
+        NSString *depthString;
+
+        if( nil != (depthString = [baseUrl objectForKey:@"linkdepth"]) )
+        {
+            linkdepth = [depthString intValue]+1;
+        }
+    }
+    
     
     [urlScanner setCaseSensitive:NO];
     if( [urlScanner scanCharactersFromSet:schemeCharacterSet intoString:&schemeString] )
@@ -244,14 +255,13 @@ static NSDictionary				*toplevelDomainDictionary;
         }
     }
 
-    //NSLog(@"url seems to be now:%@ : %@ : %@ %@",schemeString, siteString, portString, pathString );
-
-    
+    //NSLog(@"url seems to be now:%@ : %@ : %@ %@ %@",schemeString, siteString, portString, pathString,[NSString stringWithFormat:@"%d",linkdepth] );
         return [NSMutableDictionary dictionaryWithObjectsAndKeys:
             schemeString,@"method",
             siteString,@"host",
             portString,@"port",
             pathString,@"path",
+            [NSString stringWithFormat:@"%d",linkdepth],@"linkdepth",
             // subpageString,@"subpage",
             nil];
 

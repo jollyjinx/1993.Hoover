@@ -118,6 +118,13 @@
 
     [super init];
 
+    followlinks		= NO;
+    stayonsites		= YES;
+    allpathsallowed	= NO;
+    maximumlinkdepth	= 0;
+
+
+    
     pool		= [[NSAutoreleasePool alloc] init];
     receivedUrlsQueue	= [[MTQueue alloc] init];
     allSitesDatedQueue	= [[DatedQueue alloc] init];
@@ -128,6 +135,12 @@
         NSLog(@"HooverController: No 'general' Dictionary in configuration file.");
         return nil;
     }
+    if([generalConfiguration objectForKey:@"followlinks"])
+    {
+        followlinks = (NSOrderedSame==[[generalConfiguration objectForKey:@"followlinks"] caseInsensitiveCompare:@"Yes"]?YES:NO);
+    }
+    NSLog(@"HooverController: Follow links: %@",(followlinks?@"Yes":@"No"));
+
     if([generalConfiguration objectForKey:@"stayonsites"])
     {
         stayonsites = (NSOrderedSame==[[generalConfiguration objectForKey:@"stayonsites"] caseInsensitiveCompare:@"Yes"]?YES:NO);
@@ -139,6 +152,13 @@
         allpathsallowed = (NSOrderedSame==[[generalConfiguration objectForKey:@"allpathsallowed"] caseInsensitiveCompare:@"Yes"]?YES:NO);
     }
     NSLog(@"HooverController: All Paths allowed: %@",(allpathsallowed?@"Yes":@"No"));
+
+    if([generalConfiguration objectForKey:@"maximumlinkdepth"])
+    {
+        maximumlinkdepth = [[generalConfiguration objectForKey:@"maximumlinkdepth"] intValue];
+    }
+    NSLog(@"HooverController: Follow links to depth: %@",(maximumlinkdepth?[[NSNumber numberWithInt:maximumlinkdepth] description]:@"indefenitly"));
+
 
     if( !(gdbmFile = [GDBMFile gdbmFileWithPath:[generalConfiguration objectForKey:@"databasename"] create:YES readOnly:NO]) )    
     {
@@ -281,9 +301,17 @@
     NSAutoreleasePool		*pool = [[NSAutoreleasePool alloc] init];
     NSMutableDictionary		*persistentSite;											// persistent Site is persistent and contains known/ unknown information
     NSString			*siteName;
-        
-    siteName = [NSString stringWithFormat:@"%@:%@",[newUrl objectForKey:@"host"],[newUrl objectForKey:@"port"]];
 
+    
+    if( maximumlinkdepth && (maximumlinkdepth < [[newUrl objectForKey:@"linkdepth"] intValue]) )
+    {
+        #if DEBUG
+        NSLog(@"Link too deep: %@",newUrl);
+        #endif DEBUG
+        return;
+    }
+    siteName = [NSString stringWithFormat:@"%@:%@",[newUrl objectForKey:@"host"],[newUrl objectForKey:@"port"]];
+    
     if( persistentSite = [gdbmCache objectForKey:siteName] )
     {
         RobotScanner *robotScanner;
@@ -329,7 +357,7 @@
 
                 if( pathisok )
                 {
-                    [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:newPath,@"path",nil]
+                    [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:newPath,@"path",[newUrl objectForKey:@"linkdepth"],@"linkdepth",nil]
                                                                     forKey:newPath];
                     if(1 == [[persistentSite objectForKey:@"unknownpaths"] count])
                     {
@@ -348,15 +376,15 @@
         #endif
     }
     else
-    {																					// in case the site is unknown create
+    {															// in case the site is unknown create
         persistentSite = [NSMutableDictionary dictionary];								// persistent and sortedArray entries
         [persistentSite setObject:siteName forKey:@"sitename"];
         [persistentSite setObject:[newUrl objectForKey:@"host"] forKey:@"host"];
         [persistentSite setObject:[newUrl objectForKey:@"port"] forKey:@"port"];
         [persistentSite setObject:[NSMutableDictionary dictionary] forKey:@"unknownpaths"];
         [persistentSite setObject:[NSMutableDictionary dictionary] forKey:@"knownpaths"];
-        [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[newUrl objectForKey:@"path"],@"path",nil]
-														  forKey:[newUrl objectForKey:@"path"]];
+        [[persistentSite objectForKey:@"unknownpaths"] setObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:[newUrl objectForKey:@"path"],@"path",[newUrl objectForKey:@"linkdepth"],@"linkdepth",nil]
+                                                          forKey:[newUrl objectForKey:@"path"]];
         [gdbmCache setObject:persistentSite forKey:siteName];
         [allSitesDatedQueue push:siteName withDate:[NSDate date]];
     }
@@ -386,7 +414,7 @@
         #if SKIP_ROBOTS_TXT
         #warning Skipping Robots.
         #else
-            if( ! [[persistentSite objectForKey:@"knownpaths"] objectForKey:@"/robots.txt"] )				// in case we don't have the /robots.txt fetch it
+            if( ! [[persistentSite objectForKey:@"knownpaths"] objectForKey:@"/robots.txt"] )			// in case we don't have the /robots.txt fetch it
             {
                 url = [NSMutableDictionary dictionaryWithObject:@"/robots.txt" forKey:@"path"];
             }
@@ -401,7 +429,7 @@
             }
             else
             {													// we have some file to fetch,
-                url = [NSMutableDictionary dictionaryWithObject:[[[unknownDictionary objectEnumerator] nextObject] objectForKey:@"path"] forKey:@"path"];
+                url = [NSMutableDictionary dictionaryWithDictionary:[[unknownDictionary objectEnumerator] nextObject]];
             }
         }
         [siteLock unlock];
@@ -410,7 +438,6 @@
         
         {
             NSString	*ipaddress;
-
             [url setObject:siteName forKey:@"sitename"];
             [url setObject:@"http" forKey:@"method"];
             [url setObject:[persistentSite objectForKey:@"host"] forKey:@"host"];
@@ -463,7 +490,7 @@
     #if DEBUG
         NSLog(@"HooverController: receivedQueue has %d items.",[receivedUrlsQueue count]);
         NSLog(@"HooverController: popped %@%@ %@",siteName,urlPath,[url objectForKey:@"status"]);
-        //NSLog(@"Got url:%@",[url description]);
+        NSLog(@"Got url:%@",[url description]);
     #endif
     
 
@@ -489,7 +516,8 @@
         {
             NSArray *linkArray;
 
-            if( linkArray = [url objectForKey:@"links"] )							// url contains links - so add them
+           
+            if( followlinks && (linkArray = [url objectForKey:@"links"]) )							// url contains links - so add them
             {
                 NSEnumerator		*objectEnumerator = [linkArray objectEnumerator];
                 NSMutableDictionary	*newUrl;
@@ -542,7 +570,7 @@
     {
         NSDate *failedAccessDate = [persistentSite objectForKey:@"failedaccess"];
         NSString *errorreason = [url objectForKey:@"errorreason"];
-
+        
         if(! failedAccessDate )
         {
             NSLog(@"HooverController: site %@ failed the first time (%@)",siteName, errorreason);
@@ -555,13 +583,6 @@
                                forKey:@"nextaccess"];
         }
         [persistentSite setObject:[NSDate date] forKey:@"failedaccess"];
-
-        [siteLock lock];
-        if( [@"/robots.txt" isEqual:urlPath] )										// url is 'robots.txt' so instanciate a
-        {
-            [[persistentSite objectForKey:@"unknownpaths"] removeObjectForKey:urlPath];					// url now known - so remove it from unknown
-        }
-        [siteLock unlock];
     }
 
     if(! [persistentSite objectForKey:@"ipaddress"] && [url objectForKey:@"ipaddress"] )

@@ -5,6 +5,7 @@
 #import <HooverFramework/HTMLScanner.h>
 
 #import <arpa/inet.h>
+#import <libc.h>
 #import <sys/socket.h>
 #import "nametoaddress.h"
 
@@ -69,7 +70,7 @@ static	NSLock			*nameserverLookupLock;
     {
 /**/
         [nameserverLookupLock lock];
-        if( 0 == (ipaddressstring = nametoaddress([[NSString stringWithFormat:@"%@.",[hostDictionary objectForKey:@"host"]] cString])) )
+        if( NULL == (ipaddressstring = nametoaddress([[NSString stringWithFormat:@"%@.",[hostDictionary objectForKey:@"host"]] cString])) )
         {
             [nameserverLookupLock unlock];
             if( !(ipAddress = [hostDictionary objectForKey:@"host"]) )
@@ -146,21 +147,14 @@ static	NSLock			*nameserverLookupLock;
 
     [url setObject:@"invalid" forKey:@"status"];
     NSLog(@"HTTPClient:%@:%@%@",[url objectForKey:@"host"],[url objectForKey:@"port"],[url objectForKey:@"path"]);
-    
+
     conncectionFileHandle = [self createConnectionToHost:httpProxyDictionary?httpProxyDictionary:url];
 
-    if( !httpProxyDictionary )
-    {
-        requestString = [NSMutableString stringWithFormat:@"GET %@ HTTP/1.0\r\n",[url objectForKey:@"path"]];
-		[requestString appendFormat:@"Host: %@\r\n",[url objectForKey:@"host"]];
-    }
-    else
-    {
-        requestString = [NSMutableString stringWithFormat:@"GET http://%@:%@%@ HTTP/1.0\r\n",
-            [url objectForKey:@"host"], [url objectForKey:@"port"],[url objectForKey:@"path"] ];
-    }
+    requestString = [NSMutableString stringWithFormat:@"GET %@ HTTP/1.1\r\nHost: %@\r\n",[url objectForKey:@"path"],[url objectForKey:@"host"] ];
+    [requestString appendFormat:@"Connection: close\r\n"];
+    [requestString appendFormat:@"From: %@\r\n",[httpClientDictionary objectForKey:@"useragentmail"]];
     [requestString appendFormat:@"User-Agent: %@\r\n",[httpClientDictionary objectForKey:@"useragentname"]];
-    [requestString appendFormat:@"From: %@\r\n\r\n",[httpClientDictionary objectForKey:@"useragentmail"]];
+    [requestString appendString:@"\r\n"];
 
     [conncectionFileHandle writeData:[requestString dataUsingEncoding:NSISOLatin1StringEncoding]];
     beginDate = [NSDate date];
