@@ -1,0 +1,54 @@
+{
+    DYNAMIC_CODE_GEN = YES; 
+    FILESTABLE = {
+        BUNDLES = (); 
+        CLASSES = (
+            HooverController.m, 
+            SortedArray.m, 
+            HTMLScanner.m, 
+            RobotScanner.m, 
+            FetcherController.m, 
+            ThreadController.m, 
+            JPPL.m
+        ); 
+        FRAMEWORKS = (Foundation.framework); 
+        HEADERSEARCH = (); 
+        H_FILES = (
+            HooverController.h, 
+            SortedArray.h, 
+            HTMLScanner.h, 
+            RobotScanner.h, 
+            FetcherController.h, 
+            ThreadController.h, 
+            Fetcher.h, 
+            JPPL.h
+        ); 
+        LIBS = (); 
+        OTHER_LINKED = (Hoover_main.m); 
+        OTHER_SOURCES = (
+            Makefile.preamble, 
+            Makefile, 
+            Makefile.postamble, 
+            m.template, 
+            h.template, 
+            HooverConfiguration, 
+            SortedArray.description, 
+            HTMLScanner.describtion, 
+            siteDictionary.description
+        ); 
+        PRECOMPILED_HEADERS = (); 
+        PROJECT_HEADERS = (); 
+        PUBLIC_HEADERS = (); 
+        SUBPROJECTS = (); 
+        TOOLS = (); 
+    }; 
+    LANGUAGE = English; 
+    LOCALIZABLE_FILES = {}; 
+    MAKEFILEDIR = "$(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles"; 
+    NEXTSTEP_BUILDTOOL = /bin/gnumake; 
+    PDO_UNIX_BUILDTOOL = $NEXT_ROOT/NextDeveloper/bin/make; 
+    PROJECTNAME = Hoover; 
+    PROJECTTYPE = Tool; 
+    PROJECTVERSION = 2.6; 
+    WINDOWS_BUILDTOOL = $NEXT_ROOT/NextDeveloper/Executables/make; 
+}

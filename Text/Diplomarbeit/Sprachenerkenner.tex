@@ -1,0 +1,438 @@
+\chapter{Sprachenerkenner}
+
+In diesem Kapitel wird zurerst erl"autert wozu eine Sprachenerkennung ben"otigt wird und wie man sie implementieren kann. Daran anschlie"send wird gezeigt wie man schrittweise die Erkennungsquoten verbessern kann.
+
+\section{Sinn und Ziel der Sprachenerkennung}
+
+Wenn man heutzutage im Internet Begriffe durch Eingabe eines Schlagwortes sucht, benutzt man meist einsprachige W"orter wie z.B. "`Suchmaschinen"',"`Bundeskanzler"' oder "`Gummistiefel"' und bekommt dann Seiten, welche das gesuchte Wort enthalten.
+
+Schwieriger wird es da schon, wenn man nach Seiten, die etwas mit "`Film"' zu tun haben, sucht. Hier erh"alt man bei den g"anigen Suchmaschinen zum Gro"steil nur englischsprachige Seiten. 
+
+Man kann nun nat"urlich den Begriff versuchen etwas eingrenzen z.B. "`Film and not Movie"'. Man erh"alt damit alle Seiten in denen das Wort "`Film"' vorkommt, nicht jedoch das Wort "`Movie"' ({\em engl.} Film). Eine "`richtige"` Sprachenerkennung ist dies nicht, speziell wenn man die "Ubersetzungen f"ur die Schlagworte nicht kennt.
+
+Bei einer "`richtigen"' Sprachenerkennung sollte es m"oglich sein, die Sprache(n) in denen die Hypertextdokumente des Ergebnisraums auf eine Suchanfrage geschrieben sind, auszuw"ahlen: "`Suche nach {\em Film} in deutschen und franz"osischen Dokumenten"'.
+
+F"ur Informationssuchende, welche der englischen Sprache nicht m"achtig sind, w"urde damit das Internet viel einfacher benutzbar.
+
+
+\section{Vor"uberlegung}
+Im Internet enthaltene Dokumente m"ussen keinen "`Tag"'\footnote{tag {\em engl.} Markierung. - Die Dokumente sind nicht mit einer Markierung versehen die sie als "`deutsch"', "`franz"osisch"' oder "`deutsch und englisch"' ausweist.} f"ur eine Sprache haben, obwohl sog. Metatags hierf"ur existieren\footnote{http://ds.internic.net/rfc/rfc1945.txt  (RFC 1945 Abschnitt D.2.5)}.
+
+Man kann zum Teil die Sprache jedoch automatisch, durch die Kodierung der Buchstaben, erkennen. So sind z.B. Japanisch und Koreanisch durch die Zeichenwahl eindeutig bestimmt.
+
+Wenn man sich vor Augen f"uhrt, wie ein Mensch eine Sprache erkennt, kann man evtl. R"uckschl"usse f"ur einen, auf einem Rechner implementierbaren Algorithmus bekommen. Als Mensch hat man einen Wortschatz der die wichtigen W"orter f"ur die Muttersprache und die gesprochenen Fremdsprachen enth"alt. Zus"atzlich wei"s man, wie sich bestimmte Sprachen anh"oren, ohne die Sprachen jeweils zu k"onnen.
+
+So kann man einigerma"sen sicher Fr"anz"osisch von Spanisch unterscheiden, auch wenn man beiden Sprachen nicht m"achtig ist.
+
+Man mu"s also irgendwie versuchen, dieses Wissen in einen Algorithmus zu integrieren. Erster Anhaltspunkt sind sicher W"orterb"ucher, die man auch als Mensch benutzt. Diese lassen sich einfach im Rechner handhaben - eine Spracherkennung auf akustischer Basis ist auch gar nicht n"otig, da die im Internet vorliegenden Dokumente vorwiegend schriftlicher Natur sind.
+
+
+
+\section{W"orterb"ucher und Wortfrequenzen}
+\label{WoerterbuecherUndWortfrequenzen}
+
+Da man Anfangs noch keine W"orterb"ucher "uber die zu erkennenden Sprachen hat, mu"s man sich "uberlegen, wie man solche generieren kann, denn die gesuchten W"orter sind im Internet schon vorhanden.
+
+Als wahrscheinlich kann man gelten lassen, da"s die meisten Internetbenutzer ihre Dokumente in Englisch bzw. der jeweils "ublichen Landessprache schreiben. "Uberdies sind die meisten L"ander mit einer eigenen Internetdomain im Internet vertreten. Nur Amerika hat neben der {\em us} auch noch {\em edu},{\em gov},{\em mil},\dots als Domainnamen.
+
+Dies Wissen kann man einfach dazu verwenden, W"orterb"ucher automatisch zu generieren: Man holt sich Webseiten nach Internetdom"anen getrennt und generiert aus den gefundenen Dokumenten Wortlisten.
+
+Sehr schnell mu"s man nun aber feststellen, da"s in Europa alle W"orter aus dem Englischen, Franz"osizschen, Italienischen, Spanischen und Deutschen in allen Wortlisten vertreten sind. Sieht man sich jedoch die Worth"aufigkeiten an, so "uberwiegen die Landesspezifischen W"orter und Englisch.
+
+F"ur Deutsch erh"alt man mit dieser Methode W"orterb"ucher wie das in Tabelle \ref{erstesWoerterbuch} dargestellte.
+
+\begin{table}[t]
+\begin{center}
+\begin{tabular}{lr}
+der		&.0223658143 \\
+und		&.0202616321 \\
+die		&.0195573927 \\
+the		&.0192777032 \\
+in		&.0166147651 \\
+\end{tabular}
+\end{center}
+\caption{Erstes Ergebnis einer Wortliste aus deutschen HTML-Dokumenten erzeugt. Zu sehen sind noch die englischen W"orter "`the"' und "`in"'.}
+\label{erstesWoerterbuch}
+\end{table}
+
+Diese Tabelle bedeutet, da"s jedes f"unfzigste Wort (2\%) das Wort "`der"' auf deutschen Hypertextdokumenten vorkommt. Das englische Wort "`the"' ist mit 1.9\% auch sehr h"aufig.
+
+Zum Erstellen dieser Wortliste habe ich allerdings schon vorrausgesetzt, da"s man einen {\em lowercase}-Filter hat. Wie ein solcher zu implementieren ist, erkl"are ich im n"achsten Abschnitt.
+
+
+
+\section{Encodings und Kleinbuchstaben}
+
+Wie schon im vorangehenden Text kurz erl"autert, kann man bestimmte Sprachen durch die Art der benutzten Zeichen erkennen. Dies funktioniert wie schon erw"ahnt f"ur die meisten asiatischen Sprachen z.B. Chinesisch, Japanisch, Koreanisch ,\dots .
+
+F"ur solche Hypertextdokumente bietet sich an, eine Art Vorfilter zu implementieren, welcher, "uber die Art der benutzten Zeichen, die Sprache herausfindet\footnote{Eine Implementierung eines solchen Filters hat Eric Kidd von AltaVista schon get"atigt, weshalb ich darauf nicht n"aher eingehe.}. "Ubrig bleiben dann nur noch Dokumente, die in europ"aischen Zeichens"atzen geschrieben sind, bei denen der Zeichensatz nicht so einfach erkannt werden kann.
+
+Das Problem bei den europ"aischen Zeichens"atzen ist, da"s die Authoren von Hypertextdokumenten dieses Zeichensatzproblem gar nicht erkennen, da es auf Ihrem Computerbildschirm immer "`richtig"' aussieht. 
+
+HTML-Dokumente sind im ISO-Latin1 Zeichensatz gesetzt - so der Standard. Authoren in Russland (kyrillisches Alphabet) oder den slavischen L"andern k"onnen aber mit ISO-Latin1 nicht alle Zeichen des jeweiligen Alphabets benutzen. Nun bietet sich zum einen eine Transliteration der nicht vorhandenen Zeichen in den ASCII-Code an ( im Deutschen z.B. "a $\rightarrow$ ae ). Zum anderen aber haben diese Authoren meist Schriftarten bei denen f"ur Ihre Sprache die enthaltenen Zeichen auf Zeichen gelegt wurden, die sie nicht ben"otigen. 
+
+An einem Beispiel l"a"st sich das einfacher erkl"aren. Angenommen wir k"onnen drei Zeichen benutzen und der amerikanische Standard sieht eine Belegung wie folgt vor:
+
+1.Zeichen $\rightarrow$ "`f"', 2.Zeichen $\rightarrow$ "`o"', 3.Zeichen $\rightarrow$ "`r"'.
+
+Wir ben"otigen jedoch "`f"',"`"u"' und "`r"' , nicht jedoch "`o"'. Belegen wir das dritte Zeichen mit "`"u"' und wir k"onnen somit alle gew"unschten Zeichen darstellen. Versucht jemand in Amerika jedoch dann unsere Dokumente zu lesen werden alle "`f"ur"' als "`for"' erscheinen. 
+
+Da nicht immer eine "Ubersetzung mit dieser Methode erzielt wird, besteht das Problem darin, zu erkennen welcher Zeichensatz gerade vorliegt. Das ist bei den im Internet h"aufig benutzten Zeichens"atzen nicht, bzw. nur unvollst"andig m"oglich.
+
+Zwei Probleme werfen sich nun auf: Ambiguit"at und Normalisierung. Zum einen w"urde ein deutscher Benutzer alle Dokumente die "`for"'  enthalten auf eine Suchanfrage nach "`f"ur"' bekommen, zum anderen kann man nicht mehr einfach die Suchanfragen nach "`F"UR"' auf die kleingeschriebene Variante "`f"ur"' konvertieren.
+
+Die Ambiguit"at l"a"st sich durch den Sprachenerkenner aufl"osen. Eine Normalisierung kann nach eingehendem Studium der im Internet "ublichen Standardencodings (Anhang \ref{EncodingTabellen}) ohne Kenntnis des verwandten Encodings erzielt werden.
+
+Wenn man sich die ISO-8859 und KOI8-R Tabellen n"aher ansieht, so kann man eine Kleinschreibung dadurch erzielen, da"s man bei der ISO-Latin1 Tabelle die dritte Zeile auf die f"unfte und die vierte auf die letzte Zeile konvertiert.
+
+Bei ISO-Latin2 ist es die erste auf die zweite, die dritte auf die f"unfte und die vierte Zeile auf die letzte Zeile. Bei den anderen ISO-Tabellen verh"alt es sich "ahnlich, selbst die russische KOI8-R Tabelle ist genauso zu konvertieren, ausgenommen da"s dabei die Klein- in Gro"sschrift konvertiert wird.
+
+Einzuwenden bleibt, da"s die so erhaltene Gro"s-Klein-Konvertierung nicht immer richtig ist. So wird z.B. das deutsche "`"s"' in ISO-Latin1 auf den vermeintlichen Kleinbuchstaben "`\"y"' konvertiert wird. Dies spielt allerdings keine Rolle, da durch die Konvertierung keine Ambiguit"aten in den jeweiligen Sprachen auftreten. Dies w"are der Fall w"urde man "`"a"' auf "`a"' konvertieren, so da"s "`"alter"' zu "`alter"' konvertiert.
+
+Die so erhaltene "`Kleinschreibung"' ist zwar nicht immer richtig, bietet jedoch einen gangbaren Ausweg aus der Problematik an.
+
+Als beste Alternative bietet sich Unicode\footnote{Unicode ist ein 16bit Zeichensatz, d.h. man kann alle europ"aischen und asiatischen Schriftzeichen mit ein- und demselben Zeichensatz darstellen. http://www.unicode.org/}, als universelle Zeichenkodierung, an. Um Dokumente nach Unicode konvertieren zu k"onnen, mu"s man das Encoding vorher kennen. Dies ist im \www meist nicht der Fall, weshalb man erst langwierig das Encoding von Dokumenten zu erkennen versuchen m"u"ste.
+
+
+\section{HTML-Parsing}
+
+Nach diesem kleinen Abstecher in die Encoding- und {\em lowercase}-Problematik, kann ich noch gleich eine weitere grundlegende Schwierigkeit bei der Benutzung des \www , das Parsing von HTML, n"aher erl"autern.
+
+Man kann W"orterb"ucher durch das Scannen von Hyptertextdokumenten erzeugen. {\em So} einfach ist dies jedoch nicht, da Hypertextdokumente nicht nur aus hintereinandergereihten W"ortern bestehen.
+
+Grunds"atzlich sind die Hyptertextdokumente im \www in HTML\footnote{Der HTMT-Standard ist momentan in der Version 3.2 ( offiziell ) und auf http://www.w3.org/pub/WWW/MarkUp/ abzurufen} abgefa"st. HTML besteht im wesentlichen aus sog. {\em Tags}, die der Beschreibung der Seite dienen.
+
+Will man z.B. "`{\bf F}onts k"onnen {\em ohne} \underline{{\bf P}robleme} gesetzt werden."' schreiben, so sieht das entsprechende HTML-Dokument wie folgt aus:
+{\tt
+\nl \nl
+<b>F</b>onts k\&ouml;nnen <em>ohne</em> \nl
+<a href="'http://www.problem.org/"'>	\nl
+<font size="'+3"'>P</font>robleme</a> gesetzt werden.\nl}
+
+Will man aus diesem Dokument die eigentliche Information "'Fonts k"onnen ohne Probleme gesetzt werden."' herausfiltern, bedarf es eines Filters, welcher die reinen Textinformationen aus HTML-Dokumenten herausfiltern kann. In diesen Filter mu"s man einiges Wissen um den HTML-Standard einflie"sen lassen.
+
+Beginnend mit einem Parser der alle {\em Tags} herausfiltert mu"ste ich feststellen, da"s die resultierenden Wortlisten sehr "`unsauber"' sind. Ich befa"ste mich mit der Problematik daraufhin eingehender.
+
+Sehr viele Dokumente im \www enthalten Tabellen, Adressen, Listen und Graphiken. Mit solchen Dokumenten kann man schlecht Wortlisten generieren, da die gefundenen Wortfrequenzen nicht mit den in geschriebenem Text vorkommenden Frequenzen "ubereinstimmen. Einfachstes Beispiel ist das Wort "`Telefon"', welches mit einem Mal ein sehr wichtiges deutsches Wort wurde, da es auf fast jeder {\em personal Homepage} vorkommt.
+
+Am einfachsten schien es mir die HTML-Dokumente in W"orter, S"atze und Paragraphen zu zerlegen und die Wortfrequenzen nur aus aus den gefundenen Paragraphen zu erzeugen. Bei der Generierung eines solchen Parsers hat man mit zwei grunds"atzlichen Problemen zu k"ampfen:
+
+\begin{description}
+\item[Austesten:] Der Parser funktioniert f"ur die ersten zehn Megabyte Text aus Europa tadellos und st"o"st dann auf Dokumente die schlecht geparsed werden. Das Testen auf eine volle Funktionsf"ahigkeit wird dadurch erheblich behindert.
+
+\item[Unbekanntes:] Ein Parser geht von einer bestimmten Struktur der Dokumente aus. Wenn die Dokumente anders strukturiert sind, mu"s der Parser angepa"st werden. Der oben genannte Satz "`{\bf F}onts k"onnen {\em ohne} \underline{{\bf P}robleme} gesetzt werden."' ist ein gutes Beispiel daf"ur:
+
+Der Parser arbeitete zuerst nach dem Prinzip, da"s z.B. \verb|<em>| und \verb|<b>| -Tags wegfallen, unbekannte und trennende Tags als Satztrennung dienen. So wurde aus dem genannten Satz das Folgende:
+
+{\tt Fonts k"onnen ohne <HTMLTAG> \nl
+P <HTMLTAG> \nl
+robleme gesetzt werden <SENTENCE> }
+
+Der \verb|<FONT>| Tag war im alten Standard noch nicht enthalten, weshalb das "`P"' mit einem Mal ein eigener Abschnitt wurde.
+
+An diesem Beispiel wird ersichtlich, da"s man den Parser st"andig an die neuesten Standards und die tats"achlich vorhandenen Gegebenheiten im \www anpassen mu"s.
+
+\end{description}
+
+
+
+
+\section{Einfache Relativit"atenerkennung}
+
+Mit den in \ref{WoerterbuecherUndWortfrequenzen} generierten W"orterb"uchern kann man schon eine erste Sprachenerkennung implementieren. Man benutzt dazu die relativen H"aufigkeiten der W"orter in den verschiedenen L"andern, so da"s man eine Prozentuale Absch"atzung machen kann, in welcher Sprache ein Satz geschrieben ist.
+
+Mathematisch ausgedr"uckt:
+
+\begin{eqnarray}
+{WortWahrscheinlichkeit}	&=	&\frac{Worth"aufigkeit\ im\ Land}{\sum Worth"aufigkeit\ in\ L"andern}				\nonumber \\
+{SatzWahrscheinlichkeit} 	&=	&\frac{WortWahrscheinlichkeit}{\sum WortWahrscheinlichkeiten}						\nonumber
+\end{eqnarray}
+
+An einem Beispiel wird die Simplizit"at dieser Berechnung ersichtlich:
+
+Als Grundlage nehmen wir den deutschen Satz: "`Dies ist ein deutscher Satz."'. F"ur die Sprachenerkennung nehmen wir das, aus \ref{WoerterbuecherUndWortfrequenzen} erzeugte, deutsche und franz"osische W"orterbuch. So ergibt sich f"ur das Wort "`ist"' die folgende Berechnung:
+
+\begin{eqnarray}
+{\rm Worth"aufigkeit\ im\ Land(de)}		&= 5.055 10^{-3}	\nonumber \\
+{\rm Worth"aufigkeit\ im\ Land(fr)}		&= 5.584 10^{-7}	\nonumber
+\end{eqnarray}
+\begin{eqnarray}
+\Rightarrow &{\rm WortWahrscheinlichkeit(de)} = 	\nonumber \\
+	= &\frac{\rm Worth"aufigkeit\ im\ Land(de)}{\sum{ {\rm Worth"aufigkeit\ im\ Land(de)} + {\rm Worth"aufigkeit\ im\ Land(fr)}} }		\nonumber \\
+	= &\frac{5.055 10^{-3}}{5.055 10^{-3} + 5.584 10^{-7}}						\nonumber	\\
+	= &99.98 \%																	\nonumber
+\end{eqnarray}
+
+Das bedeutet, da"s das Wort "`ist"' zu 99.98\% als Deutsch und zu 0.02\%  als Franz"osisch erkannt wurde.
+Iteriert man diese Methode "uber alle W"orter des Satzes und "uber alle W"orterb"ucher, so erh"alt man die in Tabelle \ref{ersteSpracherkennung} dargestellte Erkennungstabelle.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline
+de    &87.28\%	\\
+no    &2.57\% 	\\
+is    &1.64\% 	\\
+sk    &1.04\% 	\\
+nl    &1.04\% 	\\
+dk    &0.95\% 	\\
+hu    &0.74\% 	\\
+es    &0.64\% 	\\
+fi    &0.62\% 	\\
+pl    &0.60\% 	\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Methode: Relative H"aufigkeiten; W"orterb"ucher: 20 L"ander, unges"aubert}
+\label{ersteSpracherkennung}
+\end{table}
+
+Man sieht also schon an dieser einfachen relativen H"aufigkeitsberechnung, da"s die Erkennung von Sprachen mit dieser Methode funktioniert. Die Erkennungsqualit"at zu verbessern ist das Thema des n"achsten Abschnitts.
+
+
+
+\section{Verbesserte W"orterb"ucher}
+
+Da die Qualit"at der Erkennung direkt mit der Qualit"at der zugrundeliegenden W"orterb"ucher korreliert, mu"s man versuchen die in \ref{WoerterbuecherUndWortfrequenzen} generierten W"orterb"ucher zu s"aubern.
+
+Da die erzeugten W"orterb"ucher sehr viele englische W"orter enthalten mu"s man als erstes versuchen diese herauszufiltern. Im wesentlichen bieten sich hier nach kurzer "Uberlegung drei Strategien an:
+\begin{enumerate}
+\item W"orter, die in englischsprachigen L"andern vorkommen, herausfiltern.
+
+Die W"orter, die in englischsprachigen L"andern vorkommen herauszufiltern, sieht augenscheinlich als beste Methode aus. "Uberlegen wir uns zuersteinmal das Vorgehen: Wir wollen z.B. das deutsche W"orterbuch von allen, in England vorkommenden W"ortern s"aubern.
+
+Da sicherlich Deutsche in England in deutsch geschriebene Hypertextdokumente schreiben, sollten wir nur die h"aufigsten, in England gefundenen W"orter herausfiltern. Allerdings gehen uns so auch seltene, englische W"orter verloren, die eventuell auch auf deutschen Webseiten zu finden sind.
+
+Wenn wir dann die "ubriggebliebenen hochfrequenten W"orter aus der deutschen Wortliste herausnehmen gehen uns mulitlinguale W"orter verloren, z.B. "`England"', "`Hypertext"', \dots . Man kann den Verlust dieser W"orter verschmerzen, da diese W"orter nichts zur Spracherkennung beitragen.
+
+W"orter wie z.B. "`die"' und "`these"' die in beiden Sprachen hochfrequent sind, und sehr wohl etwas zur Spracherkennung beitragen, darf man aber auf keinen Fall herausfiltern. Nun kann man "`h"andisch"' die Liste durchgehen und solche W"orter als "`ok"' markieren.
+
+
+\item W"orter, die in mehr als $\frac{n}{m}; m=Anzahl\ der\ W"orterb"ucher$ vorkommen, herausfiltern.
+
+Hier beh"alt man zum einen nicht sehr h"aufige W"orter in den Wortlisten, zum anderen filtert man dabei wieder W"orter wie "`die"' und '`these"' heraus, weshalb man diese Strategie gleich verwerfen kann.
+
+
+\item Neue W"orterb"ucher generieren. Allerdings nur S"atze f"ur die Generierung benutzen, die durch den gerade vorgestellten Sprachenerkenner als eindeutig zu einer Sprache zugeh"orig erkannt wurden.
+
+Diese Methode liefert wesentlich weniger Worte f"ur die manuelle Nachkorrektur wie die erste Methode, weshalb ich mich hierf"ur entschied. Man nimmt also S"atze und l"a"st diese vom rudiment"aren Erkenner in eine Sprache einteilen:
+
+\begin{verbatim}
+hk 24.79% pl 12.07% 
+if you have any suggestions or you need more information on
+any subject just send me an e-mail
+
+fr 76.60% de  5.46%
+liste des mots cl&eacute;s appartenant au 
+vocabulaire de cette discipline
+
+nl 82.08% cz  5.27% 
+lees je liever een korte inleiding in het nederlands
+\end{verbatim}
+
+W"ahlt man nun die Parameter des Filters z.B. 70\% minimale Zugeh"origkeit, zweiterkannte Sprache $\le$ 10\%  entsprechend, so bekommt man W"orterb"ucher wie in Tabelle \ref{zweitesWoerterbuch} zu sehen.
+\end{enumerate}
+
+\begin{table}[t]
+\begin{center}
+\begin{tabular}{lr}
+der      &.0410957468\\
+und      &.0378103926\\
+die      &.0371554176\\
+in       &.0166678019\\
+von      &.0127589115\\
+\end{tabular}
+\end{center}
+\caption{Deutsches W"orterbuch, erste S"auberung}
+\label{zweitesWoerterbuch}
+\end{table}
+
+Man sieht hierbei, da"s die englischen W"orter aus Tabelle \ref{erstesWoerterbuch} herausgefallen sind und die Worth"aufigkeiten sich quantitativ verbessert haben. Das liegt daran, da"s nun die Gesamtzahl der vorkommenden W"orter nur noch aus deutschen S"atzen stammt. Der Nenner des Bruchs von Worth"aufigkeit zu Gesamtwortzahl ist nun kleiner geworden, der Wert des Bruchs ist somit h"oher.
+
+Mit den so erhaltenen Wortlisten wird der schon bekannte Satz: "`Dies ist ein deutscher Satz."' wie in Tabelle \ref{zweiteSpracherkennung} dargestellt bewertet.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline
+de  &96.81\% \\
+no  &1.15\% \\
+is  &0.75\% \\
+nl  &0.39\% \\
+pl  &0.25\% \\
+se  &0.19\% \\
+sk  &0.13\% \\
+cz  &0.11\% \\
+fr  &0.09\% \\
+es  &0.06\% \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Methode: Relative H"aufigkeiten, W"orterb"ucher 20 - erste S"auberung}
+\label{zweiteSpracherkennung}
+\end{table}
+
+Man sieht am verbesserten Ergebnis, da"s die Qualit"at der zugrundeliegenden W"orterb"ucher entscheidenden Einflu"s auf die G"ute der Sprachenerkennung hat.
+
+Aus diesem Grunde wurden dann die so ges"auberten W"orterb"ucher von Muttersprachlern auf Fehler durchgesehen, um dadurch die Qualit"at noch weiter zu steigern. Das Ergebnis dieser "`perfekten"' W"orterb"ucher, angewandt auf den bekannten Satz, kann man in Tabelle \ref{dritteSpracherkennung} sehen.
+
+\pagebreak 
+
+\begin{table}[t]
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline
+de  &98.29\% \\
+no  &0.21\% \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Methode: Relative H"aufigkeiten, W"orterb"ucher 20 - perfekt sauber}
+\label{dritteSpracherkennung}
+\end{table}
+
+Man sieht, da"s hier nur noch Deutsch und Norwegisch auftreten. Alle anderen Wortlisten enthalten keines der W"orter in dem Satz. Die norwegische Liste enth"alt das Wort "`ein"', da dies auch norwegisch sein kann.
+
+Abschlie"send zu Thema W"orterb"ucher bleibt zu bemerken, da"s die von Muttersprachlern gepr"uften W"orterb"ucher kaum verbessert werden k"onnen. 
+
+W"ahrend der k"unftigen Spracherkennung k"onnte man allerdings automatisch alle unbekannten Worte herausschreiben. Wenn man z.B. jedes neue Wort, welches nur in einem Land auftaucht, herausfiltert, k"onnte man auf diese Weise die W"orterb"ucher st"andig erweitern.
+
+
+
+\section{Zipf}
+
+Mit den qualitativ hochwertigen W"orterb"uchern lassen sich unterschiedliche Sprachen sehr gut erkennen. Allerdings bricht die Erkennungsquote sehr schnell ein, wenn man "`verwandte"' Sprachen, wie z.B. D"anisch und Norwegisch zu  erkennen versucht.
+
+Bei d"anisch und norwegisch liegen die Fehlerraten bei 10\% mit der oben benannten Methode und perfekten W"orterb"uchern.
+
+"Uberdies haben Suchmaschinen nicht immer gen"ugend Rechnerkapazit"aten zur Verf"ugung eine HTML-Seite "`gut"' zu parsen, weshalb es notwendig wurde eine Art Sprachenverst"arker einzubauen, der wie sich sp"ater herausstellte beide Problemzonen verkleinert.
+
+Wenn man sich die Frequenzlisten der W"orterb"ucher ansieht und miteinander vergleicht ergibt sich das in Abbildung \ref{frequenzdiagramm} dargestellte Bild. 
+
+\begin{figure}[t]
+	\makebox[\textwidth]{\epsfxsize=\textwidth \epsffile{Zipfkurve.eps} }
+	\caption{Vergleich der Frequenzlisten zwischen Englisch und drei europ"aischen Sprachen.}
+	\label{frequenzdiagramm}
+\end{figure}
+
+Diese Kurven werden nach dem Entdecker Zipfkurven\cite{Zipf1949} benannt und sind in jeder Sprache vorzufinden. Ich m"ochte hier nur auf den in der Abbildung "`Zipfpunkt"' makierten Punkt eingehen.
+
+Da die englische Sprache von Leuten "uberall auf dem Globus im \www benutzt wird, hat diese als einzigste Sprache ein unregelm"a"sige Kurve.
+
+F"ur meisten Authoren im \www ist Englisch nicht die Muttersprache. Deshalb benutzen diese Authoren die bekannten englischen W"orter "uberproportional h"aufig (in der Graphik die ersten 1200 W"orter). Die nicht so h"aufig benutzten W"orter werden von diesen Authoren unterproportional wenig benutzt, weshalb die englische Kurve nach den ersten 1200 W"ortern unter die der anderen Sprachen f"allt.
+
+Man kann nun "uber diese Zipf-W"orter, welche mehr als 0.06\% (abgelesen aus der Graphik) in einer Sprache verwendet werden, bestimmte Aussagen machen. 
+
+\begin{itemize}
+\item In "`normalen"' Texten kommen zwischen 20\% und 30\% Zipfw"orter vor.
+\item Zipfw"orter sind zum Gro"steil kontextunabh"angig aber sprachabh"angig.
+\end{itemize}
+
+Wenn nun die Hypertextdokumente nicht gut geparsed sind (z.B. Tabellen und Listen), so enthalten diese keine Zipfverteilung und es kommen weniger als 20\% Zipf-w"orter darin vor. Dies stellt eine sehr einfache Methode dar festzustellen ob das zu erkennende Dokument "uberhaupt in einem sinnvollen Format vorliegt.
+
+Zipfw"orter sind in Sprachen wie Norwegisch und D"anisch sehr unterschiedlich, weshalb eine "uberproportionale Bewertung dieser W"orter zu besseren Ergebnissen f"uhrt. So konnte die die Erkennung von D"anisch und Norwegisch mit Hilfe von Zipf von 90\% auf 95\% verbessert werden.
+
+
+\section{N-gramme}
+
+Bei n"aherer Betrachtung der mit den geannten Methoden erzielten Ergebnisse kann man erkennen, da"s W"orter, welche nicht in den W"orterb"uchern enthalten sind, nichts zur Spracherkennung betragen. Als Mensch kann man aber sehr wohl "`h"oren"' ob jemand spanisch spricht, auch wenn man kein spanisches Wort kennt.
+
+Dieses "'h"oren"' von Sprachen l"a"st sich nat"urlich so nicht im Rechner nachbilden weshalb man andere Methoden finden mu"s dies zu implementieren.
+
+Hier bieten sich sog. N-gramme als L"osung an. N-gramme sind die ersten $N$ Buchstaben eines Wortes sowie die $N$ letzten. Zum Beispiel sind beim Wort die Sequenzen "`bi"' und "`mm"' die Bi-gramme\footnote{Man nennt die h"aufig benuzten N-gramme nach den griechischen Buchstaben: Bigramm (2), Trigramm (3) und Quadgramm (4).} des Wortes "`Bigramm"'.
+
+Bei vielen W"ortern einer Sprache werden die Anfangs- und Endsilben an die jeweilig zugrundeliegende Grammatik angepa"st. So gibt es im Deutschen viele W"orter die auf "`nen"' und "`ung"' enden bzw. W"orter die mit "`Be"' und "`Ver"' anfangen.
+
+Wenn man nun die H"aufigkeiten der N-gramme bestimmt, die man in den W"orterb"uchern findet, so kann man wieder "uber einfache Relativit"aten die W"ahrscheinlichkeiten ausrechnen mit denen ein Wort zu einer Sprache geh"ort.
+
+"Uber diese N-gramme kann man dann W"orter einer Sprache zuordnen, auch wenn man das Wort selbst nicht im W"orterbuch auffindet. Mit dieser Methode erh"alt man die in Tabelle \ref{ngramme} abgebildeten Erkennungsquoten mit dem bekannten Satz - ohne direkt W"orter aus W"orterb"uchern zu "ubernehmen.
+
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lcr}
+\begin{tabular}{|l|r|}
+\hline
+de&20.14\% \\
+lv&10.75\% \\
+nl&6.78\% \\
+en&6.68\% \\
+ee&6.01\% \\
+fr&5.63\% \\
+fi&5.26\% \\
+lt&4.81\% \\
+\hline
+\end{tabular}
+&\begin{tabular}{|l|r|}
+\hline
+de&45.02\% \\
+en&7.89\% \\
+fr&1.99\% \\
+lv&1.46\% \\
+pt&1.04\% \\
+nl&0.46\% \\
+lt&0.21\% \\
+se&0.16\% \\
+\hline
+\end{tabular}
+&\begin{tabular}{|l|r|}
+\hline
+de&26.93\% \\
+lv&7.80\% \\
+nl&7.48\% \\
+ee&6.84\% \\
+fr&5.39\% \\
+en&5.11\% \\
+fi&5.01\% \\
+dk&4.60\% \\
+\hline
+\end{tabular}
+\end{tabular}
+
+\end{center}
+\caption{Von links nach rechts: Bigramme, Trigramme und Quadgramme}
+\label{ngramme}
+\end{table}
+
+Wie man sieht, bieten die Trigramme das beste Ergebnis im Vergleich zu den Bi- und Quadgrammen. Wenn man die beschriebene Methode der relativen H"aufigkeiten mit Zipf und Trigrammen verbindet, kann man die Ergebnisse der Zipfversion noch verbessern.
+
+\begin{figure}[t]
+	\makebox[\textwidth]{\epsfxsize=\textwidth \epsffile{ZipfVsTrigramm.eps} }
+	\caption{Vergleich zwischen der Erkennungsquote Zipf und Zipf mit Trigrammen. Grundlage 4000 franz"osische S"atze.}
+	\label{ZipfVsTrigram}
+\end{figure}
+
+Als Beispiel hierf"ur kann ich die Erkennung von Franz"osisch in Abbildung \ref{ZipfVsTrigram} heranziehen. Hier sieht man deutlich, da"s zum einen die sehr hochfrequente Erkennung von franz"osischen S"atzen nicht mehr stattfindet, da Trigramme von franz"osischen W"ortern auch in anderen Sprachen vorkommen.
+
+Diese augenscheinliche Verschlechterung der Erkennungsrate wird aber durch die Unzahl von S"atzen ausgeglichen, die dadurch besser erkannt werden. Die Anzahl der als franz"osisch erkannten S"atze ist die Fl"ache unter der Kurve, welche mit der Zipf-Trigramm-Erkennung gr"o"ser ist.
+
+
+\section{Ausblick}
+
+Mit den bisherigen Methoden erh"alt man eine Erkennungsrate f"ur deutsche S"atze von 99.88\%. Die fehlerhaften S"atze sind allerdings auch nicht {\em sehr} Deutsch, wie man in Tabelle \ref{deutscheFehler} sieht.
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{lllll}
+en	&2.71	&de	&0.08
+&	\begin{tabular}{l}
+	ihr antikolonialistisches rezept lautet somit don't eat 	\\
+	curry don't worry and don't say sorry						\\
+	\end{tabular} \\
+en	&0.65	&de	&0.10	
+&	\begin{tabular}{l}
+suhrkamp verlag frankfurt am main taschenbuchausgabe 			\\
+kazimierz brandys warschauer tagebuch 							\\
+	\end{tabular} \\
+\end{tabular}
+\end{center}
+\caption{Fehler bei 4000 deutschen S"atzen. Methode: Relative H"aufigkeiten,Zipf und Trigramm. Die Zahlen geben Absolutwerte an.}
+\label{deutscheFehler}
+\end{table}
+
+Da bei einzelnen S"atzen eine solch hohe Erkennungsquote erzielt werden konnte, ist es offensichtlich, da"s bei Dokumenten mit mehreren S"atzen die Erkennungsquote wesentlich h"oher ist.
+
+Die hohe Erkennungsquote war auch ein Grund daf"ur weshalb w"ahrend der Implementierungsphase der Suchdienst {\em AltaVista} sich sehr an den Algorithmen zur Sprachenerkennung interessiert zeigte.
+
+Bei {\em AltaVista} wird zur Zeit die Spracherkennung auf Basis dieser Arbeit in den Suchdienst integriert und Ende August 1997 der breiten "Offentlichkeit zug"anglich gemacht. Eine Vorabversion kann der interessierte Leser "uber das \www auf {\em http://ie4.altavista.digital.com:7000/} ausprobieren.
+
+

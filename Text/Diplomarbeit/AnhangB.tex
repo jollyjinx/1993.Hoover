@@ -1,0 +1,79 @@
+\chapter{Dokumentation zu Hoover}
+\label{DokumentationHooverCrawler}
+
+\section{Starten der Fetcher}
+Wie schon ausf"uhrlich er"ortert, laufen die Fetcher, die die eigentliche Arbeit des {\em Hoover}-Systems erledigen, auf vielen Rechnern. Auf jedem, dem System zuarbeitenden Rechner, mu"s also ein Fetcher laufen, der sich dann beim {\em Hoover} anmeldet.
+Der eigentliche Programmaufruf sieht wie folgt aus:
+\begin{center}
+{\tt \small Fetcher [-threads \flq number\frq ] [-host \flq hostname\frq ]}
+\end{center}
+Die Parameter sind optional. In der Voreinstellung wird mit f"unfzig Threads gefetched und der lokale Rechner als {\em Hoover} angenommen.
+
+
+\section{Starten von Hoover}
+
+Hoover ist, wie schon in Kapitel \ref{Crawler} besprochen, mit einem Konfigurationsfile zu starten. Der eigentliche Programmaufruf sieht dann wie folgt aus:
+\begin{center}
+{\tt \small Hoover [ConfigurationFileName]}
+\end{center}
+Der Parameter ist optional. In der Voreinstellung wird mit "`HooverConfiguration"' als Konfigurationsfile gearbeitet. Hoover gibt die erhaltenen HTML-Dokumente auf die Standardausgabe aus, so da"s der Programmaufruf in einer Unix-Shell meist wie folgt aussieht:
+\begin{center}
+{\tt \small Hoover \frq fetchedWebDokuments 2\frq hooverProgressInformation }
+\end{center}
+Im Klartext: Alle geholten HTML-Dokumente werden in die Datei "`fetchedWebDokuments"' geschrieben, die Informationen, was {\em Hoover} gerade macht, in die Datei "`hooverProgressInformation"'.
+
+
+\subsection{Das Hoover Konfigurationsfile}
+
+Das Konfigurationsfile von Hoover entspricht dem "'PropertyList"'-Format von OpenStep. Dieses Format erlaubt es Daten aus Textfiles einzulesen und in Objekte abzubilden.
+
+Ein {\em NSDictionary}-Objekt erzeugt man durch Eingabe von "`Schl"usselName = WertName"', ein {\em NSString}-Objekt wird von G"ansef"uschen umramt, ein {\em NSArray} erzeugt man, indem man die Werte mit Komma trennt und in runde Klammern setzt. Kommentare werden zwischen "`/*"' und "`*/"' geschrieben.
+
+Soviel zur Theorie, in der Praxis sieht ein HooverKonfigurationsfile z.B. so aus:
+
+{\small
+\begin{verbatim}
+{   /*
+        Dies ist eine TestKonfiguration, um zu zeigen wie einfach es
+        ist ein poropertyList Format von Hand einzugeben
+    */
+    urls =  (   "http://www.leo.org/demap/cities/Muenchen.html",
+                "http://watzmann.cis.uni-muenchen.de/Deutschland.html"
+            );
+    general = {
+            useragentname = "Hoover/0.1";
+            useragentmail = "Patrick Stein <jolly@cis.uni-muenchen.de>";
+            databasename =  "webdatabase" ;
+            includehosts = ( ".de",".at","ch" );
+            excludehosts = ();
+            includepaths = ();
+            excludepaths = ( "?", "cgi-bin", "cgi_bin" );
+            httpproxy = { host="www.cis.uni-muenchen.de"; port = 8000 };
+        };
+}
+\end{verbatim}
+}
+
+Die Datei enth"alt zum gegenw"artigen Zeitpunkt ein W"orterbuch mit den folgenden zwei Eintr"agen:
+\begin{description}
+	\item[urls:]	Hier kann man die Startseiten, mit denen {\em Hoover} beginnen soll, als {\em URL}-Array eingeben.
+	\item[general:]	Hier werden Schl"ussel-Wert Paare aufgelistet, die die verschiedenen Optionen im {\em Hoover} beeinflussen:
+	\begin{description}
+		\item[useragentname:]	Mit diesem Namen meldet sich {\em Hoover} bei jeder Web-Site. Diese k"onnen dann den Zugriff "uber das {\em robots exclusion protocol} mit diesem Namen verweigern oder eingrenzen.
+		\item[useragentmail:]	Mite dieser E-Mail Adresse meldet sich {\em Hoover} bei jeder Web-Site. So k"onnen die Administratoren bei Problemen mit {\em Hoover} dies gleich der verantwortlichen Person mitteilen.
+		\item[databasename:]	Unter diesem Dateinamen wird die persistente Datenspeicherung der {\em URLs} durchgef"uhrt.
+		\item[includehosts:]	Es werden Hosts nur von {\em Hoover} kontaktiert, wenn mindestens eine Zeichenkette in diesem Array auf den Hostnamen pa"st ( matched ).
+		\item[excludehosts:]	Hosts, deren Hostname auf mindestens eine Zeichenkette in diesem Array passt, werden niemals kontaktiert.
+		\item[includepaths:]	Siehe includehosts, nur das hier auf den Pfadnamen gematched wird.
+		\item[excludepaths:]	Siehe excludehosts, nur das hier auf den Pfadnamen gematched wird.
+		\item[httpproxy:]		Existiert dieser Eintrag, dann wird das Internet von den Fetchern nur "uber den benannten Host (HTTP-Proxy) kontaktiert. Bei Nichtexistenz wird das Internet direkt von den Fetchern benutzt.
+	\end{description}
+\end{description}
+
+Es hat sich w"ahrend der Implementierung der Vorteil dieser {\em variablen} Konfiguration gezeigt. Der Eintrag "`httpproxy"' war nicht von Anfang an in der Konfiguration enthalten.
+
+Der Eintrag wurde notwendig, als das {\em Hoover}-System "uber einen Firewall-Rechner auf das Internet zugreifen sollte. Ich erg"anzte daraufhin die Spezifikation und Implementation und konnte nun das System "uber einen Firewall auf das Internet zugreifen lassen.
+
+Bahnbrechend ist dies sicher nicht, jedoch ist es ohne Probleme m"oglich die neuen, erweiterten Konfigurationsfiles auf den {\em alten} {\em Hoovern} laufen zu lassen, da diese Systeme gar nicht nach einem "`httpproxy"'-Eintrag im "'general"'-W"orterbuch suchen.
+
+

@@ -1,0 +1,170 @@
+\chapter{Dokumentation zum PerlCrawler}
+\label{DokumentationPerlCrawler}
+
+\section{Aufruf}
+
+Das Program wird durch Eingabe von 
+\begin{center}
+{\tt \small wcacheFiller.perl [ option ]\dots url=http://\dots}
+\end{center}
+aufgerufen. Die Position der Argumente ist frei w"ahlbar. Die folgenden Aufrufe sind beispielsweise g"ultig:
+\nl\nl
+{\tt \small
+	cacheFiller.perl url=http://www.next.com/						\nl
+	cacheFiller.perl database=remove url=http://www.next.com/		\nl
+	cacheFiller.perl url=http://www.next.com/ database=remove follow=text:!pictures	\nl
+}
+
+Wenn man eine falsche oder ung"ultige Argumentenliste "ubergibt, wird eine Erkl"arung der gesamten Optionen aufgelistet:
+
+{
+\small
+\begin{verbatim}
+NAME
+    cacheFiller.perl - get all html pages beginning at a specific url.
+
+SYNOPSIS
+    cacheFiller.perl [ option ]... url=http...
+
+OPTIONS :
+    defaults are marked with a *
+	
+    database=[remove|reuse*]
+                The links to follow are stored in a database. This database
+                consists of three files:
+                    'links.visited'     - Contains links that the program 
+                                            already has followed.
+                    'links.nextstage'   - Links that are new in this round are
+                                            stored here. Those links will be 
+                                            fetched in the next round.
+                    'links.unknown'     - Links that get fetched in this round.
+       
+    htmlpages=[none*|save]
+                If set, all pages fetched are saved to disk to the directory
+                htmlpages.
+                
+    languages=[none|examine*] 
+                If set, the program will exmaine every html document depending 
+                on one of the following algorithms.
+    
+        sentences=[none|examine*]
+                If set, sentences of fetched url's are appended to the files 
+                country/name. Name is the topmost internet domain of the fetched
+                url. It then appends : URL:urlname
+                                       SEN:word1:word2:...
+                                       SEN:...                      to the file.
+        
+        wordspersentence=<int>
+                Only sentences with greater and equal number of words will be 
+                appended to the sentencesfiles. Default is 5.
+        
+        minword=<int>
+                Minimal length a word has to have. Default is 2.
+        maxword=<int>
+                Maximal length a word has to have. Default is  (''== endless).
+        languagemax=<int>
+                Maximal size in megabytes of the language files. Default is 40.     
+
+    debug=[database]:[sentences]:[contents]:[linkarrays]
+        
+    follow/links=[option]:[option]:...
+        with option: text        follow only .html and .htm documents
+                     !pictures   never get picutres
+                     [!]us       [never] get things from .edu .mil .com .net ...
+                     [!]de       [never] get things from .de .leo.org ...
+                     regex       enter regular expression like .uk/ to get 
+                                 just links from the uk
+    
+    url={urlname}
+                Begin the searchtree with the url named. Default is
+                http://www.w3.org/pub/DataSources/WWW/Servers.html.
+    maxdepth=<int>          
+                Searchtree ends at depth. Default is 30.
+    timeout=<int>           
+                Maximum time in seconds to wait for an url to resolve. 
+                Default is 5.
+    retrytime=<int>           
+                Minimum time in seconds to wait before an url might be retried. 
+                Default is 1000.
+
+
+EXAMPLES
+    
+    perl5 wwwCacheFiller.pl url=http://www.next.com/ database=remove
+    perl5 wwwCacheFiller.perl links=\!us:\!de:text
+
+FILES
+    In case the environment variable "http_proxy" is set, the named proxy will
+    be used.
+	
+BUGS
+    perl5.002 or higher is mandatory.
+
+\end{verbatim}
+}
+
+\section{Beispiel}
+
+Will man zum Beispiel sehr viele deutsche Seiten mit diesem Programm holen, dann kann man als Startseite eine Auflistung vieler Web-Sites ausw"ahlen und das Programm holt dann iterativ die Seiten, die dort benannt sind und mit den regul"aren Ausdr"ucken "ubereinstimmen.
+
+Der Programmaufruf w"urde dann wie folgt aussehen:
+{\small
+\begin{verbatim}
+cacheFiller.perl url=http://www.leo.org/demap/cities/Muenchen.html follow=de
+\end{verbatim}
+}
+
+Das Programm gibt dann die Daten zur"uck, mit denen es nun das {\em Crawlen} beginnt (z.B. die regul"aren Ausd"rucke mit denen es arbeitet) und holt dann auch gleich die Seiten vom \www:
+{\small
+\begin{verbatim}
+Never Follow  :
+@links=grep(!/\/cgi-bin\//i,@links);
+@links=grep(!/\.map$/i,@links);
+@links=grep(!/^mailto:/i,@links);
+@links=grep(!/^gopher:/i,@links);
+@links=grep(!/^ftp:/,@links);
+
+Only Follow   :
+@linksOK=();
+push(@linksOK,grep(/\.de[:\/]/,@links));
+push(@linksOK,grep(/\.leo\.org[:\/]/,@links));
+push(@linksOK,grep(/\.ch[:\/]/,@links));
+push(@linksOK,grep(/\.at[:\/]/,@links));
+@links=@linksOK;
+undef @linksOK;
+
+Database      :remove
+HTML Pages    :none
+Languages     :examine
+Sentences     :examine
+Words/sentence:5
+min. Word     :2
+max. Word     :
+max. Langfile :40 MByte
+Begin         :http://www.leo.org/demap/cities/Muenchen.html
+Maxdepth      :30
+Timeout       :5
+Retrytime     :1000
+Debugging     :
+Removing link database:done.
+Entering Stage 
+ 0                     http://www.leo.org/demap/cities/Muenchen.html OK
+Database swap:done.
+Entering Stage 
+ 1                                         http://www.leo.org/demap/ OK
+ 1 http://www.leo.org/demap/cities/http//www.muenchner-aidshilfe.de/ Not Found
+ 1                                               http://www.leo.org/ OK
+ 1                                      http://www.leo.org/muenchen/ OK
+ 1                      http://www.leo.org/images/icons/LEO/leoc.gif^C
+Got signal - saving
+\end{verbatim}
+\vdots
+}
+
+Zuerst werden also die ganzen Statusmeldungen ausgegeben, dann wird die erste Stufe der Breitensuche im \www durchgef"urht. Es ist als Startpunkt {\em http://www.leo.org/demap/cities/Muenchen.html} angegeben, so da"s zuerst diese Seite geholt wird.
+
+Nachdem nun alle Seiten dieser Stufe der Suche geholt worden sind beginnt die zweite Stufe. Alle in der vorhergehenden Stufe gefundenen Links wird nun nachgegangen. Die geholten Files werden, nach Internetdom"anen geordnet. abgespeichert. 
+
+Das Programm speichert seinen momentanen Stand st"andig ab, so da"s bei Absturz des Rechners nicht alle Dokumente nocheinmal geholt werden m"ussen, sondern dort weitergemacht werden kann, wo aufgeh"ort wurde.
+
+

@@ -1,0 +1,247 @@
+\documentstyle[11pt,a4,twoside]{article}
+\small
+\newcommand{\nl}{{\newline}}
+
+\title{a simple language recognizer - abstract}
+\author{Patrick Stein $<$jolly@cis.uni-muenchen.de$>$ }
+\begin{document}
+\maketitle
+\small
+
+\section{Introduction}
+The main idea is, that most of the HTML-Pages in every country are written either in {\it english} or the language spoken in that country.
+You might argue, that this concept does not work for countries like Belgium, Lithuanian,\dots where more that just english is used. That's true, but I solved that problem later by excluding those countries first.
+
+I retrieved as many sentences from every country using a {\it broadsearch} on url's from around the globe. Those sentences were stored in different files, depending on the internet country code I found the sentence in. Like {\it de} for Germany, {\it fr} for France,\dots
+I extracted the words in those sentences and created frequency lists of the encounterd words. At the end of that stage I got dictionaries with relative frequency lists for every countryextension.
+
+The german {\it (de)} dictionary looked like:
+\begin{center}
+\begin{tabular}{lr}
+ist	 	 &.0050546603 \\
+im       &.0054891167 \\
+mit      &.0060433867\\
+des      &.0060474988 \\
+zu       &.0060683712 \\
+das      &.0060800846 \\
+den      &.0064212697 \\
+f\&uuml;r &.0069192777 \\
+to       &.0071634531 \\
+von      &.0074732984 \\
+and      &.0084007162 \\
+of       &.0115128772 \\
+in       &.0166147651 \\
+the      &.0192777032 \\
+die      &.0195573927 \\
+und      &.0202616321 \\
+der      &.0223658143 \\
+\end{tabular}
+\end{center}
+
+As you see there are just english and german words.
+
+\section{The first analyser}
+At that stage I was able to write the first language analyser from those dictionaries I just got. That analyser worked with pure relativities. 
+\begin{eqnarray}
+{relativity\ of\ word} 		&=	&\frac{relativity\ in\ language}{\sum relativity\ in\ languages}				\nonumber \\
+{relativity\ of\ sentence} 	&=	&\frac{relativity\ of\ word}{\sum relativity\ of\ word}						\nonumber
+\end{eqnarray}
+ To show how simple the real computation is I'll show you an example:
+
+German: "Dies ist ein deutscher Satz."
+
+Calculation for {\it ist} ( just german and french dictionary ):
+\begin{eqnarray}
+{\rm relativity(de)}		&= 5.055 10^{-3}	\nonumber \\
+{\rm relativity(fr)}		&= 5.584 10^{-7}	\nonumber
+\end{eqnarray}
+\begin{eqnarray}
+\Rightarrow &{\rm relativity(de)} = 	\nonumber \\
+	= &\frac{\rm relativity(de)}{\sum{ {\rm relativity(de)} + {\rm relativity(fr)}} }		\nonumber \\
+	= &\frac{5.055 10^{-3}}{5.055 10^{-3} + 5.584 10^{-7}}						\nonumber	\\
+	= &99.98 \%																	\nonumber
+\end{eqnarray}
+This means, that {\it ist} is much more often written in Germany than it is france, so that it is more likely to be german than to be french. If you iterate with this method over the whole sentence you get as result the following table:
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline
+it    &0.17\% 	\\
+ru    &0.17\% 	\\
+cz    &0.20\% 	\\
+fr    &0.20\% 	\\
+za    &0.20\% 	\\
+tr    &0.37\% 	\\
+hk    &0.44\% 	\\
+se    &0.51\% 	\\
+gr    &0.52\% 	\\
+pl    &0.60\% 	\\
+fi    &0.62\% 	\\
+es    &0.64\% 	\\
+hu    &0.74\% 	\\
+dk    &0.95\% 	\\
+nl    &1.04\% 	\\
+sk    &1.04\% 	\\
+is    &1.64\% 	\\
+no    &2.57\% 	\\
+de    &87.28\%	\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Method All}
+\end{table}
+
+\section{Improvements}
+After the creation of that simple language recognizer it's straight forward to improve the wordlists just by using the recognizer on itself. I calulated the probability on each sentence I got in the database and got something like:
+\begin{verbatim}
+hk 24.79% pl 12.07% 
+if you have any suggestions or
+you need more information on any
+subject just send me an e-mail
+
+fr 76.60% de  5.46%
+liste des mots cl&eacute;s 
+appartenant au vocabulaire de 
+cette discipline
+
+nl 82.08% cz  5.27% 
+lees je liever een korte 
+inleiding in het nederlands
+\end{verbatim}
+I just generated improved dictionaries by narrowing the selected sentences to the ones that where recognized at least to 70\%. The new dictionaries looked like this:
+ 
+\begin{center}
+\begin{tabular}{lr}
+eine     &.0065340298 \\
+ein      &.0067803004 \\
+ist      &.0072885609\\
+auf      &.0073881171\\
+sie      &.0075295917\\
+im       &.0079330563\\
+f\&uuml;r &.0079749747\\
+des      &.0089862560\\
+zu       &.0091172509\\
+mit      &.0096412309\\
+den      &.0097460269\\
+das      &.0115799567\\
+von      &.0127589115\\
+in       &.0166678019\\
+die      &.0371554176\\
+und      &.0378103926\\
+der      &.0410957468\\
+\end{tabular}
+\end{center}
+
+As you see, all the english words are now washed away, and the recognizer using the new created dictionary is much better than the first one:
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline
+hu  &0.00\% \\
+it  &0.00\% \\
+es  &0.06\% \\
+fr  &0.09\% \\
+cz  &0.11\% \\
+sk  &0.13\% \\
+se  &0.19\% \\
+pl  &0.25\% \\
+nl  &0.39\% \\
+is  &0.75\% \\
+no  &1.15\% \\
+de  &96.81\% \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Method CL (wed out english)}
+\end{table}
+
+You may test the recognizer yourself by using the {\it World\-Wide\-Web } at: \mbox{\it http://www.cis.uni-muenchen.de/Jolly}
+\pagebreak
+
+\section{Sourcecode example}
+To show you how easy the algorithm is implemented here is a Perl5 method to compute the percentages as an example:
+\small
+\small
+\begin{verbatim}
+sub recognizeSentence
+{
+    my ($self,@words) = @_;                                     # @words contains all words in the sentence
+    my %foundwords = ();                                        # %foundwords 
+    my %sorted = ();
+    my @countryfiles = @{$self->{'countryfiles'}};              # @countryfiles is an array that contains the filenames of the 
+                                                                # dictionarys ( frequency lists )
+    my $allpercent = 0;                                         # sum of all percentages of all words 
+    my $word;                                                   # $word contains the word that get's computed right now
+    
+    while( $word = shift(@words) )                              # iterate over all words in the sentence
+    {
+        my %wordfactor = ();                                    # %wordfactor{$country} contains the frequency of the word in a country
+        my $wordsum = 0;                                        # $wordsum : sum of frequencies for the word
+        foreach $country ( @countryfiles )                      # iterate over all countries
+        {                                                       
+            if( defined($cache{$country}{$word}) )              # we cache frequencys so first lookup a frequency if it's in the cache
+            {
+                        $factor = $cache{$country}{$word};
+                        $wordsum += $factor;
+                        $wordfactor{$country} = $factor;            
+            }
+            else                                                # else look it up in the frequencylist in that country
+            {                                                   # the lookup is done by the unixprogram 'look' which
+                                                                # which uses a binary search on a dictionary file
+                                                                # to lookup a word ( pretty fast )
+                $languagefilename = sprintf "%s/%s.%s",$self->{'countrydirectory'},$country,$self->{'countryfileextension'};
+                if( open(COUNTRYFILE,"look \'$word\:\' $languagefilename |") )      
+                {
+                    print STDERR "Reading $languagefilename\n" if $self->{'debug'};
+                    while( $_ = <COUNTRYFILE> )
+                    {
+                        if( /^$word:(\d+)\/(\d+)$/)             # since 'look' reports all occurences of a word we have to
+                        {                                       # use a regular expression to get the right line of the 'look' output
+                            $factor = ($1/$2);
+                            $wordsum += $factor;
+                            $wordfactor{$country} = $factor;
+                            $cache{$country}{$word}=$factor  if $self->{'cache'}==1;
+                            printf STDERR "$country SUM:%5.4e FAC:%5.4e\n",$wordsum,$factor if $self->{'debug'};
+                        }
+                    }
+                    close(COUNTRYFILE);
+                }
+                else
+                {
+                    print STDERR "Can't open $languagefilename\n";
+                }
+            }
+        }
+        
+        foreach $country (keys %wordfactor)                     # calculate the percentage a word belongs to a country in respect
+        {                                                       # of the relativity the word is spoken i a specific country
+            $foundwords{$country} += ($wordfactor{$country}/$wordsum) ;
+            printf STDERR "COUNTRY:%s %5.4f %5.4f %5.4f\n",$country,$wordsum,$percentthistime, $foundwords{$country} if $self->{'debug'};
+        }       
+    }
+        
+    $allpercent = 0;                                            # add up all percentages of the countries and
+    foreach $country (keys %foundwords )
+    {
+        $allpercent += $foundwords{$country};
+    }
+
+    while( ($country,$count)=each(%foundwords) )                # relative to the result return all percentages of countries.
+    {
+        $foundwords{$country}= (int(($count*10000)/$allpercent))/100;
+    }
+    
+    return %foundwords;
+}
+
+\end{verbatim}
+
+ 
+\end{document}
+
+
+
+
+
+
+

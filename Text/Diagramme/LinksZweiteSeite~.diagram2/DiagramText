@@ -1,0 +1,238 @@
+#!DG_TEXT-Version-2
+# D2 Version: Built by spencer on Mon May  1 17:41:27 PDT 1995
+
+
+zoom 0.75
+windowOrigin 212.00 10.00
+viewOrigin 1.00 9.00
+viewSize 624.00 478.00
+visibleOrigin 0.00 0.00
+showTools
+snapToGrid
+defaultFont "Helvetica"
+defaultFontSize 12.00
+printInfoFile "PrintInfo"
+colorFile "Colors.clr"
+
+symbol 2147483647
+	default
+	layer -1
+	shape "Rectangle"
+	location 20.00 20.00
+	size 60.00 30.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	textPlacement top
+end
+
+symbol 250
+	layer 6
+	shape "Rounded Rectangle"
+	location 126.00 63.00
+	size 135.00 63.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\fs24\fc0\cf0 Hypertextdokument\
+\
+
+\pard\tx400\tx800\tx1200\tx1601\tx2001\tx2401\tx2802\tx3202\tx3602\tx4003\qc\fc0\cf0 A
+}
+
+	textPlacement top
+end
+
+symbol 248
+	layer 7
+	shape "Rounded Rectangle"
+	location 306.00 45.00
+	size 135.00 63.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\fs24\fc0\cf0 Hypertextdokument\
+\
+
+\pard\tx400\tx800\tx1200\tx1601\tx2001\tx2401\tx2802\tx3202\tx3602\tx4003\qc\fc0\cf0 B
+}
+
+	textPlacement top
+end
+
+symbol 243
+	layer 11
+	shape "Rounded Rectangle"
+	location 513.00 63.00
+	size 135.00 63.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\fs24\fc0\cf0 Hypertextdokument\
+\
+
+\pard\tx400\tx800\tx1200\tx1600\tx2000\tx2400\tx2800\tx3200\tx3600\tx4000\qc\fc0\cf0 C
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\fc0\cf0 \
+\
+\
+
+}
+
+	textPlacement top
+end
+
+symbol 242
+	layer 12
+	shape "Rounded Rectangle"
+	location 306.00 189.00
+	size 135.00 135.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\fs24\fc0\cf0 Hypertextdokument\
+\
+
+\pard\tx400\tx800\tx1200\tx1600\tx2000\tx2400\tx2800\tx3200\tx3600\tx4000\qc\fc0\cf0 D\
+
+\pard\tx533\tx1067\tx1601\tx2135\tx2668\tx3202\tx3736\tx4270\tx4803\tx5337\fc0\cf0 Dieser Text handelt öber das Leben von Mozart und dessen fröhen Tod.
+}
+
+	textPlacement top
+end
+
+vertex 2147483645
+	default
+	layer -1
+	location 0.00 0.00
+end
+vertex 2147483644
+	default
+	layer -1
+	location 0.00 0.00
+end
+vertex 257
+	layer 0
+	location 373.50 189.00
+end
+vertex 256
+	layer 1
+	location 373.50 108.00
+end
+vertex 254
+	layer 3
+	location 311.04 200.29
+end
+vertex 253
+	layer 4
+	location 228.50 126.00
+end
+vertex 247
+	layer 8
+	location 438.82 205.38
+end
+vertex 246
+	layer 9
+	location 540.25 126.00
+end
+line 2147483646
+	default
+	from 2147483645
+	to 2147483644
+	2147483645
+	2147483644
+	layer -1
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 255
+	from 248
+	to 242
+	256
+	257
+	layer 2
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx533\tx1067\tx1601\tx2135\tx2668\tx3202\tx3736\tx4270\tx4803\tx5337\f0\b0\i0\ulnone\qc\fs24\fc0\cf0 Bekannte Komponisten
+}
+
+	labelPosition 0.50
+	labelOffset 0.00
+	labelWidth 106.00
+	headType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 252
+	from 250
+	to 242
+	253
+	254
+	layer 5
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx533\tx1067\tx1601\tx2135\tx2668\tx3202\tx3736\tx4270\tx4803\tx5337\f0\b0\i0\ulnone\qc\fs24\fc0\cf0 Biographien
+}
+
+	labelPosition 0.50
+	labelOffset 0.00
+	labelWidth 82.00
+	headType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 245
+	from 243
+	to 242
+	246
+	247
+	layer 10
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\fs24\fc0\cf0 Mehr Informationen öber das Leben von Mozart
+}
+
+	labelPosition 0.50
+	labelOffset 0.00
+	labelWidth 114.00
+	headType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end

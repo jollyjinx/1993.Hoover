@@ -1,0 +1,32 @@
+{
+    DYNAMIC_CODE_GEN = YES; 
+    FILESTABLE = {
+        BUNDLES = (); 
+        CLASSES = (Fetcher.m, HTMLScanner.m, ThreadController.m, Worker.m); 
+        FRAMEWORKS = (Foundation.framework); 
+        H_FILES = (
+            Fetcher.h, 
+            FetcherController.h, 
+            HooverController.h, 
+            HTMLScanner.h, 
+            RobotScanner.h, 
+            SortedArray.h, 
+            ThreadController.h, 
+            Worker.h
+        ); 
+        LIBS = (); 
+        OTHER_LINKED = (Fetcher_main.m); 
+        OTHER_SOURCES = (Makefile.preamble, Makefile, Makefile.postamble, m.template, h.template); 
+        SUBPROJECTS = (); 
+        TOOLS = (); 
+    }; 
+    LANGUAGE = English; 
+    LOCALIZABLE_FILES = {}; 
+    MAKEFILEDIR = "$(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles"; 
+    NEXTSTEP_BUILDTOOL = /bin/gnumake; 
+    PDO_UNIX_BUILDTOOL = $NEXT_ROOT/NextDeveloper/bin/make; 
+    PROJECTNAME = VFetcher; 
+    PROJECTTYPE = Tool; 
+    PROJECTVERSION = 2.6; 
+    WINDOWS_BUILDTOOL = $NEXT_ROOT/NextDeveloper/Executables/make; 
+}

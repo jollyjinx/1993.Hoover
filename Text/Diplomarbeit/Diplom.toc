@@ -1,0 +1,59 @@
+\contentsline {chapter}{\numberline {1}Einleitung}{3}
+\contentsline {chapter}{\numberline {2}Einf\active@dq \dq@prtct{u}hrung}{5}
+\contentsline {section}{\numberline {2.1}Konzept des World\discretionary {-}{}{}Wide\discretionary {-}{}{}Web\/ }{5}
+\contentsline {section}{\numberline {2.2}Konzept der Suchmaschinen}{5}
+\contentsline {section}{\numberline {2.3}Unzul\active@dq \dq@prtct{a}nglichkeiten von Suchmaschinen}{6}
+\contentsline {section}{\numberline {2.4}Verbesserungsm\active@dq \dq@prtct{o}glichkeiten}{7}
+\contentsline {section}{\numberline {2.5}Eingrenzung der Arbeit}{8}
+\contentsline {section}{\numberline {2.6}Grundbegriffe}{8}
+\contentsline {subsection}{\numberline {2.6.1}Internet}{8}
+\contentsline {subsection}{\numberline {2.6.2}URL}{8}
+\contentsline {subsection}{\numberline {2.6.3}HTTP}{9}
+\contentsline {subsection}{\numberline {2.6.4}HTML}{9}
+\contentsline {subsection}{\numberline {2.6.5}HTML-Dokument}{10}
+\contentsline {subsection}{\numberline {2.6.6}World\discretionary {-}{}{}Wide\discretionary {-}{}{}Web\/ }{10}
+\contentsline {subsection}{\numberline {2.6.7}Web-Browser}{10}
+\contentsline {subsection}{\numberline {2.6.8}Suchindex}{10}
+\contentsline {chapter}{\numberline {3}Crawler}{12}
+\contentsline {section}{\numberline {3.1}Einf\active@dq \dq@prtct{u}hrung in Crawler}{12}
+\contentsline {section}{\numberline {3.2}Perl Version}{14}
+\contentsline {subsection}{\numberline {3.2.1}Vor\active@dq \dq@prtct{u}berlegung}{15}
+\contentsline {subsection}{\numberline {3.2.2}Konzeption}{15}
+\contentsline {subsection}{\numberline {3.2.3}Implementierungs-\active@dq \dq@prtct{U}berlegungen}{16}
+\contentsline {subsection}{\numberline {3.2.4}Implementierungs-Probleme}{19}
+\contentsline {section}{\numberline {3.3}Verteilte Version }{19}
+\contentsline {subsection}{\numberline {3.3.1}Vor\active@dq \dq@prtct{u}berlegung}{19}
+\contentsline {subsection}{\numberline {3.3.2}Konzeption}{20}
+\contentsline {subsection}{\numberline {3.3.3}Implementierungs-\active@dq \dq@prtct{U}berlegungen}{22}
+\contentsline {subsection}{\numberline {3.3.4}Implementierung}{23}
+\contentsline {subsection}{\numberline {3.3.5}Implementierung-Probleme}{28}
+\contentsline {subsection}{\numberline {3.3.6}Leistungsanalyse}{29}
+\contentsline {subsection}{\numberline {3.3.7}Verbesserungsm\active@dq \dq@prtct{o}glichkeiten}{30}
+\contentsline {chapter}{\numberline {4}Sprachenerkenner}{32}
+\contentsline {section}{\numberline {4.1}Sinn und Ziel der Sprachenerkennung}{32}
+\contentsline {section}{\numberline {4.2}Vor\active@dq \dq@prtct{u}berlegung}{33}
+\contentsline {section}{\numberline {4.3}W\active@dq \dq@prtct{o}rterb\active@dq \dq@prtct{u}cher und Wortfrequenzen}{33}
+\contentsline {section}{\numberline {4.4}Encodings und Kleinbuchstaben}{34}
+\contentsline {section}{\numberline {4.5}HTML-Parsing}{36}
+\contentsline {section}{\numberline {4.6}Einfache Relativit\active@dq \dq@prtct{a}tenerkennung}{37}
+\contentsline {section}{\numberline {4.7}Verbesserte W\active@dq \dq@prtct{o}rterb\active@dq \dq@prtct{u}cher}{38}
+\contentsline {section}{\numberline {4.8}Zipf}{41}
+\contentsline {section}{\numberline {4.9}N-gramme}{42}
+\contentsline {section}{\numberline {4.10}Ausblick}{44}
+\contentsline {chapter}{\numberline {5}Kontexterkenner}{46}
+\contentsline {section}{\numberline {5.1}\active@dq \dq@prtct{U}berlegungen}{46}
+\contentsline {subsection}{\numberline {5.1.1}Domainerkennung und \active@dq \dq@prtct{`}hot topics\active@dq \dq@prtct{'}}{46}
+\contentsline {subsection}{\numberline {5.1.2}Clustering Algorithmen}{47}
+\contentsline {section}{\numberline {5.2}Normalisierung}{47}
+\contentsline {subsection}{\numberline {5.2.1}Linkauswertung}{48}
+\contentsline {section}{\numberline {5.3}Link-Cluster}{50}
+\contentsline {section}{\numberline {5.4}Frequenzlisten}{50}
+\contentsline {section}{\numberline {5.5}Ausblick}{51}
+\contentsline {chapter}{\numberline {A}Dokumentation zum PerlCrawler}{52}
+\contentsline {section}{\numberline {A.1}Aufruf}{52}
+\contentsline {section}{\numberline {A.2}Beispiel}{54}
+\contentsline {chapter}{\numberline {B}Dokumentation zu Hoover}{56}
+\contentsline {section}{\numberline {B.1}Starten der Fetcher}{56}
+\contentsline {section}{\numberline {B.2}Starten von Hoover}{56}
+\contentsline {subsection}{\numberline {B.2.1}Das Hoover Konfigurationsfile}{57}
+\contentsline {chapter}{\numberline {C}Encoding Tabellen}{59}

@@ -1,0 +1,464 @@
+\chapter{Crawler}
+\label{Crawler}
+
+In diesem Kapitel wird zuerst ein kleiner "Uberblick auf die verf"ugbaren Webcrawler gegeben, um daran anschlie"send die Konzeption und Implementation der verbesserten Crawling-Strategien zu erl"autern.
+
+\section{Einf"uhrung in Crawler}
+Web-Crawler verhalten sich im wesentlichen so wie Web-Browser. Man gibt dem Web-Crawler eine {\em URL}, zu der er dann das zugeh"orige Hypertextdokument aus dem \www holt. Dann wird das geholte Hyptertextdokument nach {\em URL's} durchsucht. Die neu gefundenen {\em URL's} werden daran anschlie"send vom Web-Crawler geholt und wiederum nach {\em URL's} durchsucht.
+
+Dies wird solange wiederholt, bis alle Hypertextdokumente dieses gerichteten Graphen geholt worden sind.
+
+Meist werden die Web-Crawler nicht auf das gesamte \www "`losgelassen"', sondern nur auf Teilbereiche. So kann man den Suchraum des Web-Crawlers durch Anwendung von regul"aren Ausd"ucken auf die Namen der {\em URL's} einschr"anken, z.B. "`Hole nur  {\em URL's} die ein "`muenchen.de"' am Ende des Rechnernamenes haben"'.
+
+Bei den aktuell verf"ugbaren Crawlern\footnote{\raggedright F"ur eine komplette "Ubersicht an Webcrawlern sei auf http://info.webcrawler.com/mak/projects/robots/active/html/type.html verwiesen.} werden verschiedene Strategien verfolgt:
+\begin{description}
+
+\item[Harvest:] Harvest ist ein komplettes \www-Indexierungssytem. Es wurde an der Universit"at von Colorado entwickelt. Harvest besteht aus den drei folgenden Komponenten: 
+	\begin{itemize}
+		\item {\em Gatherer} ist der Web-Crawler des Pakets. Gatherer ist ein Programm das die Informationen der verschiedenen Dokumente sammelt ( to gather, {\em engl.} sammeln, zusammensuchen ). 
+		\item {\em Broker} ist ein Programm, das die gesammelten Informationen mit dem Glimpse-Index\footnote{Der Glimpse-Index ist ein frei zug"angliches Indizierungspaket von der Universit"at von Arizona. Mehr dazu auf: http://glimpse.cs.arizona.edu/} indexiert und f"ur Abfragen zur Verf"ugung stellt.
+		\item {\em Squid} ist ein verteilter Web-Cache. Web-Caches sind Programme, die alle Dokumente die die Benutzer des \www ansehen, zwischenspeichern. Diese Zwischenspeicherung hat zwei Vorteile:
+		\begin{itemize}
+			\item Veringerung der Netzlast. 
+			
+			Benutzer des \www sehen sich teilweise Dokumente an, die schon andere Leute in der gleichen Firma oder in der gleichen Stadt gelesen haben. Wenn man diese Dokumente zwischenspeichert erspart man sich das aufwendige Holen "uber das Internet.  
+			
+			\item Erh"ohung der Geschwindigkeit.
+			
+			Ist das Dokument schon von jemanden gelesen worden, der den gleichen Web-Cache benutzt, ist es somit im Cache gespeichert und kann direkt von dort geladen werden.
+		
+			Als Nebeneffekt wird die Netzlast ins Internet geringer und nicht im Cache vorgehaltene Seiten k"onnen "uber die nun weniger benutzten Internetleitungen schneller geladen werden.
+			 
+			Damit {\em Squid} nicht nach kurzer Zeit Unmengen an Festplattenkapazit"at benutzt, werden Seiten welche lange nicht gelesen wurden wieder aus dem Cache entfernt.
+		\end{itemize}
+	Verteilt ist {\em Squid} insofern, als da"s ein Squidcache sog. Nachbarn haben kann. Wenn ein Dokument im lokalen Cache nicht vorliegt, so fragt {\em Squid} dann einen Nachbarcache, ob dort das gew"unschte Dokument vorliegt.
+	\end{itemize}
+	
+\item[MomSpider:] MomSpider wurde eigentlich daf"ur geschrieben, Websites auf Korrektheit der Links zu "uberpr"ufen. 
+
+Verweise in HTML-Dokumenten m"ussen nicht unbedingt existieren. Wenn man zum Beispiel auf ein Dokument "'Name\-Des\-Authors/Dies\-Do\-ku\-ment\-Be\-schreibt\-HTML"' verweist, der Author nun aber sein Dokument in "'Name\-Des\-Authors/Dies\-Do\-ku\-ment\-Be\-schreibt\-HTML3.2"' umbenennt, dann kann ich auf dieses Dokument nicht l"anger zugreifen.
+
+{\em MomSpider} wurde geschrieben, um alle Links, die in den Hypertextdokumenten eines Servers vorkommen, auf Korrektheit - sprich Existenz - zu "uberpr"ufen.
+
+{\em MomSpider} beinhaltet zwei Teile, zum einen die Implementation eines "'Mini\-craw\-lers"', zum anderen Bibliotheksfunktionen um einfach auf das \www zugreifen zu k"onnen. 
+
+Die von Perl aus zug"anglichen Bibliotheksfunktionen machen es sehr einfach mit regul"aren Ausdr"ucken zu arbeiten, da diese schon in Perl selbst ausgewertet werden. Aus diesem Grunde wurden schon  viele Abarten dieses "`Mini\-craw\-lers"' implementiert und an spezielle Aufgaben angepa"st.
+
+
+ 
+\item[Scooter:] {\em Scooter} ist der von vielen gro"sen Webindizes benutzte Web-Crawler. {\em Scooter} ist, nach Aussage von {\em AltaVista}, der momentan am schnellsten arbeitende Web-Crawler\footnote{http://scooter.pa-x.dec.com/}. Die hohe Geschwindigkeit, mit der Scooter arbeitet, ist auf verschiedene Strategien zur"uckzuf"uhren:
+	\begin{itemize}
+	\item Ausnutzung des Betriebssystems.
+	
+	Es wird davon ausgegangen, da"s das Betriebssystem die Aufgaben der Speicherverwaltung, des Auslagerns von nicht ben"otigten Daten auf Festplatten und die des Schedulings der Prozesse und Threads optimal erledigt.
+	\item Multithreading.
+		
+	F"ur jede zu holende Seite werden separate Threads gestartet, so da"s man w"ahrend des Ladens von Seiten "uber langsame Netzverbindungen, schon andere Webseiten holen kann.
+	\item Virtueller Speicher.
+	
+	Der erstellte Index mit einer Gr"o"se von ca. 50 Gigabyte, wird komplett in den virtuellen Arbeitsspeicher geladen. 
+	Diese Strategie ist die wohl konzeptionell am verbl"uffendsten. Das Programm benutzt den Index, als w"urde sich dieser im Arbeitsspeicher des Rechners befinden, auch wenn in der Realit"at nur ein paar Gigabyte Arbeitsspeicher zur Verf"ugung stehen.
+	
+	Man st"utzt sich hiermit vollkommen auf die ( hoffentlich ) optimale Arbeitsweise des Betriebssytem. 
+	
+	Den gro"sen Aufwand, hohe Geschwindigkeit bei der Bearbeitung von riesigen Datenbest"anden zu erzielen, spart man sich damit und kann mehr Intelligenz in die Algorithmen des Indexierers stecken. 
+	\end{itemize}
+\end{description}
+
+Bei der Konzeption der genannten Crawler wurden verschiedene Zielsetzungen verfolgt, weshalb sich die zugrundeliegenden Strategien der Informationssuche so stark unterscheiden.
+
+
+
+\section{Perl Version}
+
+In diesem Punkt wird Konzeption und Implementierung des von mir in Perl geschriebenen Web-Crawlers betrachtet. Als Grundlage dieses Web-Crawlers wurde die Funktionsbibliothek von {\em MomSpider} benutzt.
+
+Dieser Web-Crawler stellt als solcher zwar keinen Ansatz zur Verbesserung bestehender Webindizes dar; jedoch in der Praxis hat sich dieser Crawler als sehr n"utzlich erwiesen, so da"s ich ihn hier kurz umrei"se.
+
+\subsection{Vor"uberlegung}
+F"ur die Sprachenerkennung wurde ein Crawler ben"otigt, der gezielt Webseiten folgt und mit regul"aren Ausdr"ucken die gefundenen Dokumente und Verweise bearbeiten kann. Als Grundlage daf"ur wurde die www-lib\footnote{http://www.ics.uci.edu/pub/websoft/libwww-perl/}, auf die auch MomSpider aufsetzt verwendet. Diese ist konzeptionell daf"ur ausgelegt, das Schreiben von speziellen Crawlern zu erleichtern.
+
+Da MomSpider und die davon abgeleiteten Webcrawler f"ur die Dokumentverfolgung in lokalen Netzen ausgelegt sind, habe ich, um eine akzeptable Geschwindigkeit im \www zu erzielen, das verteilte Cachingsystem von {\em Harvest} vorgeschaltet.
+
+\subsection{Konzeption}
+
+Bei der Konzeption ging es darum die folgenden Anforderungen zu erf"ullen:
+\begin{itemize}
+	\item Einfache Handhabung um bestimmten Webseiten zu folgen
+	\item Regul"are Ausdr"ucke, um Hosts ein- bzw. auszugrenzen, als auch die Hypertextdokumente zu parsen
+	\item Persistenz der geholten Seiten gew"ahrleisten
+	\item Wiederaufsetzen des letzten Stands bei abgebrochenen Suchvorg"angen
+	\item Anbindung an Programme zu weiteren Bearbeitung der geholten Seiten
+\end{itemize}
+
+Da von keinem der genannten Crawler alle, der in den Anforderungen gestellten, Punkte erf"ullt wurden, mu"ste ein neues System implementiert werden. Um dabei den Aufwand f"ur eine Implementation so klein wie m"oglich zu halten, wurde versucht bestehende Komponenten aus frei verf"ugbaren Crawlern zu verwenden.
+
+Die lib-www stellte dabei das Fundament f"ur den zu schreibenden Crawler dar. Diese Bibliothek stellt Funktionen zum Zugriff auf Webseiten, als auch der Extraktion von Links aus Hypertextdokumenten, zur Verf"ugung. Da Perl keinerlei Methoden zur nebenl"aufigen Proze"ssteuerung besitzt, ist es zur Performanzsteigerung notwendig gewesen, die zu holenden Webseiten vor dem eigentlichen Zugriff zwischenzuspeichern.
+
+{\em Harvest} - bzw. {\em Squid} als Webcache - bot sich f"ur diese Aufgabe an, da dieser imstande ist nebenl"aufig, verschiedene Webseiten zu holen. Man kann {\em Squid} so konfigurieren, da"s man eine Webseite, die sich nicht im Cache befindet, holt. Auf diese Weise ist es m"oglich an Squid Anfragen zu stellen und bei nicht vorliegen der entsprechenden Seite, diese von Squid holen lassen, w"ahrend man sich unterdessen weiteren, zu holenden Seiten zuwendet.
+
+F"ur den Rest des zu implementierenden Crawlers bot sich Perl als Programmiersprache an, da es in dieser zum einen sehr einfach ist regul"are Ausdr"ucke zu behandeln, als auch die Persistenz der geholten Daten sicherzustellen.
+
+Damit war die Grundlage f"ur die in Abbildung \ref{AufbauDesPerlProgramms} dargestellte Struktur geliefert.
+
+\begin{figure}[t]
+	\makebox[\textwidth]{\epsfxsize=7cm	\epsffile{PerlCrawlerUebersicht.eps}}
+	\caption{Aufbau des in Perl geschriebenen Crawlers: Der PerlCrawler holt mit den Funktionen der www-lib Hypertextdokumente und schickt diese an den Sprachenerkenner weiter. Falls die gew"unschten Seiten nicht im Cache des lokalen {\em Squid} vorliegen fragt dieser seine Nachbarn nach den Dokumenten. Liegen bei den Nachbarn die Dokumente auch nicht vor werden die Dokumente aus dem Internet geladen.}
+	\label{AufbauDesPerlProgramms}
+\end{figure}
+
+
+\subsection{Implementierungs-"Uberlegungen}
+F"ur den inneren Aufbau des Programms mu"sten dann noch einige Designentscheidungen getroffen werden:
+\begin{itemize}
+	\item	Rechnerplattform bzw. Betriebssytemumgebung ?
+	\item	Welche Art der Konfiguration wird benutzt ?
+	\item	Wie werden die Daten persistent gehalten ?
+	\item	Welche Anbindung an die www-lib soll gew"ahlt werden ?
+	\item	Wie soll die Anbindung an den Sprachenerkenner geschehen ?
+\end{itemize}
+
+Zum besseren Verst"andis der anstehenden Entscheidungen, seien die einzelnen Punkte n"aher erl"autert:
+
+\begin{description}
+	\item[Plattform:]	Die heterogene Arbeitsumgebung am CIS lie"s mir bei dieser Entscheidung kaum Auswahlm"oglichkeiten: ca. 40 Rechner laufen mit NeXTSTEP, zwei Rechner mit Digital Unix und f"unf mit SunOS 4.*. 
+	
+	Da Perl relativ Plattformunabh"angig ist, konnte ich - durch die Wahl von Perl - alle vorhandenen Hardwareplattformen als k"unftige Zielsysteme einplanen.
+	
+	\item[Konfiguration:]	Es gibt unter Unix zwei Arten Konfigurationen mit denen Programme meist arbeiten: Konfigurationsfiles oder "Ubergabeparameter. Ich entschied mich f"ur die letztere Methode, da das Programm als n"utzliches Tool benutztbar sein soll und nicht erst m"uhsam mit Konfigurationsfiles eingerichtet werden mu"s.
+	
+	So kann jeder k"unftige Benutzer die Parameter, die das Programm ben"otigt, einfach und schnell beim Programmaufruf "ubergeben.
+	Dem Programm wird mittels regul"arer Ausdr"ucke "ubergeben, welche Dokumente aus dem \www zu holen sind und wie die Seiten f"ur den Sprachenerkenner gefiltert werden sollen.
+	
+	\item[Datenhaltung:]	F"ur die persistene Datenhaltung bietet sich unter Unix, und besonders bei Benutzung der Programmiersprache Perl, die Verwendung von {\em dbm}-Datenbankfiles an. Speziell Perl bietet hier an, da"s man Assioziative Arrays\footnote{Assioziative Arrays sind "`normale"'-Arrays, die jedoch nicht mit nat"urlichen Zahlen, sondern mit Zeichenketten indiziert werden.} automatisch als {\em dbm}-Files\footnote{{\em dbm}-Filefunktionen stehen in einer C-Bibliothek unter Unix zur Verf"ugung. Man speichert die Daten wie in einer Datenbank als Schl"ussel/Wert - Paar ab. Die Bibliotheksfunktionen sind dann f"ur das Erzeugen der Files, das Einf"ugen, L"oschen und Wiederfinden der Daten verantwortlich.} verwaltet.
+	
+	\item[www-lib:]	Es stehen zwei Versionen der www-lib zur Auswahl: eine Funktionale und eine Objektorientierte.
+	
+	Bei kurzen Testl"aufen mu"ste ich feststellen, da"s die objektorientierte Version f"ur das Durchsuchen von einigen dutzend Dokumenten schon Stunden ben"otigte, die funktionale Variante nur einige Sekunden. Dies machte die Wahl nicht schwer und so entschied ich mich die funktionale Version zu verweden.
+	
+	\item[Anbindung:]	Hier gibt es verschiedene Strategien im Unix- und Perl- Umfeld, um Programmteile miteinander zu verbinden. Via Pipes und Files bindet man meist konzeptionell verschiedene Programme an. Eng miteinander verwobene Programme kann man allerdings auch zu einem Programm zusammenlinken.
+	
+	Ich entschied mich hierbei f"ur eine Hybridl"osung: So werden die Hypertextdokumente mit dem PerlCrawler geholt. Das Laden von Hypertextdokumenten beansprucht wenig Rechenzeit, dauert jedoch recht lange. Deshalb werden die gerade geholten Dokumente durch einen HTML-Parser geschickt, der die Seiten schon f"ur die sp"atere Verwendung des Sprachenerkenners vorbereitet. 
+	
+	In dem HTML-Parser werden die Hypertextdokumente in S"atze und Paragraphen zerlegt, da dies f"ur den Sprachenerkenner gutes Ausgangsformat ist.
+	
+	Die Ausgabe der gefilterten Hypertextdokumente speichert dann der Crawler in ein File ab, aus dem dann sp"ater der Sprachenerkenner die notwendigen Daten lesen kann.
+	
+\end{description}
+
+Nach den so gef"allten Entscheidungen f"ur das Design des Perl-Crawlers sah das Design wie in Abbildung \ref{PerlCrawlerStruktogram} auf Seite \pageref{PerlCrawlerStruktogram} dargestellt aus.
+
+\begin{figure}[t]
+	\makebox[\textwidth]{ \epsfxsize=\textwidth \epsffile{PerlCrawlerStruktogram.eps} }
+	\caption{Datenflu"sdiagramm des in Perl geschriebenen Crawlers}
+	\label{PerlCrawlerStruktogram}
+\end{figure}
+
+
+\subsection{Implementierungs-Probleme}
+Bei der Implementierung galt es dann einige Hindernisse zu "uberwinden:
+
+Gleich zu Anfgang fiel auf, da"s die gew"unschte Datenhaltung der noch zu holenden {\em URL's} mittels {\em dbm}-Files zu langsam war. 
+
+Die {\em URL's} wurden in Paaren: {\em UrlName/BinSchonGeholt} abgespeichtert. Nachdem einige tausend Dokumente geholt waren, wurde diese {\em dbm}-Datenbank einige hundert Megabyte gro"s, und der Zugriff auf die Daten entsprechend lang\-sam.
+
+Der Fehler liegt daran, da"s die {\em UrlNamen} ihren Status ver"andern und die {\em dbm}-Bibliothek bei jeder "Anderung einfach das alte {\em Schl"ussel/Wert} Paar l"oscht und an das Fileende den neuen Wert schreibt.
+
+Um diesen Fehler zum umgehen benutzte ich daraufhin die {\em gdbm}-Bibliothek\footnote{{\em gdbm} ( GNU dbm ) ist eine frei verf"ugbare Version der {\em dbm}-Bibliothek.}. Dies f"uhrte jedoch zu einer Verschlimmerung: das Betriebssystem fing schon nach kurzer Zeit an zu "`thrashen"', denn ein Fehler in der {\em gdbm}-Implementierung lie"s den PerlCrawler nach ein paar Minuten einige hundert Megabyte Hauptspeicher anfordern.
+
+Im Endefekt blieb nichts anderes "ubrig, als die Namen der schon bearbeiteten Hypertextdokumente in Textfiles abzulegen, um eine f"ur das Projekt akzeptable Abarbeitungszeit zu erhalten.
+
+Eine Dokumentation zur Benutzung des Perl-Crawlers ist im Anhang \ref{DokumentationPerlCrawler} beschrieben.
+
+
+
+
+\section{Verteilte Version }
+Im Folgenden widme ich mich nun voll einem der Hauptziele dieser Diplomarbeit: Das Crawlingverhalten der aktuellen Suchmaschinen zu verbessern. Dies wird durch ein, von mir entwickeltes, verteiltes, fehlertolerantes System Namens {\em Hoover} geschafft, welches nun erl"autert wird.
+
+Das Programm bekam den Namen {\em Hoover}, da es "uber den Daten des Internet schweben soll ( {\em engl.} to hover ) und das doppelte "`oo"' ist ein Bezug auf {\em Scooter}.
+
+\subsection{Vor"uberlegung}\label{VorueberlegungVerteiltesSystem}
+Von den genannten Webcrawlern ( Harvest, MomSpider und Scooter ) sind eigentlich nur zwei im Hinblick auf ein schnelles Hypertextdokument-Retrieval geschrieben worden:
+\begin{itemize}
+	\item Harvest versucht von einem Rechner aus, "uber mehrere Squid-Caches, auf das Internet zuzugreifen.
+	\item Scooter holt von einer Maschine aus, in mehreren Threads, gleichzeitig verschiedene Seiten. 
+\end{itemize}
+Beiden Konzepten inherent ist das Vermeiden von Verz"ogerungen beim Holen von Hypertextdokumenten.
+
+Von der Idee ist dieser Ansatz zwingend notwendig, will man den Programmablauf nicht, durch das zeitintensive Holen von Dokumenten "uber langsame Netzwerkverbindungen, unn"otig verz"ogern.
+
+Der Ablauf des Programms in mehreren Threads hat sicher den Vorteil, sich nicht dem Overhead der Programmierung von fehlertoleranten, verteilten Systemen auseinanderzusetzen. Sieht man sich die Zugriffsgeschwindigkeit von Scooter an, gibt dieses Konzept den Entwicklern sicher Recht.
+
+Der Nachteil von Scooter ist, da"s Scooter auf einem Rechner in mehreren hundert Threads arbeitet, und so einen gro"sen Teil der CPU-Leistung, f"ur Verwaltungs- und Schedulingaufgaben dieser Threads verbraucht.
+
+Eine Symbiose dieser beiden, schon hochgradig optimierten, Suchmaschinen ist ein, auf mehreren Rechnern verteiltes, und auf den einzelnen Rechnern jeweils multithreaded ablaufendes Crawlen.
+
+
+
+\subsection{Konzeption}
+Bei der Konzeption dieser Symbiose mu"ste gleich zu Beginn gro"se Sorgfalt bei der Auswahl der einzelnen Komponenten, in Hinblick auf die sp"ater daraus resultierende Geschwindigkeit, verwand werden. "Uberblickshaft ergab sich durch die in \ref{VorueberlegungVerteiltesSystem}
+angestellten Vor"uberlegungen das in Abbildung \ref{HooverErsterUeberblick} dargestellte Bild.
+
+\begin{figure}[t]
+	\makebox[\textwidth]{ \epsfxsize=9cm \epsffile{HooverErsterUeberblick.eps} }
+	\caption{Grundgedanken bei der Konzeption des verteilten Crawlers.}
+	\label{HooverErsterUeberblick}
+\end{figure}
+
+
+Die dargestellten, Fetcher genannten Prozesse, laufen jeweils auf einem eigenen Rechner. Von diesen Rechnern wird dann das Internet nach Seiten durchsucht, die der kontrollierende, Hoover genannte Proze"s dem jeweiligen Fetcher vorgibt. Die Fetcher laufen zudem multithreaded, damit damit nicht unn"otig Rechenkapazit"at vergeudet wird.
+
+Der Hoover Proze"s l"auft auch auf einem separaten Rechner ab und "ubernimmt die Koordination der Fetcher. Zum einen werden Anfragen nach zu holenden Webseiten auf die Fetcher verteilt, als auch die von den Fetchern geholten Webseiten an andere Programme ( z.B. Indexer ) weitergereicht.
+
+Durch die folgenden Anforderungen, die dieses verteilte System zu erf"ullen hat konnte dann weiter die Spezifizierung der einzelnen Komponenten vorangetrieben werden:
+
+\begin{description}
+	\item[Handhabung:]	Suchmachinen die komplette Netzwerke mit hoher Performanz durchsuchen sollten nicht "`mal eben so"' gestartet werden k"onnen. Wenn jeder Benutzer Daten sehr schnell aus dem Internet mit verteilten Systemen holt, setzt das die gesamte Geschwindigkeit des Netzes herab.
+	
+	 Zudem sollte es eine spezielle Konfiguration erlauben Netzwerke regelm"a"sig, mit bestimmten Regeln, zu durchsuchen.
+	\item[Regul"are Ausdr"ucke:]	Regul"are Ausdr"ucke sind sehr rechenzeitintensiv. Deshalb ist ein vollst"andiges parsen von Hypertextdokumenten nicht sehr sinnvoll.
+	
+	Es sollte trotzdem m"oglich sein, da"s man bei der Konfiguration die zu durchsuchenden Netzwerke mit einfachen Regeln beschreiben kann.
+	\item[Persistenz:]	Hier ist die Persistenz viel wichtiger als bei einem nicht verteilt arbeitendem System. Da die geholten Datenmengen viel umfangreicher sind, ist es im industriellen Einsatz sehr kostenintensiv diese Datenmengen erneut zu holen.
+	\item[Wiederaufsetzen:] Das Wiederaufsetzen ist aus dem gleichen Grund wie die Persistenz zu implementieren.
+	\item[Anbindung:]	Da hierbei die anzubindenden Programme zeitlich versetzt auf den Daten arbeiten, ist hier nur ein entsprechendes "Ubergabeformat der Daten zu konzipieren.
+\end{description}
+
+Die aufgelisteten Anforderungen sind von {\em Scooter} und {\em Harvest} schon erf"ullt, so da"s eine Verbesserung bestehender Suchmaschinen nur in Bezug auf die Datenmenge und Geschwindigkeit erzielt werden kann.
+
+Um die Geschwindigkeit zu erh"ohen wird, wie schon angesprochen die Arbeit des Holens von Hypertextdokumenten, als auch die Koordination welche Seiten geholt werden sollen, auf verschiedene Rechner verteilt. Man kann nun nat"urlich auch weitere, notwendige Arbeiten auf die Fetcher verteilen:
+
+Weitere Arbeiten von Suchmaschinen sind das Parsen der Dokumente nach Hyperlinks, das Parsen des "`/robots.txt"' Files\footnote{Wird im Abschnitt der Implementierung noch n"aher erkl"art} und die Normalisierung\footnote{Normalisieren ist der Proze"s, in dem versucht wird den Links die man in Hypertextdokumenten folgt eindeutige Namen zu geben. ( Wir noch erl"autert ).} von Hyperlinks. Von diesen Aufgaben kann man ohne Umst"ande das Parsen der Dokumente nach Hyperlinks und deren Normalisierung auf die Fetcher verteilen, so da"s man den kontrollierenden Hooverproze"s noch einmal von Rechenlast erleichtert. 
+
+Die einzige Aufgabe des Hoverprozesses besteht dann im Verwalten der gefundenen und zu holenden Hypertextdokumenten und dem Verteilen der Auftr"age an die existierenden Fetcher ( Abbildung \ref{HooverZweiterUeberblick} ).
+
+\begin{figure}[t]
+	\makebox[\textwidth]{ \epsfxsize=\textwidth \epsffile{HooverZweiterUeberblick.eps} }
+	\caption{Erweiterte Konzeption des verteilten Crawlers.}
+	\label{HooverZweiterUeberblick}
+\end{figure}
+
+\subsection{Implementierungs-"Uberlegungen}
+Um mit der Implementierung der Suchmaschine beginnen zu k"onnen mu"sten vorab noch einige Entscheidungen des zu w"ahlenden Designs getroffen werden. Hierbei war die Auswahl der Komponenten wesentlich freier, als dies beim Perlcrawler der Fall war. Es konnte nicht auf schon voher implementierte Teilelemente zur"uckgegriffen werden weshalb die folgende Frage die Entwicklung ma"sgeblich bestimmte:
+\begin{itemize}
+	\item	Wie soll die Verteilung des Systems implementiert werden ?
+\end{itemize}
+
+Diese Frage setzt allerdings schon eine gewisse Vorkenntnis "uber verteilte Systeme voraus; es sei an dieser Stelle auf das Buch von Sape Mullender\cite{Mullender1993} verwiesen. Es sind hier zwei gegens"atzliche Kriterien bei der Implementation des beschriebenen Systems in Einklang zu bringen.
+
+Auf der einen Seite mu"s man davon ausgehen, da"s die Fetcher und die Computer auf denen sie laufen zu jedem beliebigen Zeitpunkt nicht l"anger verf"ugbar sein k"onnen. So k"onnen die Programme abst"urzen, die Computer vom Netzwerk getrennt oder einfach nur das Haus, in dem sie sich befinden, abbrennen. Solche Situationen d"urfen jedoch nicht zu einem Stillstehen der Suchmaschine f"uhren.
+
+Auf der anderen Seite ist durch die "Ubersendung von Datenstrukturen eine hohe Abstraktionsebene gegeben, die die meisten Implementationen von verteilten Systemen vermissen lassen.
+
+Ich entschied mich f"ur die "`portable distributed objects"' ({\em pdo}\footnote{{\em pdo} wird von NeXT ( http://www.next.com/ ) commerziell auf Digital-Unix, HP-UX, NeXT-OpenStep/Mach, Sun-Solaris und Microsoft-Windows NT/95 angeboten. Es gibt auch eine unter dem GNU-Copyleft ver"offentlichte freie Version. Ich habe bei der Implementierung mit der OpenStep/Mach Version auf Motorola- als auch Intel-Hardware gearbeitet.}) genannte Enwicklungsumgebung von NeXT, da diese es erm"oglicht ohne gro"sen Aufwand komplexe Datenstrukturen und sogar ganze Programme im Netzwerk zu verteilen. Die Fehlererkennung und Behandlung ist in dieser Umgebung recht einfach zu implementieren, so da"s die gew"unschten Anforderungen von dieser Entwicklungsumgebung erf"ullt wurden.
+
+Da {\em pdo} auf Objective-C als Programmiersprache aufsetzt, war mit der Wahl des Verteilungsmechanismus auch schon fast die Wahl der Programmiersprache gefallen. Man kann zwar C{\small ++} oder C-Programme an das {\em pdo}-System anbinden, da die Klassenbibliotheken von Objective-C jedoch schon sehr komfortable Funktionen zur Stringbearbeitung, als auch persistenten Abspeicherung von Datenobjekten bieten, entschied ich mich diese direkt in Objektive-C zu benutzen und das System in Objective-C zu implementieren.
+
+
+\subsection{Implementierung}
+
+Nachdem nun alle Designfragen gekl"art waren, konnte mit der Implementierung begonnen werden.
+
+Eine Einarbeitung in die zur Verf"ugung stehenden Klassenbibliotheken lie"s mich daraufhin den Hooverproze"s wie in Abbildung \ref{HooverDritterUeberblick} dargestellt unterteilen.
+
+Die einzeln dargestellten Objekte haben folgenden Aufgaben:
+\begin{description}
+\item[HooverController:] Dieses Objekt hat die Aufgabe, das Konfigurationsfile zu lesen und mit den darin enthaltenen Daten den {\em GeneralScanner}, das {\em SitesDictionary}, das {\em Sites sorted by next accessdate array} und den {\em FetcherController} zu initialisieren.
+
+Die im Konfigurationsfile benannten Startseiten werden ins {\em Sites sorted by next accessdate array} gelesen.
+
+Aus dem {\em Sites sorted by next accessdate array} wird dann das erste Objekt ({\em SiteDictionary}) entnommen und nach einer unbekannten Seite befragt. Diese Seite wird dann an den {\em FetcherController} zum Retrieven weitergereicht.
+
+Kommen Hypertextdokumente vom FetcherController zurr"uck, so wird deren Inhalt in der {\em fetched Page}-Datei gespeichert und die in der Seite enthaltenen Hyperlinks an den {\em GeneralScanner} geschickt.
+
+\begin{figure}[t]
+	\makebox[\textwidth]{ \epsfxsize=\textwidth \epsffile{HooverDritterUeberblick.eps} }
+	\caption{Erweiterte Konzeption des verteilten Crawlers.}
+	\label{HooverDritterUeberblick}
+\end{figure}
+
+\item[GeneralScanner:]	Vom {\em HooverController} wird dieses Objekt mit Regeln f"ur zul"assige Hypertextdokumente  instanziert, z.B. "Nur Dokumente die "`.html"' am Ende des Pfadnamens haben und aus der "`.gov"' oder "`.mil"' Internetdomain kommen.
+
+W"ahrend des eigentlichen Programmablaufs bekommt der {\em GeneralScanner} dann die von den Fetchern geholten Arrays von URL's zurr"uck, um diese Mittels der Regeln auszusortieren und die g"ultigen URL's an das {\em SitesDictionary} weiterzureichen.
+
+
+\item[SiteDictionary:] Solch ein Objekt enth"alt alle persistenten Daten "uber eine {\em Site}. Hypertextdokumente werden "uber einen Sitenamen und einen Dokumentnamen angesprochen. 
+
+Damit eine "Ubersicht "uber die schon geholten Dokumente besteht, werden die Dokumente nach dem Status ( schon geholt, noch zu holen ) in dem jeweiligen {\em SiteDictionary} gespeichert. "Uberdies halten {\em SiteDictionary} Objekte noch weitere Informationen zur Verf"ugung:
+\begin{itemize}
+	\item	Internet Domainname des Hosts
+	\item	Internet Adresse ( und Portnummer )
+	\item 	Datum des letzten Zugriffs
+	\item	Transferrate des letzten Zugriffs
+	\item	Datum des n"achsten Zugriffs
+	\item	SiteScanner
+	\item	Inhalt der "`/robots.txt"'-Datei
+	\item	Schon bekannte ( geholte ) Hypertextdokumente
+	\item	Noch unbekannte ( zu holende ) Hypertextdokumente
+\end{itemize}
+
+Das Objekt arbeitet wie ein W"orterbuch\footnote{dictionary {\em engl.} W"orterbuch.}: man fragt z.B. nach "`lastaccess"' um das Datum des letzten Zugriffs zu erfahren. Diese Datenstruktur erm"oglicht es sehr einfach neue Attribute einzuf"uhren, um evtl. ge"anderten Standards zu gen"ugen.
+
+
+\item[SitesDictionary:]	In diesem Objekt sind alle {\em SiteDictionary} Objekte "uber den Namen der {\em Site} gespeichert. Fragt man z.B. nach dem Namen "`www.cis.uni-muenchen.de"' bekommt man das dazugeh"orige {\em SiteDictionary}.
+
+Neben dieser W"orterbuchfunktion hat dieses Objekt noch die Aufgabe die beinhaltenten {\em SiteDictionary} Objekte in regelm"a"sigen Abst"anden konsistent abzuspeichern.
+
+Beim Start des Systems werden dann aus den gespeicherten Daten die {\em SiteDictionary}-Objekte wieder erzeugt.
+
+
+\item[SiteScanner:]	Dieses Objekt bekommt jeden Hypertextlink, der durch den {\em GeneralScanner} nicht herausgefiltert wurde und zum InternetSite des dazugeh"origen {\em SitesDictionary} geh"ort. Hier wird nach Regeln, die im "`/robots.txt"' der jeweiligen Internetsite stehen, der neue Hypertextdokumentname gefiltert.
+
+An dieser Stelle bietet es sich an "uber die "`/robots.txt"'-Datei zu sprechen. 
+
+Viele Internetdokumente werden entweder f"ur den Benutzer erzeugt (z.B. Resultate auf Suchanfragen), t"aglich ge"andert oder sind sonst f"ur Suchmaschinen uninteressant (z.B. Webseiten die nur "uber Passw"orter zug"anglich sind). Sie k"onnen vom Betreiber einer Internetsite als uninteressant f"ur Roboter (Suchmaschinen) makiert werden.
+
+Um nun dem sog. {\em robotsexclusion protocol}\footnote{http://info.webcrawler.com/mak/projects/robots/robots.html} zu entsprechen mu"s man das Hypertextdokument "`/robots.txt"' auf der jeweiligen Internetsite einlesen und die dort enthaltenen Regeln anwenden.
+
+So kann man im "`/robots.txt"' sagen, welche Pfadnamen zug"anglich sind, und welche nicht. Ein Beispiel macht dies anschaulicher:
+
+Auf der Internetsite "`thestar.com.my"' beinhaltet das "`/robots.txt"'-File folgendes:
+\begin{verbatim}
+User-agent: *
+Disallow: /cgi-bin/
+\end{verbatim}
+D.h, jedem ("`*"') UserAgent (Roboter) ist es verboten, Dokumente zu holen, die mit "`/cgi-bin/"' anfangen.
+
+Es sei noch angemerkt das dieses Protokol kein "`Mu"s"' f"ur Suchmaschinen ist; es geh"ort jedoch zum "`guten Ton"'.
+
+
+\item[Sites sorted by nextaccess:] Dieses Objekt bietet im Endefekt die gleiche Datenstruktur, wie die des {\em Sitedictionary}-Objekts an, au"ser da"s man hier einfach nach dem ersten Objekt in dem Array fragt, um den Namen des als n"achstes zu holenden Hypertextdokumentes zu erfahren.
+
+Der Aufwand, die {\em SiteDictionary} Objekte nach dem n"achsten Datum zu sortieren, hat folgenden Hintergedanken: Die Suchmaschine beginnt z.B. mit dem Dokument 
+\begin{itemize}
+	\item "`MeinInstitutsServer/MeineEigeneInternetSeite"' 
+\end{itemize}
+und holt dieses. Nach dem Parsen des Dokumentes sind die folgenden Seiten bekannt :
+\begin{itemize}
+	\item	MeinInstitutsServer/DieSeiteDesChefs
+	\item	MeinInstitutsServer/DieSeiteSeinesStellvertreters
+	\item	MeinInstitutsServer/MeineEigeneInternetSeiteMitWitzen
+	\item	MeinInstitutsServer/DieSeiteMeinesArbeitskollegen
+\end{itemize}
+Die Suchmaschine versucht folglich, im n"achsten Durchlauf die vier genannten Seiten vom {\em InstitutsServer}-Rechner zu holen. Wenn die Suchmaschine hochoptimiert arbeitet, dann holt sie die genannten Seiten gleichzeitig vom {\em InstitutsServer}.
+
+Falls die Suchmaschine keine Vorkehrungen trifft, dieses "`hammering"'\footnote{to hammer {\em engl.} h"ammern. {\em hier} niederkn"uppeln, da der Rechner so lange mit Anfragen bombadiert wird, bis er zu {\em thrashen} anf"angt und sich nicht mehr "`regen"' kann.} genannte Verhalten zu vermeiden, dann kann es in der Praxis passieren, da"s einige hundert Hypertextdokumente zum gleichen Zeitpunkt, von ein- und demselben Rechner geholt werden.
+
+Dieses Verhalten f"uhrt dann zu zwei Resultaten:
+
+Zum einen wird der nun "`thrashen"'-de Rechner sehr z"ogerlich auf die Anfragen reagieren und die Performanz der Suchmaschine leidet erheblich; zum anderen macht man sich keine Freunde in der Internetgemeinde, so da"s die Serverbesitzer die Suchmaschine verfluchen und via {\em robotsexclusion protocol} den Zugriff auf ihre Site total verbieten.
+
+
+\item[FetcherController:]	Diese Objekt "ubernimmt den kompletten Anschlu"s des Systems an die auf anderen Rechnern laufenden Fetcherprozesse. Dabei wird ein {\em Hoover}-Server netzwerkweit zur Verf"ugung gestellt, an welchem sich dann Fetcher anmelden und sich "`zur Arbeit bereit"' anmelden.
+
+Fetcher die momentan wenig ausgelastet sind, werden mit neuen Anfragen nach Webseiten beauftragt. Fetcher die Webseiten geholt haben senden diese dem {\em FetcherController}, der diese Seiten dann an dem {\em HooverController} weiterreicht.
+
+Um festzustellen ob Fetcher noch am Arbeiten sind, werden diese, wenn sie eine zeitlang keine bearbeiteten Auftr"age abgeliefert haben "`angepingt"'\footnote{Das {\em Ping-Pong} Protokoll funktioniert so: Man sendet dem zu "uberpr"ufenden Proze"s ein "`Ping"' ( einen Glockenschlag ) worauf dieser mit "`Pong"' antwortet. Antwortet der Proze"s nicht innerhalb einer festgelegten Zeit wird er als "`tot"' erkl"art.}.
+
+Melden sich die Fetcher auf dieses "`Ping"' ein paar Mal nicht, werden sie aus der Gruppe der arbeitenden Fetcher herausgenommen und alle ihnen anvertrauten Auftr"age werden wieder in die "`noch zu erledigen"'-Warteschlange gestellt.
+
+
+\item[FetcherArray:]	Hier werden die momentan zur Verf"ugung stehenden Fetcher, in der Reihenfolge ihrer noch freien Arbeitskraft nach einsortiert. Auch werden die Auftr"age, die die einzelnen Fetcher erledigen, hier festgehalten. So kann man bei Ausfall eines Fetchers, die Arbeit, die er zu erledigen hatte, nachgehalten werden.
+
+\end{description}
+
+
+Die einzelnen Fetcherprozesse sind wie in Abbildung \ref{FetcherErsterUeberblick} dargestellt aufgebaut.
+ 
+\begin{figure}[t]
+	\makebox[\textwidth]{\epsfxsize=\textwidth \epsffile{FetcherErsterUeberblick.eps} }
+	\caption{Aufbau der Fetcherprozesse.}
+	\label{FetcherErsterUeberblick}
+\end{figure}
+
+\begin{description}
+
+
+\item[Fetcher:]	Dieser nimmt Kontakt mit dem {\em FetcherController} des im Netwerk laufenden {\em Hoover} auf und meldet sich dort mit seiner zur Verf"ugung stehenden Arbeitskapazit"at an.
+
+Wenn Anfragen vom {\em FetcherController} kommen wird der {\em ThreadController} nach einem freien {\em Worker} gefragt und dieser mit der Anfrage beauftragt.
+
+Von den {\em Worker}-Objekten fertig geholte Webseiten werden an {\em Hoover} weitergeleitet.
+
+\item[ThreadController:]	Bei diesem melden sich freie {\em Worker} an und diese gibt er dann dem {\em Fetcher} falls dieser danach verlangt. 
+
+Dieses Objekt bildet, die eigentliche asyncrone Kommunikation mit Threads als syncrone ab. Dies vereinfacht multithreaded ablaufende Programme zu implementieren.
+
+Intern geschieht die Kommunikation "uber Semaphore. Normalerweise ist es recht schwierig eine Kommunikation mit Semaphoren zu implementieren. In diesem Objekt wird nur diese Kommunikation betrachtet, und nicht die speziellen Probleme des Hauptprogramms. So ist der Aufwand, Threads zu programmieren, aufgeteilt und die gesamte Implementation wird vereinfacht.
+
+
+\item[Worker:]	Dieses Objekt bildet die eigentliche Kommunikation mit dem Internet. Er holt Seiten von den verlangten Websites und parsed diese mit dem {\em HTMLScanner} nach g"ultigen Hyperlinks. 
+
+Wenn die Arbeit beendet ist, sendet er das geparste Hypertextdokument an den {\em Fetcher} zur"uck. Wenn ein Dokument nicht geholt werden konnte (z.B. der Rechner, von dem das Dokument geholt werden sollte, nicht erreichbar war), dann meldet der {\em Worker} auch dies dem {\em Fetcher} zur"uck.
+
+Danach meldet sich der {\em Worker} beim {\em ThreadController} zur"uck.
+
+\item[HTMLScanner:] Dieser parsed die HTML Seiten ( sonstige Hypertextdokumente werden in der akuellen Version noch nicht unterst"utzt ) nach Hyperlinks und gibt die gefundenen Links in einem Datenobjekt zurr"uck an den {\em Worker}.
+
+\end{description}
+
+
+\subsection{Implementierung-Probleme}
+
+Bei der eigentlichen Implementierung gab es dann noch einige Probleme zu umschiffen.
+
+So mu"ste gleich zu Anfang festgestellt werden, da"s die Sortierroutine der mitgelieferten Klassenbibliotheken nur das komplette Array sortiert. Da dies bei einigen zehntausend Sites zu zeitaufwendig ist, mu"ste dann noch eine {\em SortedArray}-Klasse geschrieben werden. 
+
+Bei dieser Klasse wird nun jedes Objekt beim Einf"ugen gleich an der richtigen Stelle eingef"ugt. Implementiert wurde das "`richtige Eingf"ugen"' mittels bin"arer Suche.
+
+Bei der Implementierung der {\em Fetcher} wurde zuerst die Arbeit des {\em Thread\-Con\-troller}-objekts im {\em Fetcher}-Objekt erledigt. Da das {\em pdo}-Objekt, welches f"ur die Netzanbindung zust"andig ist, nicht threadsafe ist, mu"ste der {\em ThreadController} dazwischengesetzt werden. 
+
+
+\subsection{Leistungsanalyse}
+
+Nachdem nun das komplette System fertig implementiert war, blieb abzuwarten wie die vorher getroffenen Designentscheidungen sich auf die Geschwindigkeit der Suchmaschine ausgewirkt haben.
+
+\begin{figure}[t]
+	\makebox[\textwidth]{\epsfxsize=9cm \epsffile{PerlVsObjC.eps} }
+	\caption{Vergleich zwischen dem der Perl und der Objective-C Version. Es durften nur HTML-Hypertextdokumente aus Norwegen geholt werden. Startpunkt waren 10 000 norwegische Links.}
+	\label{PerlVsObjC}
+\end{figure}
+
+Die in Abbildung \ref{PerlVsObjC} zeigt die Performancesteigerung von der Perl/squid Version zur Objective-C Version. Die Perl Version lief auf einer Alpha5000 von Digital, die Objective-C Version auf einem PentiumPro System.
+Die Perl Variante sieht man dabei mit zwei unterschiedlichen Kurven:
+\begin{description}
+	\item[Cache cold:]	Dies ist der erste Lauf der Perl Version, hier wird nur ein Teil der Daten gleich geholt. Seiten welche nach 3 Sekunden nicht geholt wurden werden von {\em squid} geholt.
+	\item[Cache hot:]	Dies ist der zweite Lauf, hier sind alle Seiten schon im Cache und es werden nur noch nicht bekannte Seiten von {\em squid} im Hintergrund geholt.
+	\item[Objective-C:]	Zum Vergleich die Objective-C Version, welche nach 5 Minuten schon 17 Megabyte direkt aus Norwegen geholt hat, ohne das die Daten schon lokal vorgelegen w"aren.
+	
+	Nach einer Minute ist die Seite mit den 10000 Links geparsed und die "`/robots.txt"'-Seiten werden geholt.
+	
+	Nach eineinhalb Minuten sind alle "`/robots.txt"'-Seiten geholt und die eigentlichen Seiten werden von den Fetchern dann aus Norwegen geladen.  
+\end{description}
+
+Wie zu erwarten ist {\em Hoover} wesentlich schneller als die Perl Version. Von {\em Scooter} ist bekannt, da"s das Programm auf einer Digital-TurboLaser rund 500 kByte/s aus dem Internet holt. {\em Hoover} ist mit rund 120 kByte/s auf einem Intel-PentiumPro System nicht schneller, der Hardwarekostenaufwand ist aber um einige Gr"o"senordnungen geringer.
+
+
+\subsection{Verbesserungsm"oglichkeiten}
+
+Noch w"ahrend der Implementierung wurde ersichtlich, da"s nun die Performance der Suchmaschine zum Gro"steil von der Kommunikation der {\em Fetcher} mit dem {\em Hoover} abh"angt.
+
+In der ersten Version wurden die Hypertextdokumente als Proxyobjekte den {\em Fetcher\/}prozessen zug"anglich gemacht.
+
+Proxyobjekte sehen f"ur den lokalen Proze"s aus, wie lokale Objekte. Werden nun Nachrichten an ein Proxyobjekt geschickt, verarbeitet es diese Nachrichten nicht selbst, sondern schickt die Nachrichten an den Server, wo die "`wirklichen"' Objekte benachrichtigt werden.
+
+Dies hatte zur Folge, da"s jedesmal wenn ein Hypertextdokument geholt werden sollte eine entsprechende Nachricht an den {\em Fetcher} geschickt wurde. Dieser informierte sich dann ersteinmal "uber die zu holende Seite indem er das Objekt, welches in Wirklichkeit nur im {\em Hoover} existierte, befragte, welches Dokument denn zu holen sei.
+
+Als erste Optimierung wurden die zu holenden Hypertextdokumente als Kopie den {\em Fetcher}prozessen geschickt, so da"s die Fetcher die Objekte "`direkt"' und nicht "uber den Netzwerkumweg befragen konnten. Den Geschwindigkeitszuwachs dieser Verbesserung ist in Abbildung \ref{DatenVsObjekte} dargestellt.
+
+\begin{figure}[t]
+	\makebox[\textwidth]{\epsfxsize=\textwidth \epsffile{DatenVsObjekte.eps} }
+	\caption{Vergleich zwischen dem "Ubertragen von Daten und dem Benutzen von Proxyobjekten. Es durften nur HTML-Hypertextdokumente aus Norwegen geholt werden. Startpunkt waren 10 000 norwegische Links.}
+	\label{DatenVsObjekte}
+\end{figure}
+
+
+Als weitere Optimierung k"onnte man die Auftr"age die an {\em Fetcher} vergeben werden b"undeln. D.h. nicht f"ur jedes Hypertextdokument welches geholt werden soll eine eigene Anfrage senden, sondern zu Kolonnen von mehreren Auftr"agen. 
+
+Dies w"urde die Gr"o"se der Nachrichten, die "uber das Netzwerk geschickt werden , vergr"o"sern, jedoch die Anzahl erheblich verkleinern. Da bei jeder Nachricht immer ein kleiner, gleich gro"ser Overhead entsteht, h"atte diese Verbesserung Aussichten auf eine leichte Geschwindigkeitssteigerung der Suchmaschine.
+
+
+
+
+

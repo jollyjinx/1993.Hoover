@@ -1,0 +1,494 @@
+#!DG_TEXT-Version-2
+# D2 Version: Built by spencer on Mon May  1 17:41:27 PDT 1995
+
+
+zoom 0.75
+windowOrigin 218.00 35.00
+viewOrigin 1.00 9.00
+viewSize 624.00 478.00
+visibleOrigin 0.00 0.00
+showTools
+snapToGrid
+defaultFont "Helvetica"
+defaultFontSize 12.00
+printInfoFile "PrintInfo"
+colorFile "Colors.clr"
+
+symbol 2147483647
+	default
+	layer -1
+	shape "Rectangle"
+	location 20.00 20.00
+	size 60.00 30.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	textPlacement top
+end
+
+symbol 136
+	layer 21
+	shape "Circle"
+	location 486.00 90.00
+	size 72.00 72.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	shadowed
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\qc\fs24\fc0\cf0 Fetcher
+}
+
+	textPlacement middle
+end
+
+symbol 134
+	layer 22
+	shape "Circle"
+	location 378.00 126.00
+	size 72.00 72.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	shadowed
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\qc\fs24\fc0\cf0 Fetcher
+}
+
+	textPlacement middle
+end
+
+symbol 132
+	layer 23
+	shape "Circle"
+	location 261.00 126.00
+	size 72.00 72.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	shadowed
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\qc\fs24\fc0\cf0 Fetcher
+}
+
+	textPlacement middle
+end
+
+symbol 2
+	layer 24
+	shape "Rounded Rectangle"
+	location 297.00 243.00
+	size 126.00 72.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	shadowed
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\qc\fs24\fc0\cf0 Controller
+}
+
+	textPlacement middle
+end
+
+symbol 122
+	layer -1
+	shape "Rectangle"
+	location 335.66 56.60
+	size 54.00 18.00
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	rtfText {\rtf0\ansi{\fonttbl\f1\fnil Times-Roman;}\margl40\margr40\pard\tx480\tx960\tx1440\tx1920\tx2400\tx2880\tx3360\tx3840\tx4320\tx4800\f1\b0\i0\ulnone\fs24\fc0\cf0 Internet}
+	textPlacement top
+end
+
+symbol 6
+	layer 29
+	shape "Circle"
+	location 153.00 90.00
+	size 72.00 72.00
+	framed
+	fillColor colorIndex 0
+	frameColor colorIndex 1
+	shadowColor colorIndex 2
+	lineWidth 1.00
+	filled
+	shadowed
+	rtfText {\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;}
+\margl40
+\margr40
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b0\i0\ulnone\qc\fs24\fc0\cf0 Fetcher
+}
+
+	textPlacement middle
+end
+
+vertex 2147483645
+	default
+	layer -1
+	location 0.00 0.00
+end
+vertex 2147483644
+	default
+	layer -1
+	location 0.00 0.00
+end
+vertex 158
+	layer 0
+	location 398.12 243.00
+end
+vertex 157
+	layer 1
+	location 495.83 150.72
+end
+vertex 155
+	layer 3
+	location 376.62 243.00
+end
+vertex 154
+	layer 4
+	location 398.91 194.69
+end
+vertex 152
+	layer 6
+	location 314.07 193.70
+end
+vertex 151
+	layer 7
+	location 340.62 243.00
+end
+vertex 149
+	layer 9
+	location 319.76 243.00
+end
+vertex 148
+	layer 10
+	location 215.83 150.00
+end
+vertex 146
+	layer 12
+	location 488.34 113.24
+end
+vertex 145
+	layer 13
+	location 386.40 74.60
+end
+vertex 143
+	layer 15
+	location 399.38 129.10
+end
+vertex 142
+	layer 16
+	location 378.00 81.00
+end
+vertex 140
+	layer 18
+	location 356.53 74.60
+end
+vertex 139
+	layer 19
+	location 317.27 132.25
+end
+vertex 125
+	layer 25
+	location 336.78 74.60
+end
+vertex 124
+	layer 26
+	location 223.00 114.17
+end
+vertex 121
+	layer -1
+	location 344.66 29.60
+end
+vertex 120
+	layer -1
+	location 344.66 29.60
+end
+vertex 119
+	layer -1
+	location 362.66 20.60
+end
+vertex 118
+	layer -1
+	location 371.66 29.60
+end
+vertex 117
+	layer -1
+	location 389.66 20.60
+end
+vertex 116
+	layer -1
+	location 398.66 38.60
+end
+vertex 115
+	layer -1
+	location 416.66 38.60
+end
+vertex 114
+	layer -1
+	location 416.66 56.60
+end
+vertex 113
+	layer -1
+	location 398.66 65.60
+end
+vertex 112
+	layer -1
+	location 416.66 83.60
+end
+vertex 111
+	layer -1
+	location 389.66 101.60
+end
+vertex 110
+	layer -1
+	location 362.66 92.60
+end
+vertex 109
+	layer -1
+	location 344.66 110.60
+end
+vertex 108
+	layer -1
+	location 317.66 110.60
+end
+vertex 107
+	layer -1
+	location 326.66 92.60
+end
+vertex 106
+	layer -1
+	location 308.66 83.60
+end
+vertex 105
+	layer -1
+	location 290.66 65.60
+end
+vertex 104
+	layer -1
+	location 299.66 47.60
+end
+vertex 103
+	layer -1
+	location 290.66 38.60
+end
+vertex 102
+	layer -1
+	location 290.66 20.60
+end
+vertex 101
+	layer -1
+	location 308.66 20.60
+end
+vertex 100
+	layer -1
+	location 326.66 29.60
+end
+vertex 99
+	layer -1
+	location 344.66 29.60
+end
+line 2147483646
+	default
+	from 2147483645
+	to 2147483644
+	2147483645
+	2147483644
+	layer -1
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 156
+	from 136
+	to 2
+	157
+	158
+	layer 2
+	headType arrow
+	tailType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 153
+	from 134
+	to 2
+	154
+	155
+	layer 5
+	headType arrow
+	tailType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 150
+	from 2
+	to 132
+	151
+	152
+	layer 8
+	headType arrow
+	tailType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 147
+	from 6
+	to 2
+	148
+	149
+	layer 11
+	headType arrow
+	tailType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 144
+	from 122
+	to 136
+	145
+	146
+	layer 14
+	headType arrow
+	tailType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 141
+	from 142
+	to 134
+	142
+	143
+	layer 17
+	headType arrow
+	tailType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 138
+	from 132
+	to 122
+	139
+	140
+	layer 20
+	headType arrow
+	tailType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 123
+	from 6
+	to 122
+	124
+	125
+	layer 27
+	headType arrow
+	tailType arrow
+	lineWidth 1.00
+	filled
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+line 98
+	from 99
+	to 121
+	99
+	100
+	101
+	102
+	103
+	104
+	105
+	106
+	107
+	108
+	109
+	110
+	111
+	112
+	113
+	114
+	115
+	116
+	117
+	118
+	119
+	120
+	121
+	layer -1
+	curved
+	lineWidth 1.00
+	frameColor colorIndex 1
+	fillColor colorIndex 0
+end
+group 97
+	layer 28
+	location 288.00 18.00
+	size 132.80 96.42
+122
+121
+120
+119
+118
+117
+116
+115
+114
+113
+112
+111
+110
+109
+108
+107
+106
+105
+104
+103
+102
+101
+100
+99
+98
+end
+

@@ -1,0 +1,158 @@
+This is CTeX, NeXT Version 3.141 (format=lplain 96.12.29)  6 AUG 1997 09:31
+**&latex Diplom.tex
+(Diplom.tex
+LaTeX Version 2.09 <25 March 1992>
+(/usr/lib/tex/inputs/report.sty
+Standard Document Style `report' <14 Jan 92>.
+(/usr/lib/tex/inputs/rep12.sty)
+\descriptionmargin=\dimen99
+\c@part=\count79
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+ (/usr/lib/tex/inputs/titlepag.sty
+Document Style Option `titlepage' -- Released 16 June 1991.
+)) (/usr/lib/tex/inputs/a4.sty
+LaTeX Package `{a4} ' v1.2e <1995/09/25> A4 based page layout
+) (/usr/lib/tex/inputs/german.sty
+Package `german', Version 2.5c of 96/05/01.
+LaTeX Package `german' v2.5c <1996/05/01> Package for writing german texts (br)
+
+\grmnU@D=\dimen100
+german -- \language number for French undefined, default 255 used.
+) (/usr/lib/tex/inputs/epsf.sty
+\epsffilein=\read1
+\epsfxsize=\dimen101
+\epsfysize=\dimen102
+\epsftsize=\dimen103
+\epsfrsize=\dimen104
+\epsftmp=\dimen105
+\pspoints=\dimen106
+)
+(Diplom.aux (Titelblatt.aux) (Einleitung.aux) (Einfuehrung.aux) (Crawler.aux)
+(Sprachenerkenner.aux) (Kontexterkenner.aux) (AnhangA.aux) (AnhangB.aux)
+(AnhangC.aux) (Bibliographie.aux) (Glossar.aux) (Bestaetigung.aux))
+(Titelblatt.tex
+Overfull \hbox (37.67664pt too wide) in paragraph at lines 4--15
+[][] 
+
+\hbox(295.52791+285.1579)x411.93877
+.\hbox(0.0+0.0)x17.62482
+.\hbox(295.52791+285.1579)x431.99059
+..\mathon
+..\vbox(295.52791+285.1579)x431.99059
+...\hbox(20.99991+9.00009)x431.99059 []
+...\rule(0.4+0.0)x431.99059
+...\hbox(20.99991+94.35835)x431.99059 []
+...\glue(\lineskip) 0.0
+...\hbox(20.99991+9.00009)x431.99059 []
+...etc.
+..\mathoff
+.\penalty 10000
+.\glue(\parfillskip) 0.0 plus 1.0fil
+.\glue(\rightskip) 0.0
+
+[0
+
+
+]) (Diplom.toc [1
+
+
+])
+\tf@toc=\write3
+ [2] (Einleitung.tex
+Kapitel 1.
+[3
+
+
+]) [4] (Sprachenerkenner.tex
+Kapitel 4.
+[32
+
+
+
+
+
+] [33] [34] [35]
+Underfull \hbox (badness 4479) in paragraph at lines 103--103
+[][][]\tenrm Der HTMT-Standard ist mo-men-tan in der Ver-si-on 3.2 ( of-fi-zi-e
+ll ) und auf
+
+\hbox(8.4+2.5)x411.93877, glue set 3.55388
+.\hbox(8.14003+0.0)x18.00005, glue set 13.51392fil
+..\glue 0.0 plus 1.0fil minus 1.0fil
+..\mathon
+..\hbox(4.51111+0.0)x4.48613, shifted -3.62892
+...\sevrm 5
+..\mathoff
+.\hbox(8.4+0.0)x0.0
+..\rule(8.4+0.0)x0.0
+.\setlanguage1 (hyphenmin 2,2)
+.\tenrm D
+.\tenrm e
+.etc.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 105--111
+
+
+\hbox(0.0+0.0)x411.93877
+.\penalty -10000
+.\glue(\rightskip) 0.0
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 105--111
+
+
+\hbox(0.0+0.0)x411.93877
+.\glue(\rightskip) 0.0
+
+[36] [37] [38]
+Overfull \hbox (0.93346pt too wide) in paragraph at lines 233--234
+\twlrm zwei-ter-kann-te Spra-che $\twlsy ^^T$ \twlrm 10% ent-spre-chend, so be-
+kommt man W[]orterb[]ucher
+
+\hbox(9.0+2.33331)x382.56407, glue set - 1.0
+.\twlrm z
+.\twlrm w
+.\kern-0.32639
+.\twlrm e
+.\twlrm i
+.etc.
+
+[39] [40] [41] [42] [43]
+Overfull \hbox (16.01726pt too wide) in paragraph at lines 415--427
+ [] 
+
+\hbox(31.99997+25.99997)x411.93877
+.\glue(\leftskip) 0.0 plus 1.0fil
+.\hbox(31.99997+25.99997)x427.95602
+..\mathon
+..\vbox(31.99997+25.99997)x427.95602
+...\hbox(17.49998+11.49998)x427.95602 []
+...\glue(\lineskip) 0.0
+...\hbox(17.49998+11.49998)x427.95602 []
+..\mathoff
+.\penalty 10000
+.\glue(\parfillskip) 0.0
+.\glue(\rightskip) 0.0 plus 1.0fil
+
+[44]) [45] (Diplom.aux (Titelblatt.aux) (Einleitung.aux) (Einfuehrung.aux)
+(Crawler.aux) (Sprachenerkenner.aux) (Kontexterkenner.aux) (AnhangA.aux)
+(AnhangB.aux) (AnhangC.aux) (Bibliographie.aux) (Glossar.aux)
+(Bestaetigung.aux)) ) 
+Here is how much of TeX's memory you used:
+ 597 strings out of 16973
+ 6083 string characters out of 163135
+ 43415 words of memory out of 262141
+ 2393 multiletter control sequences out of 9500
+ 19304 words of font info for 73 fonts, out of 72000 for 255
+ 14 hyphenation exceptions out of 607
+ 15i,14n,20p,610b,308s stack positions out of 300i,40n,60p,3000b,4000s
+
+Output written on Diplom.dvi (19 pages, 61044 bytes).
