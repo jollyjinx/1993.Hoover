@@ -79,7 +79,7 @@
 {
     FILE			*stdinstream = fdopen(0,"r");
     static char		linebuffer[MAXIMUM_URL_LENGTH];
-    int				counter = 0;
+    //int				counter = 0;
 
     NSLog(@"HooverController - readURLsFromStdinFilehandle: begin.");
 
@@ -95,8 +95,13 @@
             {
                 [self addUrlToSearchlist:aLink freePath:YES];
             }
-            if( 0 == (counter++ %100) )
+
+            while( [fetcherController count] > 30 )		// keep the Hoover not to busy just loading robot.txt files
+            {
                 [NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
+            }
+            //if( 0 == (counter++ %10) )
+            //    [NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
             [innerPool release];
         }
     }

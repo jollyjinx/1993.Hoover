@@ -2,6 +2,9 @@
 	br	= { tagtext = "\n" };
 
 /**/
+	table = { tagtext = "\n";};
+	"/table" = { tagtext = "\n";};
+	
 	tr	= { tagtext = "\n" };
 	th	= { tagtext = "\t" };
 	td	= { tagtext = "\t" };
