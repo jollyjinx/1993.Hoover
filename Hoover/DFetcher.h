@@ -2,23 +2,23 @@
 
 #import <Foundation/Foundation.h>
 #import <HooverFramework/HooverFramework.h>
-//#import <OmniNetworking/OmniNetworking.h>
+#import <OmniNetworking/OmniNetworking.h>
 
 #import "FetcherController.h"
 
 @interface DFetcher : NSObject
 {
-    NSNumber			*key;
+    NSNumber		*key;
     FetcherController 	*fetcherController;
 
-    MTQueue		*stopRunningQueue;
+    Queue		*stopRunningQueue;
     NSLock		*currentworkLoadLock;
     int			currentworkload;
     int			maximumworkload;
 
-    NSString	*hostName;
+    NSString		*hostName;
 
-    MTQueue		*sendQueue;
+    Queue		*sendQueue;
 }
 + (NSNumber *)getNewKey;
 - (NSNumber *)key;

@@ -2,6 +2,7 @@
 
 #import <Foundation/Foundation.h>
 #import <HooverFramework/HooverFramework.h>
+#import <OmniNetworking/OmniNetworking.h>
 
 #import "GeneralScanner.h"
 
@@ -10,9 +11,9 @@
     FileWriter		*fileWriter;
     GeneralScanner	*generalScanner;
 
-    MTQueue		*stopRunningQueue;
-    MTQueue		*sendQueue;
-    MTQueue		*receiveQueue;
+    Queue		*stopRunningQueue;
+    Queue		*sendQueue;
+    Queue		*receiveQueue;
 
     TCPConnection    	*receivePort;
     TCPConnection      	*sendPort;

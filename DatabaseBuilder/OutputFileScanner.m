@@ -1,8 +1,12 @@
 /* OutputFileScanner.m created by jolly on Thu 12-Feb-1998 */
 
-#import "OutputFileScanner.h"
-#import <HooverFramework/HooverFramework.h>
+#import "GDBMFile.h"
 
+
+#import "OutputFileScanner.h"
+#import "HTMLDocument.h"
+#import "HTMLScanner.h"
+#import "Categories.h"
 
 @implementation OutputFileScanner
 
@@ -61,8 +65,7 @@
             NSScanner			*fileScanner;
             
             NSLog(@"Reading file %@:",fileName);
-            //fileAsString = [NSString stringWithData:fileData encoding:NSISOLatin1StringEncoding];
-            fileAsString = [NSString stringWithData:fileData encoding:[NSString defaultCStringEncoding]];
+            fileAsString = [NSString stringWithData:fileData encoding:NSISOLatin1StringEncoding];
             fileScanner = [NSScanner scannerWithString:fileAsString];
 			
             while( ! [fileScanner isAtEnd] )
@@ -85,8 +88,7 @@
                             
                             if( [fileScanner scanUpToString:@"Hoover-Url:" intoString:&documentString] )
                             {
-                                //HTMLDocument *htmlDocument = [HTMLDocument documentWithData:[documentString dataUsingEncoding:NSISOLatin1StringEncoding]];
-                                HTMLDocument *htmlDocument = [HTMLDocument documentWithData:[documentString dataUsingEncoding:[NSString defaultCStringEncoding]]];
+                                HTMLDocument *htmlDocument = [HTMLDocument documentWithData:[documentString dataUsingEncoding:NSISOLatin1StringEncoding]];
                                 NSEnumerator *urlEnumerator;
                                 NSString	 *urlString;
                                 
@@ -125,7 +127,6 @@
     NSEnumerator	*keyEnumerator;
    	id				aKey;
     
-	NSLog(@"Writing database now.");
 	if( ! (gdbmFile = [[GDBMFile alloc] initWithPath:aPath create:YES readOnly:NO]) )
     {
         NSLog(@"Can't write database at path:%@",aPath);
@@ -139,10 +140,7 @@
                      forKey:aKey];
     }
     [gdbmFile flush];
-	NSLog(@"Writing flush done.");
     [gdbmFile release];
-	NSLog(@"Writing database done.");
-
 }
 
 
@@ -167,6 +165,7 @@
     }
     else
     {																												// in case the site is unknown create
+
         persistentSite = [NSMutableDictionary dictionary];															// persistent and sortedArray entries
         [persistentSite setObject:siteName forKey:@"sitename"];
         [persistentSite setObject:[newUrl objectForKey:@"host"] forKey:@"host"];

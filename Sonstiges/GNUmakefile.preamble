@@ -1,5 +1,0 @@
-TOOL_NAME=helloObjects
-ADDITIONAL_CPPFLAGS += -DDEBUG=1
-ADDITIONAL_TOOL_LIBS += -lgnustep-base -lm
-helloObjects_OBJC_FILES=helloObjects.m
-helloObjects_HEADER_FILES=

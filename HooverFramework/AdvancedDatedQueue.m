@@ -1,5 +1,5 @@
 
-#import <HooverFramework/AdvancedDatedQueue.h>
+#import "AdvancedDatedQueue.h"
 
 #define	FIRST_IN_QUEUE_IS_UNKNOWN	0
 #define FIRST_IN_QUEUE_IS_KNOWN		1

@@ -14,7 +14,7 @@
     NSMutableDictionary	*distributedFetchersWorkDictionary;
     NSConditionLock    	*distributedFetchersSortedArrayLock;
     
-    MTQueue		*workQueue;
+    Queue		*workQueue;
 
     HooverController	*hooverController;
 }
@@ -28,7 +28,7 @@
 - (void)createVendingConnection;							
 
 - (void)fetcherLogon:(DFetcher *)dFetcher;
-- (void)fetcherLogoff:(DFetcher *)dFetcher reason:(NSString *)errorString;
+- (void)fetcherLogoff:(DFetcher *)dFetcher;
 
 
 @end

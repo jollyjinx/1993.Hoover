@@ -1,4 +1,0 @@
-TOOL_NAME=URLSyntaxChecker
-
-ADDITIONAL_TOOL_LIBS += -lHooverFramework
-URLSyntaxChecker_OBJC_FILES=URLSyntaxChecker_main.m

@@ -1,6 +1,7 @@
 
-#import <Foundation/Foundation.h>
 #import "OutputFileScanner.h"
+
+#import <Foundation/Foundation.h>
 
 
 int main (int argc, const char *argv[])
@@ -8,31 +9,13 @@ int main (int argc, const char *argv[])
     NSString			*commandlineArgument;
     NSString			*configurationFileName=nil;
     OutputFileScanner	*outputFileScanner;
-    NSEnumerator		*enumerator;
     
     NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
   	NSMutableArray		*filesToRead = [NSMutableArray array];
+    NSEnumerator		*enumerator = [[[NSProcessInfo processInfo] arguments] objectEnumerator];
 
-#if LIB_FOUNDATION_LIBRARY
-    [NSProcessInfo initializeWithArguments:argv count:argc environment:env];
-#endif
-
-{
-	NSLock *myLock = [[NSLock alloc] init];
-	
-	[myLock lock];
-	NSLog(@"Lock now locked");
-	[myLock unlock];
-	NSLog(@"Lock now unlocked");
-	[myLock release];
-	NSLog(@"Lock now released");
-}
-
-
-
-	enumerator = [[[NSProcessInfo processInfo] arguments] objectEnumerator];
-    [enumerator nextObject]; // throw away first argument
-	while( commandlineArgument = [enumerator nextObject])
+    
+    while( commandlineArgument = [enumerator nextObject])
     {
         if( [commandlineArgument isEqual:@"-database"] && (commandlineArgument = [enumerator nextObject]) )
         {

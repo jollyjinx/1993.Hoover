@@ -11,7 +11,7 @@
 {
     GDBMCache	  		*gdbmCache;
 
-    MTQueue			*receivedUrlsQueue;
+    Queue			*receivedUrlsQueue;
 
     FetcherController		*fetcherController;
     

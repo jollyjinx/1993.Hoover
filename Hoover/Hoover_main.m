@@ -52,7 +52,8 @@ int main(int argc, const char *argv[])
                                 toTarget:hoover
                               withObject:nil];
        NSLog(@"Enableing Signals now.");
-         signal(SIGPIPE, SIG_IGN);
+#ifdef GNUSTEP
+       signal(SIGPIPE, SIG_IGN);
          signal(SIGTERM, SIG_IGN);
          signal(SIGINT, SIG_IGN);
          signal(SIGUSR1, SIG_IGN);
@@ -65,12 +66,13 @@ int main(int argc, const char *argv[])
 			sigaddset(&aset, SIGHUP);
 			pthread_sigmask(SIG_UNBLOCK, &aset, NULL);
 		}
-		
+#else		
 
-//         signal(SIGTERM, signalhandler);
-//         signal(SIGINT, signalhandler);
-//         signal(SIGUSR1, signalusr1);
-       while(1)
+         signal(SIGTERM, signalhandler);
+         signal(SIGINT, signalhandler);
+         signal(SIGUSR1, signalusr1);
+#endif
+         while(1)
            [NSThread sleepUntilDate:[NSDate distantFuture]];
        [hoover release];
    }

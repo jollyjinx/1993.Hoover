@@ -1,20 +1,14 @@
 {
-	useragentname = "iCrawlTheNet/0.0.1";
-	useragentmail = "<brain_failure@yahoo.com>";
-//	httpproxy = { host="evosonic.jinx.de"; port = 80 };
-	includehosts = ( ".de"); 
-	includehosts = ( "software-spatz.de"); 
-	excludehosts = ( ); //"gov", "nasa", "edu", "us", "ca", "uk", "au","com","net","mil");
-	includepaths = ( );
-	//excludepaths = ( "?", "cgi-bin", "cgi_bin");
-	excludeextensions = (   "mov","avi","mpeg","mpg","movie",
-                                "gif","tif", "tiff","jpeg","jpg","png","bmp","pbm","ras","raw","xbm",
-                                "gz","gzip","tar","tgz","zip","exe","z",
-                                "bin","sit","sea","hex",
-                                "au","snd","wav","aif","iff","mp3","mp",
-                                "perl","java","class","c","cxx","cpp","c++","m","m4","perl5","pm","pl",
-                                "o","obj","ovl","exe","com","a","so","dbm","db","gdbm",
-                                "ps","eps","pdf","doc","dvi",
-                                "word","ppt","xls","xl","qls"
-                             );
+	useragentname = "Hoover/0.3 - intermediate";
+	useragentmail = "Patrick Stein (<jolly@eko.de>)";
+	//httpproxy = { host="www.cis.uni-muenchen.de"; port = 8000 };
+        includehosts = ( "warlock", "cis.uni-muenchen.de" );
+        excludehosts = ( "gov", "nasa", "edu", "us", "ca", "uk", "au","com","net","mil");
+        includepaths = ( );
+        excludepaths = ( "?", "cgi-bin", "cgi_bin");
+        excludeextensions = (	"mov","avi","mpeg","mpg",
+                                "gif","tif", "tiff","jpeg","jpg","png","bmp",
+                                "ps","eps",
+                                "gz","gzip","tar","tgz","zip","exe"
+                                );
 }

@@ -1,5 +1,0 @@
-TOOL_NAME=Fetcher
-# ADDITIONAL_CPPFLAGS += -DDEBUG=1
-ADDITIONAL_TOOL_LIBS += -lHooverFramework -lgnustep-base -lm
-Fetcher_OBJC_FILES=Fetcher.m  Fetcher_main.m  GeneralScanner.m  HTTPClient.m  Worker.m
-Fetcher_HEADER_FILES=Fetcher.h  GeneralScanner.h  HTTPClient.h  Worker.h  nametoaddress.h

@@ -1,12 +1,11 @@
 /* HTMLScanner.m created by jolly on Mon 03-Mar-1997 */
 
-#import <HooverFramework/HTMLScanner.h>
-#import <HooverFramework/HTMLDocument.h>
+#import "HTMLScanner.h"
 
-#define DIGIT_CHARACTERS       	@"0123456789"
+#define DIGIT_CHARACTERS       		@"0123456789"
 #define ALPPHA_CHARACTERS		@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 #define SCHEME_CHARACTERS		@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-."
-#define HOSTNUMBER_CHARACTERS	@"0123456789."
+#define HOSTNUMBER_CHARACTERS		@"0123456789."
 #define HOSTNAME_CHARACTERS		@"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._"
 
 // Be aware that hostname characters contain an underscore '_' which is not included in the RFC 1808 !
@@ -16,17 +15,17 @@
 #define EXTRA_CHARACTERS		@"!*'(),"
 #define NATIONAL_CHARACTERS		@"{}|\\^~[]Á"
 #define	RESERVED_CHARACTERS		@";/?:@&="
-#define	PUNCTUATION_CHARACTERS	@"<>#%'\""
+#define	PUNCTUATION_CHARACTERS		@"<>#%'\""
 
 
 
-static NSCharacterSet 			*schemeCharacterSet;
-static NSCharacterSet 			*hostnameCharacterSet;
-static NSCharacterSet 			*hostnumberCharacterSet;
-static NSCharacterSet 			*digitCharacterSet;
-static NSMutableCharacterSet 	*pathCharacterSet;
-static NSMutableCharacterSet 	*convertISOLatin1CharacterSet;
-static NSDictionary				*toplevelDomainDictionary;
+NSCharacterSet 	*schemeCharacterSet;
+NSCharacterSet 	*hostnameCharacterSet;
+NSCharacterSet 	*hostnumberCharacterSet;
+NSCharacterSet 	*digitCharacterSet;
+NSMutableCharacterSet 	*pathCharacterSet;
+NSMutableCharacterSet 	*convertISOLatin1CharacterSet;
+NSDictionary	*toplevelDomainDictionary;
 
 
 @implementation HTMLScanner
@@ -225,14 +224,8 @@ static NSDictionary				*toplevelDomainDictionary;
         {
             subpageString = @"";
         }
-		
-		if(! (pathString = [HTMLDocument decodeHTMLTags:pathString]) )									// be Netscape and IE compatible ( http://www.wowowo.de/test?bla&amp;test )
-		{
-            NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: Pathstring could not be decoded from HTML ( NetscapeCompatibility ) :%@",urlString);
-            return nil;
-        }
-		
-		if( ! (pathString = [self recodeISOLatin1:pathString]) )
+
+        if( ! (pathString = [self recodeISOLatin1:pathString]) )
         {
             NSLog(@"HTMLScanner getDictionaryFromURL:baseURL: Pathstring could not be converted to ISOLatin1:%@",urlString);
             return nil;
@@ -318,11 +311,12 @@ static NSDictionary				*toplevelDomainDictionary;
 + (NSString *)recodeISOLatin1:(NSString *)pathString;
 {
     NSScanner			*pathScanner;
-    NSMutableString 	*convertedString = [NSMutableString string];
+    NSMutableString 		*convertedString;
     NSMutableString		*appendString;
     
     if( nil == pathString ) return nil;
     
+    convertedString = [NSMutableString string];
     pathScanner = [NSScanner scannerWithString:pathString];
 
 
@@ -401,7 +395,7 @@ static NSDictionary				*toplevelDomainDictionary;
 
     if( nil == html ) return nil;
     
-    htmlString = [html mutableCopy];
+    htmlString = [NSMutableString stringWithString:html];
     htmlScanner = [NSScanner scannerWithString:htmlString];
     [htmlScanner setCharactersToBeSkipped:[[NSCharacterSet characterSetWithCharactersInString:@"%"] invertedSet]];
 
@@ -434,9 +428,9 @@ static NSDictionary				*toplevelDomainDictionary;
 
         hexrange.location--;
         hexrange.length++;
-        [htmlString replaceCharactersInRange:hexrange withString:[NSString stringWithData:[NSData dataWithBytes:&c length:1]
-																				 encoding:[NSString defaultCStringEncoding]]];
-//																				 encoding:NSISOLatin1StringEncoding]];
+        [htmlString replaceCharactersInRange:hexrange
+                                  withString:[NSString stringWithData:[NSData dataWithBytes:&c length:1]
+                                                             encoding:NSISOLatin1StringEncoding]];
         htmlScanner = [NSScanner scannerWithString:htmlString];
         [htmlScanner setCharactersToBeSkipped:[[NSCharacterSet characterSetWithCharactersInString:@"%"] invertedSet]];
     }

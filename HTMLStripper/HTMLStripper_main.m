@@ -30,8 +30,7 @@ int main (int argc, char** argv, char** env)
     {
         NSEnumerator	*commandlineEnumerator;
         NSString       	*commandlineArgument;
-		NSString		*fileName;
-		
+
         commandlineEnumerator = [commandlineArguments objectEnumerator];
         while( commandlineArgument =  [commandlineEnumerator nextObject])
         {
@@ -47,72 +46,27 @@ int main (int argc, char** argv, char** env)
 
         commandlineEnumerator = [commandlineArguments objectEnumerator];
         [commandlineEnumerator nextObject];
-    	while( fileName = [commandlineEnumerator nextObject] )
-    	{
-        	NSData				*fileData = [NSData dataWithContentsOfMappedFile:fileName];
-           	NSLog(@"Reading file %@:",fileName);
+        while( commandlineArgument =  [commandlineEnumerator nextObject])
+        {
+            NSAutoreleasePool	*innerPool = [[NSAutoreleasePool alloc] init];
+            NSData	*fileData;
 
-       		if( fileData )
-        	{
-            	NSAutoreleasePool	*outerPool = [[NSAutoreleasePool alloc] init];
-            	NSString			*fileAsString;
-            	NSScanner			*fileScanner;
+            if( fileData = [NSData dataWithContentsOfFile:commandlineArgument] )
+            {
+                HTMLDocument *htmlDocument;
 
-            	//fileAsString = [NSString stringWithData:fileData encoding:NSISOLatin1StringEncoding];
-            	fileAsString = [NSString stringWithData:fileData encoding:[NSString defaultCStringEncoding]];
-            	fileScanner = [NSScanner scannerWithString:fileAsString];
-
-            	while( ! [fileScanner isAtEnd] )
-            	{
-                	NSAutoreleasePool	*innerPool = [[NSAutoreleasePool alloc] init];
-                	NSString			*urlName;
-
-                	[fileScanner scanUpToString:@"Hoover-Url:" intoString:NULL];
-                	if( [fileScanner scanString:@"Hoover-Url:" intoString:NULL] )
-                	{
-                    	if( [fileScanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] intoString:&urlName] )
-                    	{
-                        	NSLog(@"reading url:%@",urlName);
-                        	[fileScanner scanUpToString:@"Hoover-Httpdata:\n" intoString:NULL];
-                        	if( [fileScanner scanString:@"Hoover-Httpdata:\n" intoString:NULL] )
-                        	{
-                            	NSString *documentString;
-
-                            	if( [fileScanner scanUpToString:@"Hoover-Url:" intoString:&documentString] )
-                            	{
-                                	HTMLDocument *htmlDocument;
-                					
-									if( htmlDocument = [HTMLDocument documentWithData:[documentString dataUsingEncoding:NSISOLatin1StringEncoding]] )
-                					{
-										NSString *urlAsString  = [htmlDocument textRepresentation];
-										
-										//NSLog(@"Document looks like:%@",[[htmlDocument htmlArray] description]);
-										[stdoutFilehandle writeData:[[NSString stringWithFormat:@"Hoover-Url:%@\n",urlName] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:NO]];
-                    					write(1,[urlAsString cString],[urlAsString cStringLength]);
-										[stdoutFilehandle writeData:[urlAsString dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:NO]];
-                					}
-									else
-									{
-										NSLog(@"Couldn't create document Object.");
-									}
-
-                            	}
-                            	else
-                            	{
-                                	NSLog(@"Url did not contain anything %@",urlName);
-                            	}
-                        	}
-                    	}
-						else
-                    	{
-                        	NSLog(@"Did not get urlname at : %d",[fileScanner scanLocation]);
-                    	}
-                	}
-                	[innerPool release];
-            	}
-            	[outerPool release];
-        	}
-    	} 
+                if( htmlDocument = [HTMLDocument documentWithData:fileData] )
+                {
+                    [stdoutFilehandle writeData:[[htmlDocument textRepresentation] dataUsingEncoding:NSISOLatin1StringEncoding
+                                                                                allowLossyConversion:YES]];
+                }
+            }
+            else
+            {
+                NSLog(@"Can't get data from file: %@",commandlineArgument);
+            }
+            [innerPool release];
+        }
     }
     [pool release];
 

@@ -1,9 +1,9 @@
 
 #import <Foundation/Foundation.h>
 #import <HooverFramework/HooverFramework.h>
-#import <signal.h>
-#import <sys/time.h>
-#import <unistd.h>
+#import <OmniNetworking/OmniNetworking.h>
+#import <libc.h>
+
 #import "Fetcher.h"
 
 #define HOOVER_PORT 12345
@@ -52,11 +52,11 @@ int main (int argc, const char *argv[])
     }
 
     if( nil == hostName )
-        hostName = @"localhost";
+        hostName = @"hoover";
 
 
     {
-        HFUDPSocket		*hooverSocket;
+        ONUDPSocket		*hooverSocket;
         NSMutableDictionary	*informationDictionary = [NSMutableDictionary dictionary];
 
         [informationDictionary	setObject:[[NSHost currentHost] name] forKey:@"hostname"];
@@ -71,8 +71,8 @@ int main (int argc, const char *argv[])
         [informationDictionary setObject:[NSNumber numberWithInt:[outPort localPortNumber]] forKey:@"outport"];
         [informationDictionary setObject:[NSNumber numberWithInt:maximumthreads] forKey:@"maximumworkload"];
 
-        hooverSocket = [HFUDPSocket socket];
-        [hooverSocket connectToHost:[NSHost hostWithName:hostName] port: HOOVER_PORT];
+        hooverSocket = [ONUDPSocket socket];
+        [hooverSocket connectToHost:[ONHost hostForHostname: hostName] port: HOOVER_PORT];
         [hooverSocket writeData:[NSArchiver archivedDataWithRootObject:informationDictionary]];
 
 

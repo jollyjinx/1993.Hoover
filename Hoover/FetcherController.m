@@ -1,7 +1,7 @@
 /* FetcherController.m created by jolly on Thu 06-Mar-1997 */
 
 #import "FetcherController.h"
-//#import <OmniNetworking/OmniNetworking.h>
+#import <OmniNetworking/OmniNetworking.h>
 
 #define	CONDITION_NO_VENDED_CONNECTION	0
 #define	CONDITION_ONE_VENDED_CONNECTION	1
@@ -42,7 +42,7 @@
     distributedFetchersWorkDictionary = [[NSMutableDictionary alloc] init];
     distributedFetchersSortedArrayLock = [[NSConditionLock alloc] initWithCondition:CONDITION_NO_FETCHERS_AVAILABLE];
     
-    workQueue = [[MTQueue alloc] init];
+    workQueue = [[Queue alloc] init];
 
     return self;
 }
@@ -92,7 +92,7 @@
 - (void)createVendingConnection;							
 {
     NSAutoreleasePool	*outerPool = [[NSAutoreleasePool alloc] init];
-    HFUDPSocket		*vendingPort = [HFUDPSocket socket];
+    ONUDPSocket		*vendingPort = [ONUDPSocket socket];
 
     [vendingPort setLocalPortNumber:HOOVER_PORT allowingAddressReuse: YES];
     if( 0 )
@@ -158,11 +158,11 @@
 }
 
 
-- (void)fetcherLogoff:(DFetcher *)dFetcher reason:(NSString *)errorString;
+- (void)fetcherLogoff:(DFetcher *)dFetcher;
 {
     NSMutableDictionary	*workDictionary;
     NSMutableDictionary	*url;
-    NSEnumerator		*objectEnumerator;
+    NSEnumerator	*objectEnumerator;
     
     [distributedFetchersSortedArrayLock lock];
 
@@ -172,7 +172,6 @@
     while( url = [objectEnumerator nextObject] )
     {
         [url setObject:@"invalid" forKey:@"status"];
-		[url setObject:errorString forKey:@"errorreason"];
         [hooverController retrievedUrl:url];
     }
 
@@ -183,7 +182,8 @@
         [distributedFetchersSortedArrayLock unlockWithCondition:CONDITION_NO_FETCHERS_AVAILABLE];
         return;
     }
-    [distributedFetchersSortedArrayLock unlockWithCondition: ((float)[[distributedFetchersSortedArray lastObject] percentage]>0.0)?CONDITION_FETCHER_AVAILABLE:CONDITION_NO_FETCHERS_AVAILABLE];
+    [distributedFetchersSortedArrayLock unlockWithCondition:
+((float)[[distributedFetchersSortedArray lastObject] percentage]>0.0)?CONDITION_FETCHER_AVAILABLE:CONDITION_NO_FETCHERS_AVAILABLE];
 }       
 
 @end

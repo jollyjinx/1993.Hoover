@@ -1,6 +1,6 @@
 /* JPPL.m created by jolly on Fri 09-May-1997 */
 
-#import <HooverFramework/GDBMCache.h>
+#import "GDBMCache.h"
 
 @implementation GDBMCache
 
@@ -23,22 +23,20 @@
 {    
     [super init];
 
-    cacheLifeTime= 3600;												// default 20 Minutes
+    cacheLifeTime= 1000.0;												// default 20 Minutes
 
     gdbmFile 	= [aGDBMFile retain];
     cacheLock 	= [[NSRecursiveLock alloc] init];
     cacheDictionary = [[NSMutableDictionary alloc] init];
     cacheDatedQueue = [[AdvancedDatedQueue alloc] init];
-    #if DEBUG
-        NSLog(@"GDBMCache: will start background writeout");
-    #endif    
+    
     [NSThread detachNewThreadSelector:@selector(runBackgroundWriteout)
                              toTarget:self
                            withObject:nil];
     return self;
 }
 
-- (void)runBackgroundWriteout;
+- (void)runBackgroundWriteout
 {
     #if DEBUG
         NSLog(@"GDBMCache: starting background writeout");
