@@ -3,12 +3,7 @@
     FILESTABLE = {
         BUNDLES = (); 
         CLASSES = (HooverController.m, RobotScanner.m, FetcherController.m, DFetcher.m); 
-        FRAMEWORKS = (
-            Foundation.framework, 
-            HooverFramework.framework, 
-            OmniBase.framework, 
-            OmniNetworking.framework
-        ); 
+        FRAMEWORKS = (Foundation.framework, HooverFramework.framework); 
         FRAMEWORKSEARCH = (); 
         HEADERSEARCH = (); 
         H_FILES = (HooverController.h, RobotScanner.h, FetcherController.h, DFetcher.h); 

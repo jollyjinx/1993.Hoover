@@ -13,10 +13,6 @@ PROJECTVERSION = 2.6
 PROJECT_TYPE = Tool
 LANGUAGE = English
 
-CLASSES = Categories.m HTMLDocument.m
-
-HFILES = Categories.h HTMLDocument.h
-
 MFILES = HTMLStripper_main.m
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template\
@@ -31,7 +27,9 @@ DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
-FRAMEWORKS = -framework Foundation
+FRAMEWORK_PATHS = -F/Users/jolly/Sources/Hoover/HooverFramework
+FRAMEWORKS = -framework Foundation -framework HooverFramework\
+             -framework System
 
 
 include $(MAKEFILEDIR)/platform.make

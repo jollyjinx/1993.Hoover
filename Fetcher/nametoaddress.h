@@ -1,0 +1,1 @@
+int nametoaddress(char *hostname);

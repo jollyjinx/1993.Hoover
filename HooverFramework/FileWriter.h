@@ -1,10 +1,10 @@
 
 #import <Foundation/Foundation.h>
-#import "Queue.h"
+#import "MTQueue.h"
 
 @interface FileWriter : NSObject
 {
-    Queue	*writeToFileQueue;
+    MTQueue	*writeToFileQueue;
 }
 
 - (id)init;

@@ -1,13 +1,13 @@
 
 #import "FileWriter.h"
 #import "HTMLScanner.h"
-
+#import "MD5Checksum.h"
 @implementation FileWriter
 
 - (id)init;
 {
     [super init];
-    writeToFileQueue = [[Queue alloc] init];
+    writeToFileQueue = [[MTQueue alloc] init];
     [NSThread detachNewThreadSelector:@selector(_runTheWriteToFileLoop)
                              toTarget:self
                            withObject:nil];
@@ -23,6 +23,11 @@
 
 - (void) writeUrlDatatoFile:(NSDictionary *)urlDictionary;
 {
+    while( [writeToFileQueue count] > 10 )
+    {
+        NSLog(@"Filewriter busy - waiting\n");
+        [NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:10.0]];
+    }
     [writeToFileQueue push:urlDictionary];
 }
 
@@ -47,8 +52,14 @@
             [fileHandle writeData:[[HTMLScanner encodeISOLatin1:[url objectForKey:@"path"]] dataUsingEncoding:NSISOLatin1StringEncoding
                                                            allowLossyConversion:YES]];
 
+            [fileHandle writeData:[@"\nHoover-TransferDate:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+            [fileHandle writeData:[[[url objectForKey:@"transferdate"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
             [fileHandle writeData:[@"\nHoover-TransferTime:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
             [fileHandle writeData:[[[url objectForKey:@"transfertime"] description] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+            [fileHandle writeData:[@"\nHoover-MD5Checksum:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+            [fileHandle writeData:[[MD5Checksum md5String:[url objectForKey:@"httpdata"]] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+            [fileHandle writeData:[@"\nHoover-ContentLength:" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+            [fileHandle writeData:[[NSString stringWithFormat:@"%d",[[url objectForKey:@"httpdata"] length]] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
 /*
             if( [url objectForKey:@"links"] && [[url objectForKey:@"links"] count]  )
             {
@@ -75,14 +86,16 @@
                 }
             }
  */
-            [fileHandle writeData:[@"\nHoover-Httpdata:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
-            [fileHandle writeData:[url objectForKey:@"httpdata"]];
-/*            if([url objectForKey:@"textRepresentation"])
+            if([url objectForKey:@"textRepresentation"])
             {	
                 [fileHandle writeData:[@"\nHoover-TextualRepresentation:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
                 [fileHandle writeData:[[url objectForKey:@"textRepresentation"] dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
             }
-*/
+            
+            [fileHandle writeData:[@"\nHoover-Httpdata:\n" dataUsingEncoding:NSISOLatin1StringEncoding allowLossyConversion:YES]];
+            [fileHandle writeData:[url objectForKey:@"httpdata"]];
+
+
         }
         [innerPool release];
     }

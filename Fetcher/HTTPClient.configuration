@@ -1,14 +1,24 @@
 {
-	useragentname = "Hoover/0.3 - intermediate";
-	useragentmail = "Patrick Stein (<jolly@eko.de>)";
-	//httpproxy = { host="www.cis.uni-muenchen.de"; port = 8000 };
-        includehosts = ( "warlock", "cis.uni-muenchen.de" );
-        excludehosts = ( "gov", "nasa", "edu", "us", "ca", "uk", "au","com","net","mil");
-        includepaths = ( );
-        excludepaths = ( "?", "cgi-bin", "cgi_bin");
-        excludeextensions = (	"mov","avi","mpeg","mpg",
-                                "gif","tif", "tiff","jpeg","jpg","png","bmp",
-                                "ps","eps",
-                                "gz","gzip","tar","tgz","zip","exe"
-                                );
+	useragentname = "RockBot/1.00.0";								// this is the useragent name we will provide the connected hosts
+	useragentmail = "<rockbot@rockbottom.de>";						// this is the useragentmail we will provide the connected hosts
+//	httpproxy = { host="evosonic.jinx.de"; port = 80 };				// if we are using a proxy to crawl the web set this
+
+	includehosts = ( );										// the hosts we crawl need to have the extensions provided inside this array
+
+	excludehosts = ( ); 									// the hosts we crawl must not have the extensions provided inside this array
+
+	includepaths = ( );										// paths with not even one of the strings inside this array will not be crawled
+
+	//excludepaths = ( "?", "cgi-bin", "cgi_bin");					// paths with one of the strings inside this array will not be crawled
+	excludeextensions = (   "mov","avi","mpeg","mpg","movie",
+                                "gif","tif", "tiff","jpeg","jpg","png","bmp","pbm","ras","raw","xbm",
+                                "gz","gzip","tar","tgz","zip","exe","z","bzip2",
+                                "bin","sit","sea","hex",
+                                "au","snd","wav","aif","iff","mp3","mp",
+								"class","c","cxx","cpp","c++","m","m4",
+                              //  "perl","java","perl5","pm","pl",
+                                "o","obj","ovl","exe","com","a","so","dbm","db","gdbm",
+                                "ps","eps","pdf","doc","dvi",
+                                "word","ppt","xls","xl","qls"
+                             );
 }

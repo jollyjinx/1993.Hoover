@@ -3,12 +3,12 @@
     FILESTABLE = {
         BUNDLES = (); 
         CLASSES = (Fetcher.m, Worker.m, HTTPClient.m, GeneralScanner.m); 
-        FRAMEWORKS = (Foundation.framework, HooverFramework.framework, OmniNetworking.framework); 
+        FRAMEWORKS = (Foundation.framework, HooverFramework.framework, System.framework); 
         FRAMEWORKSEARCH = (); 
-        H_FILES = (Fetcher.h, Worker.h, HTTPClient.h, GeneralScanner.h); 
+        H_FILES = (Fetcher.h, Worker.h, HTTPClient.h, GeneralScanner.h, nametoaddress.h); 
         LIBS = (); 
         OTHER_LIBS = (); 
-        OTHER_LINKED = (Fetcher_main.m); 
+        OTHER_LINKED = (Fetcher_main.m, nametoaddress.c); 
         OTHER_SOURCES = (
             Makefile.preamble, 
             Makefile, 

@@ -1,8 +1,8 @@
 {
     DYNAMIC_CODE_GEN = YES; 
     FILESTABLE = {
-        CLASSES = (); 
-        FRAMEWORKS = (Foundation.framework, HooverFramework.framework); 
+        FRAMEWORKS = (Foundation.framework, HooverFramework.framework, System.framework); 
+        FRAMEWORKSEARCH = (/Users/jolly/Sources/Hoover/HooverFramework); 
         H_FILES = (); 
         OTHER_LINKED = (HTMLStripper_main.m); 
         OTHER_SOURCES = (

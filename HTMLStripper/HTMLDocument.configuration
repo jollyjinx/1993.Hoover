@@ -1,8 +1,44 @@
 {
 	br	= { tagtext = "\n" };
+
+/**/
 	tr	= { tagtext = "\n" };
-	td	= { tagtext = "\t" };
+	"/tr"	= { tagtext = "\n" };
 	th	= { tagtext = "\t" };
+	"/th"	= { tagtext = "\t" };
+	td	= { tagtext = "\t" };
+	"/td"	= { tagtext = "\t" };
+/*
+	"h1"	= { showtag=1  };
+	"/h1"	= { showtag=1  };
+	"h2"	= { showtag=1  };
+	"/h2"	= { showtag=1  };
+	"h3"	= { showtag=1  };
+	"/h3"	= { showtag=1  };
+	"h4"	= { showtag=1  };
+	"/h4"	= { showtag=1  };
+	"/html"	= { showtag=1  };
+	table	= { showtag=1  };
+	"/table"= { showtag=1 };
+	tr	= { showtag=1  };
+	"/tr"  = {  showtag=1  };
+	th	= { showtag=1 };
+	"/th"  = { showtag=1  };
+	td	= {showtag=1 };
+	"/td"  = { showtag=1  };
+	pre	= {showtag=1 };
+	"/pre"  = { showtag=1  };
+	strong	= { showtag=1  };
+	"/strong" = { showtag=1  };
+	big	= { showtag=1  };
+	"/big" = { showtag=1  };
+	b	= { showtag=1  };
+	"/b" = { showtag=1  };
+	i	= { showtag=1  };
+	"/i" = { showtag=1  };
+	u	= { showtag=1  };
+	"/u" = { showtag=1  };
+/**/
 	a 	= { link = "href" };
 	img	= { link = "src"; optiontext = "alt" };
 	frame	= { link = "src"; optiontext = "name" };
@@ -10,105 +46,105 @@
 	input	= { optiontext ="text" };
 	
 	escapedCharacters	= {
-"nbsp"="\0240";
-"iexcl"="\0241";
-"cent"="\0242";
-"pound"="\0243";
-"curren"="\0244";
-"yen"="\0245";
-"brvbar"="\0246";
-"sect"="\0247";
-"uml"="\0250";
-"copy"="\0251";
-"ordf"="\0252";
-"laquo"="\0253";
-"not"="\0254";
-"shy"="\0255";
-"reg"="\0256";
-"macr"="\0257";
-"deg"="\0260";
-"plusmn"="\0261";
-"sup2"="\0262";
-"sup3"="\0263";
-"acute"="\0264";
-"micro"="\0265";
-"para"="\0266";
-"middot"="\0267";
-"cedil"="\0270";
-"sup1"="\0271";
-"ordm"="\0272";
-"raquo"="\0273";
-"frac14"="\0274";
-"frac12"="\0275";
-"frac34"="\0276";
-"iquest"="\0277";
-"Agrave"="\0300";
-"Aacute"="\0301";
-"Acirc"="\0302";
-"Atilde"="\0303";
-"Auml"="\0304";
-"Aring"="\0305";
-"AElig"="\0306";
-"Ccedil"="\0307";
-"Egrave"="\0310";
-"Eacute"="\0311";
-"Ecirc"="\0312";
-"Euml"="\0313";
-"Igrave"="\0314";
-"Iacute"="\0315";
-"Icirc"="\0316";
-"Iuml"="\0317";
-"ETH"="\0320";
-"Ntilde"="\0321";
-"Ograve"="\0322";
-"Oacute"="\0323";
-"Ocirc"="\0324";
-"Otilde"="\0325";
-"Ouml"="\0326";
-"times"="\0327";
-"Oslash"="\0330";
-"Ugrave"="\0331";
-"Uacute"="\0332";
-"Ucirc"="\0333";
-"Uuml"="\0334";
-"Yacute"="\0335";
-"THORN"="\0336";
-"szlig"="\0337";
-"agrave"="\0340";
-"aacute"="\0341";
-"acirc"="\0342";
-"atilde"="\0343";
-"auml"="\0344";
-"aring"="\0345";
-"aelig"="\0346";
-"ccedil"="\0347";
-"egrave"="\0350";
-"eacute"="\0351";
-"ecirc"="\0352";
-"euml"="\0353";
-"igrave"="\0354";
-"iacute"="\0355";
-"icirc"="\0356";
-"iuml"="\0357";
-"eth"="\0360";
-"ntilde"="\0361";
-"ograve"="\0362";
-"oacute"="\0363";
-"ocirc"="\0364";
-"otilde"="\0365";
-"ouml"="\0366";
-"divide"="\0367";
-"oslash"="\0370";
-"ugrave"="\0371";
-"uacute"="\0372";
-"ucirc"="\0373";
-"uuml"="\0374";
-"yacute"="\0375";
-"thorn"="\0376";
-"yuml"="\0377";
-"quot"="\042";
-"amp"="\046";
-"lt"="\074";
-"gt"="\076";
+    "nbsp"=<a0>;	 // no-break space -->
+    "iexcl"=<a1>;	 // inverted exclamation mark -->
+    "cent"=<a2>;	 // cent sign -->
+    "pound"=<a3>;	 // pound sterling sign -->
+    "curren"=<a4>;	 // general currency sign -->
+    "yen"=<a5>;		 // yen sign -->
+    "brvbar"=<a6>;	 // broken (vertical) bar -->
+    "sect"=<a7>;	 // section sign -->
+    "uml"=<a8>;	 	// umlaut (dieresis) -->
+    "copy"=<a9>;	 // copyright sign -->
+    "ordf"=<aa>;	 // ordinal indicator, feminine -->
+    "laquo"=<ab>;	 // angle quotation mark, left -->
+    "not"=<ac>;	 	// not sign -->
+    "shy"=<ad>;	 	// soft hyphen -->
+    "reg"=<ae>;	 	// registered sign -->
+    "macr"=<af>;	 // macron -->
+    "deg"=<b0>;	 	// degree sign -->
+    "plusmn"=<b1>;	 // plus-or-minus sign -->
+    "sup2"=<b2>;	 // superscript two -->
+    "sup3"=<b3>;	 // superscript three -->
+    "acute"=<b4>;	 // acute accent -->
+    "micro"=<b5>;	 // micro sign -->
+    "para"=<b6>;	 // pilcrow (paragraph sign) -->
+    "middot"=<b7>;	 // middle dot -->
+    "cedil"=<b8>;	 // cedilla -->
+    "sup1"=<b9>;	 // superscript one -->
+    "ordm"=<ba>;	 // ordinal indicator, masculine -->
+    "raquo"=<bb>;	 // angle quotation mark, right -->
+    "frac14"=<bc>;	 // fraction one-quarter -->
+    "frac12"=<bd>;	 // fraction one-half -->
+    "frac34"=<be>;	 // fraction three-quarters -->
+    "iquest"=<bf>;	 // inverted question mark -->
+    "Agrave"=<c0>;	 // capital A, grave accent -->
+    "Aacute"=<c1>;	 // capital A, acute accent -->
+    "Acirc"=<c2>;	 // capital A, circumflex accent -->
+    "Atilde"=<c3>;	 // capital A, tilde -->
+    "Auml"=<c4>;	 // capital A, dieresis or umlaut mark -->
+    "Aring"=<c5>;	 // capital A, ring -->
+    "AElig"=<c6>;	 // capital AE diphthong (ligature) -->
+    "Ccedil"=<c7>;	 // capital C, cedilla -->
+    "Egrave"=<c8>;	 // capital E, grave accent -->
+    "Eacute"=<c9>;	 // capital E, acute accent -->
+    "Ecirc"=<ca>;	 // capital E, circumflex accent -->
+    "Euml"=<cb>;	 // capital E, dieresis or umlaut mark -->
+    "Igrave"=<cc>;	 // capital I, grave accent -->
+    "Iacute"=<cd>;	 // capital I, acute accent -->
+    "Icirc"=<ce>;	 // capital I, circumflex accent -->
+    "Iuml"=<cf>;	 // capital I, dieresis or umlaut mark -->
+    "ETH"=<d0>;		// capital Eth, Icelandic -->
+    "Ntilde"=<d1>;	 // capital N, tilde -->
+    "Ograve"=<d2>;	 // capital O, grave accent -->
+    "Oacute"=<d3>;	 // capital O, acute accent -->
+    "Ocirc"=<d4>;	 // capital O, circumflex accent -->
+    "Otilde"=<d5>;	 // capital O, tilde -->
+    "Ouml"=<d6>;	 // capital O, dieresis or umlaut mark -->
+    "times"=<d7>;	 // multiply sign -->
+    "Oslash"=<d8>;	 // capital O, slash -->
+    "Ugrave"=<d9>;	 // capital U, grave accent -->
+    "Uacute"=<da>;	 // capital U, acute accent -->
+    "Ucirc"=<db>;	 // capital U, circumflex accent -->
+    "Uuml"=<dc>;	 // capital U, dieresis or umlaut mark -->
+    "Yacute"=<dd>;	 // capital Y, acute accent -->
+    "THORN"=<de>;	 // capital THORN, Icelandic -->
+    "szlig"=<df>;	 // small sharp s, German (sz ligature) -->
+    "agrave"=<e0>;	 // small a, grave accent -->
+    "aacute"=<e1>;	 // small a, acute accent -->
+    "acirc"=<e2>;	 // small a, circumflex accent -->
+    "atilde"=<e3>;	 // small a, tilde -->
+    "auml"=<e4>;	 // small a, dieresis or umlaut mark -->
+    "aring"=<e5>;	 // small a, ring -->
+    "aelig"=<e6>;	 // small ae diphthong (ligature) -->
+    "ccedil"=<e7>;	 // small c, cedilla -->
+    "egrave"=<e8>;	 // small e, grave accent -->
+    "eacute"=<e9>;	 // small e, acute accent -->
+    "ecirc"=<ea>;	 // small e, circumflex accent -->
+    "euml"=<eb>;	 // small e, dieresis or umlaut mark -->
+    "igrave"=<ec>;	 // small i, grave accent -->
+    "iacute"=<ed>;	 // small i, acute accent -->
+    "icirc"=<ee>;	 // small i, circumflex accent -->
+    "iuml"=<ef>;	 // small i, dieresis or umlaut mark -->
+    "eth"=<f0>;	 	// small eth, Icelandic -->
+    "ntilde"=<f1>;	 // small n, tilde -->
+    "ograve"=<f2>;	 // small o, grave accent -->
+    "oacute"=<f3>;	 // small o, acute accent -->
+    "ocirc"=<f4>;	 // small o, circumflex accent -->
+    "otilde"=<f5>;	 // small o, tilde -->
+    "ouml"=<f6>;	 // small o, dieresis or umlaut mark -->
+    "divide"=<f7>;	 // divide sign -->
+    "oslash"=<f8>;	 // small o, slash -->
+    "ugrave"=<f9>;	 // small u, grave accent -->
+    "uacute"=<fa>;	 // small u, acute accent -->
+    "ucirc"=<fb>;	 // small u, circumflex accent -->
+    "uuml"=<fc>;	 // small u, dieresis or umlaut mark -->
+    "yacute"=<fd>;	 // small y, acute accent -->
+    "thorn"=<fe>;	 // small thorn, Icelandic -->
+    "yuml"=<ff>;	 // small y, dieresis or umlaut mark -->
+	"quot"="\042";
+	"amp"="\046";
+	"lt"="\074";
+	"gt"="\076";
 	}
 }

@@ -1,0 +1,9 @@
+{ /*test*/
+	/*urls =  (
+			"http://evosonic.jinx.de/servers/"
+              );*/
+	general = {
+				useragentname = "iCrawlTheNet/0.0.1";
+				databasename =  "webdatabase" ;
+		};
+}

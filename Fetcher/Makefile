@@ -15,9 +15,12 @@ LANGUAGE = English
 
 CLASSES = Fetcher.m Worker.m HTTPClient.m GeneralScanner.m
 
-HFILES = Fetcher.h Worker.h HTTPClient.h GeneralScanner.h
+HFILES = Fetcher.h Worker.h HTTPClient.h GeneralScanner.h\
+         nametoaddress.h
 
 MFILES = Fetcher_main.m
+
+CFILES = nametoaddress.c
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble\
             HTMLDocument.configuration HTTPClient.configuration
@@ -32,7 +35,7 @@ PROF_LIBS = $(LIBS)
 
 
 FRAMEWORKS = -framework Foundation -framework HooverFramework\
-             -framework OmniNetworking
+             -framework System
 
 
 include $(MAKEFILEDIR)/platform.make

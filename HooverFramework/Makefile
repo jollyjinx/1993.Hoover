@@ -13,17 +13,18 @@ PROJECTVERSION = 2.6
 PROJECT_TYPE = Framework
 LANGUAGE = English
 
-CLASSES = SortedArray.m Queue.m DatedQueue.m GDBMFile.m GDBMCache.m\
+CLASSES = SortedArray.m DatedQueue.m GDBMFile.m GDBMCache.m\
           FileWriter.m Categories.m HTMLScanner.m TCPConnection.m\
-          AdvancedDatedQueue.m URL.m HTMLDocument.m
+          AdvancedDatedQueue.m HTMLDocument.m MTQueue.m HFUDPSocket.m\
+          MD5Checksum.m
 
-HFILES = HooverFramework.h SortedArray.h Queue.h DatedQueue.h gdbm.h\
+HFILES = HooverFramework.h SortedArray.h DatedQueue.h gdbm.h\
          GDBMFile.h GDBMCache.h FileWriter.h Categories.h\
-         HTMLScanner.h TCPConnection.h AdvancedDatedQueue.h URL.h\
-         HTMLDocument.h
+         HTMLScanner.h TCPConnection.h AdvancedDatedQueue.h\
+         HTMLDocument.h MTQueue.h HFUDPSocket.h MD5Checksum.h
 
 OTHERSRCS = Makefile.preamble Makefile Makefile.postamble m.template\
-            h.template
+            h.template HTMLDocument.configuration
 
 MAKEFILEDIR = $(NEXT_ROOT)/NextDeveloper/Makefiles/pb_makefiles
 CURRENTLY_ACTIVE_VERSION = YES
@@ -37,11 +38,12 @@ DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
-FRAMEWORKS = -framework Foundation -framework GDBM
-PUBLIC_HEADERS = HooverFramework.h SortedArray.h Queue.h DatedQueue.h\
+FRAMEWORKS = -framework Foundation -framework GDBM -framework System
+PUBLIC_HEADERS = HooverFramework.h SortedArray.h DatedQueue.h\
                  GDBMFile.h GDBMCache.h gdbm.h FileWriter.h\
                  Categories.h HTMLScanner.h TCPConnection.h\
-                 AdvancedDatedQueue.h HTMLDocument.h
+                 AdvancedDatedQueue.h HTMLDocument.h MTQueue.h\
+                 HFUDPSocket.h
 
 PROJECT_HEADERS = HooverFramework.h
 

@@ -11,13 +11,16 @@
 {
     GDBMCache	  		*gdbmCache;
 
-    Queue			*receivedUrlsQueue;
+    MTQueue			*receivedUrlsQueue;
 
     FetcherController		*fetcherController;
     
     NSMutableDictionary		*allSitesDictionary;
     DatedQueue			*allSitesDatedQueue;
     NSLock			*siteLock;
+
+    BOOL			stayonsites;
+    BOOL			allpathsallowed;
 }
 
 - (id)initWithConfiguration:(NSDictionary *)configurationDictionary;
@@ -29,6 +32,7 @@
 - (void)workOnReceivedUrlsQueue;
 
 - (void)addUrlToSearchlist:(NSMutableDictionary *)newUrl;
+- (void)addUrlToSearchlist:(NSMutableDictionary *)newUrl freePath:(BOOL)freepath;
 
 // Remote Methods
 - (void)retrievedUrl:(NSMutableDictionary *)url;

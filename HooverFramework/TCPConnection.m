@@ -181,7 +181,9 @@
 {
     int byteswritten = 0;
 
-    //signal(SIGPIPE, SIG_IGN);
+#ifdef NeXT
+    signal(SIGPIPE, SIG_IGN);
+#endif
     do
     {
         int written;
@@ -189,13 +191,17 @@
         {
             NSLog(@"TCPConnection: write error :%s  ( written %d )",strerror(errno),written);
             connectionisvalid = NO;
-            //signal(SIGPIPE, SIG_DFL);
+#ifdef NeXT
+            signal(SIGPIPE, SIG_DFL);
+#endif
             return -1;
         }
         byteswritten+=written;
     }
     while( byteswritten < length );
-    //signal(SIGPIPE, SIG_DFL);
+#ifdef NeXT
+    signal(SIGPIPE, SIG_DFL);
+#endif
     return byteswritten;
 }
 
@@ -221,7 +227,9 @@
 {
     int bytesread = 0;
 
-    //signal(SIGPIPE, SIG_IGN);
+#ifdef NeXT
+    signal(SIGPIPE, SIG_IGN);
+#endif
     do
     {
         int readonce;
@@ -229,13 +237,17 @@
         {
             NSLog(@"TCPConnection: read error:%s  ( read %d )",strerror(errno),readonce);
             connectionisvalid = NO;
-            //signal(SIGPIPE, SIG_DFL);
+#ifdef NeXT
+            signal(SIGPIPE, SIG_DFL);
+#endif
             return -1;
         }
         bytesread+=readonce;
     }
     while( bytesread < length );
-    //signal(SIGPIPE, SIG_DFL);
+#ifdef NeXT
+    signal(SIGPIPE, SIG_DFL);
+#endif
     return bytesread;
 }
 

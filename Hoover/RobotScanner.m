@@ -47,7 +47,7 @@ static NSString *userAgentName;
     
     NSScanner 	*commandScanner;	       	// scans a line for commands
     NSString 	*argumentString;
-    BOOL 	useragentflag = NO;
+    BOOL 	useragentflag = NO,commandflag =NO;
 
     [super init];
     includedPathArray = nil;
@@ -70,14 +70,18 @@ static NSString *userAgentName;
                         useragentflag=YES;
                     else if ([userAgentName hasPrefix:argumentString])
                         useragentflag=YES;
-                    else
+                    else if ( commandflag )
+                    {
                         useragentflag=NO;
+                        commandflag=NO;
+                    }
                 }
             }
             else if( useragentflag )
             {
                 if( [commandScanner scanString:@"Disallow:" intoString:NULL] )
                 {
+                    commandflag = YES;
                     [commandScanner setCharactersToBeSkipped:[NSCharacterSet whitespaceCharacterSet]];
                     if( [commandScanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\t #*"]
                                                     intoString:&argumentString] )
@@ -87,6 +91,7 @@ static NSString *userAgentName;
                 }
                 else if( [commandScanner scanString:@"Allow:" intoString:NULL] )
                 {
+                    commandflag = YES;
                     [commandScanner setCharactersToBeSkipped:[NSCharacterSet whitespaceCharacterSet]];
                     if( [commandScanner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\t #*"]
                                                     intoString:&argumentString] )

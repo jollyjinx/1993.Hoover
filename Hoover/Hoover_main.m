@@ -48,33 +48,33 @@ int main(int argc, const char *argv[])
    {
         
        hoover = [[HooverController alloc] initWithConfiguration:configurationDictionary];
+       NSLog(@"Enableing Signals now.");
+#ifdef GNUSTEP
        [NSThread detachNewThreadSelector:@selector(putWorkInSendingUrlsQueue)
                                 toTarget:hoover
                               withObject:nil];
-       NSLog(@"Enableing Signals now.");
-#ifdef GNUSTEP
-       signal(SIGPIPE, SIG_IGN);
+         signal(SIGPIPE, SIG_IGN);
          signal(SIGTERM, SIG_IGN);
          signal(SIGINT, SIG_IGN);
          signal(SIGUSR1, SIG_IGN);
 	
-		signal(SIGUSR1, *signalusr1 );
-		{
-			sigset_t	aset;
-			
-			sigemptyset(&aset);
-			sigaddset(&aset, SIGHUP);
-			pthread_sigmask(SIG_UNBLOCK, &aset, NULL);
-		}
-#else		
+        signal(SIGUSR1, *signalusr1 );
+        {
+                sigset_t	aset;
 
-         signal(SIGTERM, signalhandler);
-         signal(SIGINT, signalhandler);
-         signal(SIGUSR1, signalusr1);
-#endif
-         while(1)
+                sigemptyset(&aset);
+                sigaddset(&aset, SIGHUP);
+                pthread_sigmask(SIG_UNBLOCK, &aset, NULL);
+        }
+       while(1)
            [NSThread sleepUntilDate:[NSDate distantFuture]];
-       [hoover release];
+#else
+        signal(SIGTERM, signalhandler);
+        signal(SIGINT, signalhandler);
+        signal(SIGUSR1, signalusr1);
+        [hoover putWorkInSendingUrlsQueue];
+#endif
+        [hoover release];
    }
 
    [pool release];

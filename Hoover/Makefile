@@ -33,8 +33,7 @@ DEBUG_LIBS = $(LIBS)
 PROF_LIBS = $(LIBS)
 
 
-FRAMEWORKS = -framework Foundation -framework HooverFramework\
-             -framework OmniBase -framework OmniNetworking
+FRAMEWORKS = -framework Foundation -framework HooverFramework
 
 
 include $(MAKEFILEDIR)/platform.make
