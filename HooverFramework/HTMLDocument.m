@@ -198,7 +198,7 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
 
             if( [htmlScanner scanString:@"!-" intoString:NULL] )						//  Scan Remarks '<!-'
             {
-                if( ! [htmlScanner scanUpToString:@"->" intoString:&tagValue] )
+                if( ! [htmlScanner scanUpToString:@"-->" intoString:&tagValue] )
                 {
                     NSLog(@"Found HTML remark without end.");
                 }
@@ -206,6 +206,7 @@ static NSCharacterSet		*nonprintableCharacterSet = nil;
                 {
                     htmlTagArray = [NSMutableArray arrayWithObjects:@"!-",tagValue,nil];
                     [htmlArray addObject:htmlTagArray];
+                    [htmlScanner scanString:@"-->" intoString:NULL];
                 }
             }
             else

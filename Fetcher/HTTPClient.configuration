@@ -10,15 +10,15 @@
 	includepaths = ( );										// paths with not even one of the strings inside this array will not be crawled
 
 	//excludepaths = ( "?", "cgi-bin", "cgi_bin");					// paths with one of the strings inside this array will not be crawled
-	excludeextensions = (   "mov","avi","mpeg","mpg","movie",
-                                "gif","tif", "tiff","jpeg","jpg","png","bmp","pbm","ras","raw","xbm",
-                                "gz","gzip","tar","tgz","zip","exe","z","bzip2",
-                                "bin","sit","sea","hex",
-                                "au","snd","wav","aif","iff","mp3","mp",
-								"class","c","cxx","cpp","c++","m","m4",
-                              //  "perl","java","perl5","pm","pl",
-                                "o","obj","ovl","exe","com","a","so","dbm","db","gdbm",
-                                "ps","eps","pdf","doc","dvi",
-                                "word","ppt","xls","xl","qls"
-                             );
+	excludeextensions = (   "mov","avi","mpeg","mpg","movie","rm",
+                            "gif","tif", "tiff","jpeg","jpg","png","bmp","pbm","ras","raw","xbm",
+                            "gz","gzip","tar","tgz","zip","exe","z","bzip2",
+                            "bin","sit","sea","hex",
+                            "au","snd","wav","aif","iff","mp3","mp","ra",
+                            "class","c","cxx","cpp","c++","m","m4",
+                            //  "perl","java","perl5","pm","pl",
+                            "o","obj","ovl","exe","com","a","so","dbm","db","gdbm",
+                            "ps","eps","pdf","doc","dvi",
+                            "word","ppt","xls","xl","qls"
+                         );
 }

@@ -16,17 +16,17 @@
 #define EXTRA_CHARACTERS		@"!*'(),"
 #define NATIONAL_CHARACTERS		@"{}|\\^~[]Á"
 #define	RESERVED_CHARACTERS		@";/?:@&="
-#define	PUNCTUATION_CHARACTERS	@"<>#%'\""
+#define	PUNCTUATION_CHARACTERS		@"<>#%'\""
 
 
 
-static NSCharacterSet 			*schemeCharacterSet;
-static NSCharacterSet 			*hostnameCharacterSet;
-static NSCharacterSet 			*hostnumberCharacterSet;
-static NSCharacterSet 			*digitCharacterSet;
+static NSCharacterSet		*schemeCharacterSet;
+static NSCharacterSet		*hostnameCharacterSet;
+static NSCharacterSet		*hostnumberCharacterSet;
+static NSCharacterSet 		*digitCharacterSet;
 static NSMutableCharacterSet 	*pathCharacterSet;
 static NSMutableCharacterSet 	*convertISOLatin1CharacterSet;
-static NSDictionary				*toplevelDomainDictionary;
+static NSDictionary		*toplevelDomainDictionary;
 
 
 @implementation HTMLScanner
